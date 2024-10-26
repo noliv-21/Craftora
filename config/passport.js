@@ -3,6 +3,7 @@ const GoogleStrategy=require('passport-google-oauth20').Strategy;
 const User=require('../models/userSchema.js');
 const env=require('dotenv').config()
 
+//google auth by passport
 passport.use(new GoogleStrategy({
     clientID:process.env.GOOGLE_CLIENT_ID,
     clientSecret:process.env.GOOGLE_CLIENT_SECRET,
@@ -41,5 +42,7 @@ passport.deserializeUser((id,done)=>{
         done(err,null)
     })
 })
+
+
 
 module.exports=passport
