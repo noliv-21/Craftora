@@ -1,0 +1,115 @@
+/* body{
+    margin:0;
+    background-color: aqua;
+    display: flex;
+} */
+.container_ {
+    padding: 0;
+    background: url('../../images/admin/login.jpg');
+    height: 100vh;
+    width: 100%;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login_box {
+    width: 30%;
+    /* height: 40%; */
+    padding:30px;
+    border-radius: 10px;
+    background-color: transparent;
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    /* box-shadow: -2px 3px 9px 2px rgba(0, 0, 0, 0.5); */
+    transition: box-shadow .5s ease-in-out;
+}
+.login_box:hover {
+    box-shadow: inset 400px 400px 100px rgba(0, 0, 1, 0.3), inset -400px -400px 100px rgba(0, 0, 1, 0.3);
+}
+
+.heading {
+    margin: 0 0 30px;
+    padding: 0;
+    color: #fff;
+    text-align: center;
+}
+
+form {
+    width: 70%;
+}
+
+.login_box .input-box {
+    position: relative;
+}
+
+.login_box .input-box input {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 16px;
+    color: #fff;
+    margin-bottom: 30px;
+    border: none;
+    border-bottom: 1px solid #fff;
+    outline: none;
+    background: transparent;
+}
+
+.login_box .input-box label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 10px 0;
+    font-size: 16px;
+    color: #fff;
+    pointer-events: none;
+    transition: .5s;
+}
+
+.login_box .input-box input:focus~label,
+.login_box .input-box input:valid~label {
+    top: -20px;
+    left: 0;
+    color: #03e9f4;
+    font-size: 12px;
+}
+
+
+.Login_btn {
+    background-image: linear-gradient(to top, #f14c76, #9847a2);
+    background-repeat: no-repeat;
+    width: 75px;
+    margin: 0 auto;
+    padding: 5px 10px;
+    transition: .5s;
+    border: .5px #f14c76 thin;
+    border-radius: 5px;
+}
+
+.Login_btn:hover {
+    transform: translateX(4px);
+}
+
+#toggle-password {
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: #ebf1f2;
+    transition: .5s;
+    box-shadow: 0 5px 5px rgba(0, 0, 0, .6);
+}
+
+#toggle-password:hover {
+    color: #b6f6d0;
+    transform: scale(1.12);
+}
+
+#password_error{
+    position:relative;
+    top:-20px;
+    left:0
+}

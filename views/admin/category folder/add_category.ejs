@@ -1,0 +1,59 @@
+<div class="flex">
+    <!-- Sidebar -->
+    <%- include('../../partials/admin/side bar') %>
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+            <%- include('../../partials/admin/header') %>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold">Add Category</h2>
+                </div>
+                <div class="flex items-center text-gray-500 mb-6">
+                    <a href="#" class="hover:underline">Dashboard</a>
+                    <span class="mx-2">></span>
+                    <a href="#" class="hover:underline">Categories</a>
+                    <span class="mx-2">></span>
+                    <span>Add Category</span>
+                </div>
+                <form action="/admin/categories/add" method="post">
+                    <div class="flex space-x-6">
+                        <!-- Thumbnail Section -->
+                        <div class="w-1/3 bg-white p-6 rounded-lg shadow-md">
+                            <h3 class="text-lg font-semibold mb-4">Thumbnail</h3>
+                            <div class="border-2 border-dashed border-gray-300 p-6 text-center rounded-lg">
+                                <i class="fas fa-image text-4xl text-gray-400 mb-4"></i>
+                                <p class="text-gray-500 mb-4">Drag and drop image here, or click add image</p>
+                                <button class="bg-purple-600 text-white px-4 py-2 rounded-md">Add Image</button>
+                            </div>
+                        </div>
+                        <!-- General Information Section -->
+                        <div class="w-2/3 bg-white p-6 rounded-lg shadow-md">
+                            <h3 class="text-lg font-semibold mb-4">General Information</h3>
+                            <div class="mb-4">
+                                <label for="category-name" class="block text-gray-700 mb-2">Category Name</label>
+                                <input type="text" id="category-name" name="category-name"
+                                    class="w-full border border-gray-300 p-2 rounded-md"
+                                    placeholder="Type category name here...">
+                            </div>
+                            <div>
+                                <label for="description" class="block text-gray-700 mb-2">Description</label>
+                                <textarea id="description" name="description"
+                                    class="w-full border border-gray-300 p-2 rounded-md" rows="4"
+                                    placeholder="Type category description here..."></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label for="status" class="block text-gray-700 mb-2">Status</label>
+                                <select id="status" name="status" class="w-full border border-gray-300 p-2 rounded-md">
+                                    <option value="listed" selected>Listed</option>
+                                    <option value="unlisted">Unlisted</option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="flex justify-end mt-6">
+                        <button onclick="window.history.back()" type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md mr-4">Cancel</button>
+                        <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-md">+ Add Category</button>
+                    </div>
+                </form>
+        </div>
+</div>

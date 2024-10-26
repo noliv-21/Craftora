@@ -1,0 +1,268 @@
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+    }
+</style>
+<div class="flex">
+    <!-- Sidebar -->
+    <%-include('.. /partials/admin/side bar')%>
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+            <!-- Header -->
+            <%-include('.. /partials/admin/header')%>
+                <!-- User Content -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <span class="text-gray-500">Dashboard</span> / <span class="text-gray-700">Customer
+                                List</span>
+                        </div>
+                        <div class="flex space-x-4">
+                            <button class="bg-purple-100 text-purple-500 px-4 py-2 rounded-lg">Export</button>
+                            <button class="bg-gray-100 text-gray-500 px-4 py-2 rounded-lg">Filters</button>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <input type="text" placeholder="Search customer..."
+                            class="w-full p-3 border border-gray-300 rounded-lg">
+                    </div>
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-gray-500">
+                                <th class="py-2"><input type="checkbox"></th>
+                                <th class="py-2">Customer Name</th>
+                                <th class="py-2">Phone</th>
+                                <th class="py-2">Orders</th>
+                                <th class="py-2">Balance</th>
+                                <th class="py-2">Status</th>
+                                <th class="py-2">Created</th>
+                                <th class="py-2">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-700">
+                            <tr class="border-b">
+                                <td class="py-2"><input type="checkbox"></td>
+                                <td class="py-2 flex items-center">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                                    <div>
+                                        <div class="font-semibold">John Bushmill</div>
+                                        <div class="text-gray-500 text-sm">johnb@mail.com</div>
+                                    </div>
+                                </td>
+                                <td class="py-2">078 5054 8877</td>
+                                <td class="py-2">124</td>
+                                <td class="py-2">$121.00</td>
+                                <td class="py-2"><span
+                                        class="bg-red-100 text-red-500 px-2 py-1 rounded-lg">Blocked</span></td>
+                                <td class="py-2">29 Dec 2022</td>
+                                <td class="py-2 flex space-x-2">
+                                    <i class="fas fa-eye text-gray-500"></i>
+                                    <i class="fas fa-edit text-gray-500"></i>
+                                    <i class="fas fa-trash text-gray-500"></i>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2"><input type="checkbox"></td>
+                                <td class="py-2 flex items-center">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                                    <div>
+                                        <div class="font-semibold">Laura Prichet</div>
+                                        <div class="text-gray-500 text-sm">laura_prichet@mail.com</div>
+                                    </div>
+                                </td>
+                                <td class="py-2">215 302 3376</td>
+                                <td class="py-2">45</td>
+                                <td class="py-2">$590.00</td>
+                                <td class="py-2"><span
+                                        class="bg-green-100 text-green-500 px-2 py-1 rounded-lg">Active</span></td>
+                                <td class="py-2">24 Dec 2022</td>
+                                <td class="py-2 flex space-x-2">
+                                    <i class="fas fa-eye text-gray-500"></i>
+                                    <i class="fas fa-edit text-gray-500"></i>
+                                    <i class="fas fa-trash text-gray-500"></i>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2"><input type="checkbox"></td>
+                                <td class="py-2 flex items-center">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                                    <div>
+                                        <div class="font-semibold">Mohammad Karim</div>
+                                        <div class="text-gray-500 text-sm">m_karim@mail.com</div>
+                                    </div>
+                                </td>
+                                <td class="py-2">050 414 8778</td>
+                                <td class="py-2">984</td>
+                                <td class="py-2">$125.00</td>
+                                <td class="py-2"><span
+                                        class="bg-red-100 text-red-500 px-2 py-1 rounded-lg">Blocked</span></td>
+                                <td class="py-2">12 Dec 2022</td>
+                                <td class="py-2 flex space-x-2">
+                                    <i class="fas fa-eye text-gray-500"></i>
+                                    <i class="fas fa-edit text-gray-500"></i>
+                                    <i class="fas fa-trash text-gray-500"></i>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2"><input type="checkbox"></td>
+                                <td class="py-2 flex items-center">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                                    <div>
+                                        <div class="font-semibold">Josh Bill</div>
+                                        <div class="text-gray-500 text-sm">josh_bill@mail.com</div>
+                                    </div>
+                                </td>
+                                <td class="py-2">216 75 612 706</td>
+                                <td class="py-2">99</td>
+                                <td class="py-2">$348.00</td>
+                                <td class="py-2"><span
+                                        class="bg-red-100 text-red-500 px-2 py-1 rounded-lg">Blocked</span></td>
+                                <td class="py-2">21 Oct 2022</td>
+                                <td class="py-2 flex space-x-2">
+                                    <i class="fas fa-eye text-gray-500"></i>
+                                    <i class="fas fa-edit text-gray-500"></i>
+                                    <i class="fas fa-trash text-gray-500"></i>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2"><input type="checkbox"></td>
+                                <td class="py-2 flex items-center">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                                    <div>
+                                        <div class="font-semibold">Josh Adam</div>
+                                        <div class="text-gray-500 text-sm">josh_adam@mail.com</div>
+                                    </div>
+                                </td>
+                                <td class="py-2">02 75 150 655</td>
+                                <td class="py-2">1,540</td>
+                                <td class="py-2">$607.00</td>
+                                <td class="py-2"><span
+                                        class="bg-green-100 text-green-500 px-2 py-1 rounded-lg">Active</span></td>
+                                <td class="py-2">21 Oct 2022</td>
+                                <td class="py-2 flex space-x-2">
+                                    <i class="fas fa-eye text-gray-500"></i>
+                                    <i class="fas fa-edit text-gray-500"></i>
+                                    <i class="fas fa-trash text-gray-500"></i>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2"><input type="checkbox"></td>
+                                <td class="py-2 flex items-center">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                                    <div>
+                                        <div class="font-semibold">Sin Tae</div>
+                                        <div class="text-gray-500 text-sm">sin_tae@mail.com</div>
+                                    </div>
+                                </td>
+                                <td class="py-2">078 6013 3854</td>
+                                <td class="py-2">431</td>
+                                <td class="py-2">$234.00</td>
+                                <td class="py-2"><span
+                                        class="bg-green-100 text-green-500 px-2 py-1 rounded-lg">Active</span></td>
+                                <td class="py-2">21 Oct 2022</td>
+                                <td class="py-2 flex space-x-2">
+                                    <i class="fas fa-eye text-gray-500"></i>
+                                    <i class="fas fa-edit text-gray-500"></i>
+                                    <i class="fas fa-trash text-gray-500"></i>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2"><input type="checkbox"></td>
+                                <td class="py-2 flex items-center">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                                    <div>
+                                        <div class="font-semibold">Rajesh Masvidal</div>
+                                        <div class="text-gray-500 text-sm">rajesh_m@mail.com</div>
+                                    </div>
+                                </td>
+                                <td class="py-2">828 216 2190</td>
+                                <td class="py-2">36</td>
+                                <td class="py-2">$760.00</td>
+                                <td class="py-2"><span
+                                        class="bg-red-100 text-red-500 px-2 py-1 rounded-lg">Blocked</span></td>
+                                <td class="py-2">19 Sep 2022</td>
+                                <td class="py-2 flex space-x-2">
+                                    <i class="fas fa-eye text-gray-500"></i>
+                                    <i class="fas fa-edit text-gray-500"></i>
+                                    <i class="fas fa-trash text-gray-500"></i>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2"><input type="checkbox"></td>
+                                <td class="py-2 flex items-center">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                                    <div>
+                                        <div class="font-semibold">Fajar Surya</div>
+                                        <div class="text-gray-500 text-sm">fsurya@mail.com</div>
+                                    </div>
+                                </td>
+                                <td class="py-2">078 7173 9261</td>
+                                <td class="py-2">77</td>
+                                <td class="py-2">$400.00</td>
+                                <td class="py-2"><span
+                                        class="bg-green-100 text-green-500 px-2 py-1 rounded-lg">Active</span></td>
+                                <td class="py-2">19 Sep 2022</td>
+                                <td class="py-2 flex space-x-2">
+                                    <i class="fas fa-eye text-gray-500"></i>
+                                    <i class="fas fa-edit text-gray-500"></i>
+                                    <i class="fas fa-trash text-gray-500"></i>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2"><input type="checkbox"></td>
+                                <td class="py-2 flex items-center">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                                    <div>
+                                        <div class="font-semibold">Lisa Greg</div>
+                                        <div class="text-gray-500 text-sm">lisa@mail.com</div>
+                                    </div>
+                                </td>
+                                <td class="py-2">077 6157 4248</td>
+                                <td class="py-2">89</td>
+                                <td class="py-2">$812.00</td>
+                                <td class="py-2"><span
+                                        class="bg-green-100 text-green-500 px-2 py-1 rounded-lg">Active</span></td>
+                                <td class="py-2">19 Sep 2022</td>
+                                <td class="py-2 flex space-x-2">
+                                    <i class="fas fa-eye text-gray-500"></i>
+                                    <i class="fas fa-edit text-gray-500"></i>
+                                    <i class="fas fa-trash text-gray-500"></i>
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2"><input type="checkbox"></td>
+                                <td class="py-2 flex items-center">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                                    <div>
+                                        <div class="font-semibold">Linda Blair</div>
+                                        <div class="text-gray-500 text-sm">lindablair@mail.com</div>
+                                    </div>
+                                </td>
+                                <td class="py-2">050 414 8778</td>
+                                <td class="py-2">1,296</td>
+                                <td class="py-2">$723.00</td>
+                                <td class="py-2"><span
+                                        class="bg-green-100 text-green-500 px-2 py-1 rounded-lg">Active</span></td>
+                                <td class="py-2">10 Aug 2022</td>
+                                <td class="py-2 flex space-x-2">
+                                    <i class="fas fa-eye text-gray-500"></i>
+                                    <i class="fas fa-edit text-gray-500"></i>
+                                    <i class="fas fa-trash text-gray-500"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="flex justify-between items-center mt-4">
+                        <span class="text-gray-500">Showing 1-10 from 100</span>
+                        <div class="flex space-x-2">
+                            <button class="bg-blue-100 text-blue-500 px-3 py-1 rounded-lg">1</button>
+                            <button class="bg-gray-100 text-gray-500 px-3 py-1 rounded-lg">2</button>
+                            <button class="bg-gray-100 text-gray-500 px-3 py-1 rounded-lg">3</button>
+                            <button class="bg-gray-100 text-gray-500 px-3 py-1 rounded-lg">4</button>
+                            <button class="bg-gray-100 text-gray-500 px-3 py-1 rounded-lg">5</button>
+                            <button class="bg-gray-100 text-gray-500 px-3 py-1 rounded-lg">&gt;</button>
+                        </div>
+                    </div>
+                </div>
+        </div>
+</div>

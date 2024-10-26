@@ -1,0 +1,32 @@
+<header class="bg-pink-500 text-white">
+    <div class="container mx-auto flex justify-between items-center py-4 px-6">
+        <div><img class="w-[120px] h-auto" src="images/Craftora_logo.png" alt="brand icon"></div>
+        <div class="flex items-center space-x-4">
+
+            <input class="px-4 py-2 rounded-full" placeholder="Search" type="text" />
+            <button class="bg-white text-pink-500 px-4 py-2 rounded-full">
+                Search
+            </button>
+        </div>
+        <nav class="flex space-x-4">
+
+            <a class="hover:underline" href="#">
+                Home
+            </a>
+            <a class="hover:underline" href="#">
+                Contact
+            </a>
+            <a class="hover:underline" href="#">
+                About
+            </a>
+            <% if (!greetName){%>
+                <a class="hover:underline" href="#">
+                    Sign Up
+                </a>
+                <a class="hover:underline" href="#">
+                    Sign In
+                </a>
+            <% } %>
+        </nav>
+    </div>
+</header>

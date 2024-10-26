@@ -1,0 +1,22 @@
+<div class="container">
+  <div class="otp_box">
+    <h2>Confirm your E-Mail</h2>
+    <form action="/user/verify_otp" method="post">
+      <div class="user-box">
+        <input type="text" name="email" value="{{email}}" hidden>
+        <input type="text" name="otp" id="otp-input" required="">
+        <label>OTP</label>
+        <span style="color:red;" id="otp_error"></span>
+        <label>Didn't get the OTP? Try again in <span id="timer">30</span> seconds</label>
+        <button class="btn btn-primary" type="submit">Verify OTP</button>
+      </div>
+    </form>
+
+
+    <form action="/user/otp_resend" method="post">
+      <input type="text" name="email" value="{{email}}" hidden>
+      <button class="btn btn-success" type="submit" id="resend-btn" disabled>Resend OTP</button>
+    </form>
+  </div>
+</div>
+<script src="JS/user/functionings.js"></script>

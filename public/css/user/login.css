@@ -1,0 +1,247 @@
+body {
+  margin: 0;
+  padding: 0;
+  /* background-image:repeating-linear-gradient(to right, #f06b6b, #f7c546 50%); */
+  background-image: url(../../images/user/login.jpg);
+  background-size: cover;
+}
+
+.container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* .box-container{
+  display:flex;
+  justify-content: center;
+  flex-direction: row;
+} */
+
+.login-box {
+  position:absolute;
+  top: 200px;
+  /* position: absolute;
+  top: 50%;
+  left: 50%; */
+  margin: auto;
+  width: 400px;
+  padding: 40px;
+  backdrop-filter: blur(5px);
+  background-size: cover;
+  /* transform: translate(-50%, -50%); */
+  background-color: transparent;
+  /* box-sizing: border-box; */
+  box-shadow: 0 15px 25px rgba(0, 0, 0, .6);
+  border-radius: 15px;
+  /* Add transition for opacity */
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+  opacity: 1;
+  visibility: block;
+  /* display:block; */
+}
+
+.signUp-box {
+  position:absolute;
+  top: -100px;
+  /* margin: 0 auto; */
+  width: 400px;
+  padding: 40px;
+  backdrop-filter: blur(5px);
+  background-size: cover;
+  /* transform: translate(-50%, -50%); */
+  background-color: transparent;
+  /* box-sizing: border-box; */
+  box-shadow: 0 15px 25px rgba(0, 0, 0, .6);
+  border-radius: 15px;
+  /* Add transition for opacity */
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+  opacity: 0;
+  visibility: hidden;
+  /* display: none; */
+}
+
+.login-box.active {
+  opacity: 0;
+  visibility: hidden;
+  /* display: none; */
+}
+
+.signUp-box.active {
+  position:absolute;
+  top: 100px;
+  opacity: 1;
+  visibility: visible;
+  /* display:block; */
+}
+
+.login-box h2,
+.signUp-box h2 {
+  margin: 0 0 30px;
+  padding: 0;
+  color: #fff;
+  text-align: center;
+}
+
+.signUp-box h5{
+  color:#f9c282
+}
+
+.login-box .user-box,
+.signUp-box .user-box {
+  position: relative;
+  width:95%;
+}
+
+.login-box .user-box input,
+.signUp-box .user-box input {
+  width: 100%;
+  padding: 10px 0;
+  font-size: 16px;
+  color: #fff;
+  margin-bottom: 30px;
+  border: none;
+  border-bottom: 1px solid #fff;
+  outline: none;
+  background: transparent;
+}
+
+.login-box .user-box label,
+.signUp-box .user-box label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 10px 0;
+  font-size: 16px;
+  color: #fff;
+  pointer-events: none;
+  transition: .5s;
+}
+
+.login-box .user-box input:focus~label,
+.login-box .user-box input:valid~label,
+.signUp-box .user-box input:focus~label,
+.signUp-box .user-box input:valid~label {
+  top: -20px;
+  left: 0;
+  color: #03e9f4;
+  font-size: 12px;
+}
+
+.user-box span{
+  color:#ff471e;
+  position: relative;
+  top:-30px;
+  left:0;
+  font-size: x-small;
+  line-height: 5px;
+}
+
+.forgotPass_btn{
+  text-decoration: none;
+  color:#feb38a;
+  position:relative;
+  top:-20px;
+  left:0
+}
+.forgotPass_btn:hover{
+  color:#fc955e;
+}
+
+.user-box span:not(:empty) ~ .forgotPass_btn {
+  /* Styles when span has content */
+  top: -10px;
+  left: -110px;
+}
+
+/* .login-box form a {
+  position: relative;
+  display: inline-block;
+  padding: 10px 20px;
+  color: #03e9f4;
+  font-size: 16px;
+  text-decoration: none;
+  text-transform: uppercase;
+  overflow: hidden;
+  transition: .5s;
+  margin-top: 40px;
+  letter-spacing: 4px
+} */
+
+.Login_btn {
+  background-image: linear-gradient(to bottom, #ff6fa4, #feb38a);
+  border-radius: 7px;
+  background-repeat: no-repeat;
+  /* width: 75px; */
+  margin: 0 auto;
+  padding: 5px 10px;
+  transition: .5s;
+}
+
+.Login_btn:hover {
+  transform: translateX(4px);
+}
+
+.sign-in_up{
+  position:relative;
+  top:-10px;
+  text-decoration: none;
+  color:rgb(249, 221, 180);
+  font-family: cursive;
+  display: block;
+  margin-top: 20px;
+}
+.sign-in_up:hover{
+  color: #f9c282;
+}
+
+.or{
+  display: flexbox;
+  align-self: center;
+  color:lightpink
+}
+
+.Sign_up-btn {
+  background-image: linear-gradient(to bottom, #6b46d9, #ff6e9f);
+  background-repeat: no-repeat;
+  border-radius: 7px;
+  color: rgb(229, 239, 85);
+  width: 80px;
+  padding: 5px 10px;
+  transition: .5s;
+  position: relative;
+  white-space: nowrap;
+  left: auto;
+}
+
+.Sign_up-btn:hover {
+  transform: translateX(4px);
+  color: darkturquoise;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: #ebf1f2;
+  transition: .5s;
+  box-shadow: -2px 2px 5px 2px rgba(0, 0, 0, .6);
+}
+
+.toggle-password:hover {
+  color: #b6f6d0;
+  transform: scale(1.08);
+}
+
+form {
+  width: 100%;
+}
+
+#password_error {
+  position: relative;
+  top: -20px;
+  left: 0
+}

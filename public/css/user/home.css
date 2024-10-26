@@ -1,0 +1,52 @@
+body{
+    width:100%;
+    height:100vh;
+    /* background-image: url(../../images/user/home.jpg);
+    background-size: cover; */
+}
+.navbar{
+    /* background-color: #46e8f7; */
+    background-size: auto;
+    background-repeat: no-repeat;
+    background-position: top right;
+    border:1px solid transparent;
+    box-shadow: 0 0 5px 2px rgba(0,0,0,.5);
+}
+.user_greet{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    width:100%;
+    height:60px;
+    background: #FFFBD8;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.categories{
+    width:100%;
+    /* display: block; */
+    display:flex;
+    justify-content: center;
+    column-gap: 50px;
+}
+.categories a{
+    text-decoration: none;
+}
+
+.carousel-item{
+    height:400px;
+}
+
+.card_container{
+    width:100%;
+    padding:100px;
+    display:flex;
+    justify-content: space-between;
+}
+.cat_box{
+    width:160px;
+    height:170px;
+    background-color: aquamarine;
+    border: transparent 0.5px;
+    border-radius: 10px;
+}

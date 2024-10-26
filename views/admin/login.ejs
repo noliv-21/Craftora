@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="css/admin/login.css">
+<title>Admin Login</title>
+<div class="container_">
+  <div class="login_box">
+    <h1 class="heading">Admin Login</h1>
+    <form action="/admin/login" method="post">
+      <div class="input-box">
+        <input type="text" name="username" id="username-input" oninput="validate_username()" required="">
+        <label>Username</label>
+        <span style="color:red;" id="username_error"></span>
+      </div>
+      <div class="input-box">
+        <input type="password" name="password" id="password-input" oninput="validate_password()" required="">
+        <span style="color:red;" id="password_error"></span>
+        <label>Password</label>
+        <div class="btn btn-transparent" id="toggle-password">Show</div>
+      </div>
+      <button class="btn btn-bg-info Login_btn" type="submit">Login</button>
+    </form>
+    <span>
+      <form action="/admin/login" method="post" class="demo-form">
+        <input type="hidden" name="username" value="guest">
+        <input type="hidden" name="password" value="Guest@123">
+        <button class="btn btn-secondary" type="submit">Demo</button>
+      </form>
+    </span>
+  </div>
+</div>
+
+
+<script>
+  const passwordInput_chk = document.getElementById('password-input');
+  const toggleButton = document.getElementById('toggle-password');
+
+  toggleButton.addEventListener('click', () => {
+    if (passwordInput_chk.type === 'password') {
+      passwordInput_chk.type = 'text';
+      toggleButton.textContent = 'Hide';
+    } else {
+      passwordInput_chk.type = 'password';
+      toggleButton.textContent = 'Show';
+    }
+  });
+</script>
+<script src="JS files/validation.js"></script>

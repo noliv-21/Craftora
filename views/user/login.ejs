@@ -1,0 +1,99 @@
+<link rel="stylesheet" href="css/user/login.css">
+<title>User Login</title>
+<div class="container">
+    <div class="login-box" id="login-box">
+      <h2>Login</h2>
+      <h4 class="text-danger"><%=msg%></h4>
+      <form action="/user/login" id="loginForm" method="post">
+        <div class="user-box">
+          <input type="text" name="cred" id="login_cred-input" oninput="validate_login_cred()" required="">
+          <label>Username or E-Mail</label>
+          <span id="login_cred_error"></span>
+        </div>
+        <div class="user-box">
+          <input type="password" name="password" id="login_pass-input" class="password-input" oninput="validate_login_pass()" required="">
+          <label>Password</label>
+          <span id="login_pass_error"></span>
+          <a class="forgotPass_btn">Forgot Password?</a>
+          <div class="btn btn-transparent toggle-password">Show</div>
+        </div>
+        <div class="d-flex justify-content-center">
+          <button class="btn Login_btn" type="submit">Login</button>
+        </div>
+        <a class="sign-in_up" onclick="showSignUp()">Don't have an Account? <b>Sign Up here</b></a>
+      </form>
+      <p class="or">Or</p>
+      <a href="/auth/google" class="btn btn-outline-light" id="google-login"><img src="images/user/google_logo.png" style="width:24px; height:24px">Sign In with Google</a>
+      <form action="/user/login" method="post" class="demo-form">
+        <input type="hidden" name="cred" value="mishal">
+        <input type="hidden" name="password" value="User@123">
+        <button class="btn btn-secondary" type="submit">Demo</button>
+      </form>
+      </div>
+
+    <div class="signUp-box" id="signUp-box">
+      <h2>Sign Up</h2>
+      <h5>Join us to enjoy all the services</h5>
+      <h4 class="text-danger"><%%= signUp_msg %></h4>
+      <form action="/user/signUp" id="signUpForm" method="post">
+        <div class="user-box">
+          <input type="text" name="email" id="email-input" oninput="validate_email()" required="">
+          <label>Email</label>
+          <span id="email_error"></span>
+        </div>
+        <div class="user-box">
+          <input type="text" name="username" id="username-input" oninput="validate_username()" required="">
+          <label>Username</label>
+          <span id="username_error"></span>
+        </div>
+        <div class="user-box">
+          <input type="text" name="phone" id="phone-input" oninput="validate_phone()" required="">
+          <label>Phone</label>
+          <span id="phone_error"></span>
+        </div>
+        <div class="user-box">
+          <input type="password" name="password" id="password-input" class="password-input"
+            oninput="validate_password()" required="">
+          <span id="password_error"></span>
+          <label>Password</label>
+          <div class="btn btn-transparent toggle-password">Show</div>
+        </div>
+        <div class="user-box">
+          <input type="password" name="cfm_password" id="cfm_password-input" class="password-input"
+            oninput="validate_cfm_password()" required="">
+          <span id="cfm_password_error"></span>
+          <label> Confirm Password</label>
+          <div class="btn btn-transparent toggle-password">Show</div>
+        </div>
+        <div class="d-flex justify-content-center">
+          <button class="btn Login_btn" type="submit">Send OTP</button>
+        </div>
+        <a class="sign-in_up" onclick="hideSignUp()">Already have an Account? <b>Sign in</b></a>
+      </form>
+      <p class="or">Or</p>
+      <a href="/auth/google" class="btn btn-outline-light" id="google-signUp"><img src="images/user/google_logo.png" style="width:24px; height:24px">Sign Up with Google
+      </a>
+    </div>
+
+</div>
+
+
+<script>
+  const passwordInputs = document.querySelectorAll('.password-input');
+  const toggleButtons = document.querySelectorAll('.toggle-password');
+
+  // Loop through each toggle button to add the event listener.
+  for (let i = 0; i < toggleButtons.length; i++) {
+    toggleButtons[i].addEventListener('click', function () {
+      if (passwordInputs[i].type === 'password') {
+        passwordInputs[i].type = 'text';
+        toggleButtons[i].textContent = 'Hide';
+      } else {
+        passwordInputs[i].type = 'password';
+        toggleButtons[i].textContent = 'Show';
+      }
+    });
+  }
+</script>
+<script src="JS/user/Functionings.js"></script>
+<script src="JS/user/validation.js"></script>

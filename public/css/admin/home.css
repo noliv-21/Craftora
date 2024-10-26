@@ -1,0 +1,284 @@
+.container_{
+    width:100vw;
+    height:100vh;
+    background-image: url('../../images/admin/home.jpg');
+    background-size: cover;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.body_section{
+    width:100%;
+    height:90vh;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.view{
+    width:90vw;
+    height:80vh;
+    backdrop-filter: blur(5px);
+    background-color: rgba(237, 182, 155, 0.5);
+    border-radius: 20px;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    /* position:relative;*/
+    margin-top:5%;
+    transition: opacity 0.5s ease, visibility 0.5s ease; /* Add transition for opacity */
+    opacity: 1;
+    visibility: block;
+}
+.viewUsers{
+    width:90vw;
+    height:80vh;
+    padding:30px;
+    backdrop-filter: blur(5px);
+    background-color: rgba(237, 182, 155, 0.5);
+    border-radius: 20px;
+    display:flex;
+    align-items: center;
+    flex-direction: column;
+    position: absolute;
+    margin-top:5%;
+    transition: opacity 0.5s ease, visibility 0.5s ease; /* Add transition for opacity */
+    opacity: 0;
+    visibility: hidden;
+}
+
+.view.active{
+    opacity:0;
+    visibility:hidden;
+}
+
+.viewUsers.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+#search{
+    position:absolute;
+    top:5%;
+    left:20%;
+    width:60%;
+    height:45px;
+    border-radius: 50px;
+    background-color: blanchedalmond;
+    padding:20px;
+}
+input::placeholder {
+    color: #ab1d1d;
+}
+.back2dash{
+    position: absolute;
+    background-image:linear-gradient(to top, #9abab9, #feab75);
+    background-repeat: no-repeat;
+    background-size: cover;
+    top: 35px;
+    left:40px;
+    border-radius: 50px;
+    border:0.5px transparent;
+    height:6%;
+    padding:10px;
+}
+
+.navbar{
+    height:10%;
+    background: linear-gradient(to left, #9bb9b7, #ebb594);
+}
+
+#user_details{
+    display:relative;
+    position:relative;
+    top:15%;
+    width:60%;
+    height:80%;
+    padding:1.5%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    backdrop-filter: blur(5px) brightness(0.8) saturate(0.5);
+    border-radius: 10px;
+    overflow: auto;
+}
+.user-info{
+    width:90%;
+    height:30px;
+    margin-bottom:5px;
+    padding:0 10px;
+    position:relative;
+    background-color: #ebb594;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+.buttons_div{
+    margin-top: 3px;
+    /* display: flex;
+    justify-content: space-between; */
+}
+.edit-button{
+    background-image: url('../images/pencil.png');
+    background-size: cover;
+    background-color: transparent;
+    border:.5px transparent;
+    /* border-radius: 25px; */
+    height:25px;
+    width:25px;
+    margin-right: 5px;
+}
+.delete-button{
+    background-image: url('../images/bin.png');
+    background-size: cover;
+    background-color: transparent;
+    border:.5px transparent;
+    border-radius: 50px;
+    height:25px;
+    width:25px;
+    margin-left: 5px;
+}
+.edit-info{
+    width:40vw;
+    height:40vh;
+    position:absolute;
+    top:15%;
+    backdrop-filter: blur(10px) sepia(.6);
+    background-color: rgba(250, 185, 116, 0.768);
+    z-index: 2;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    justify-content: space-around;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+    transition: 0.5s ease-in-out;
+}
+.edit-form{
+    width:80%;
+    height:80%;
+    display: flex;
+    justify-content: center;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-direction: column;
+}
+.edit_input-box{
+    width:80%;
+    height:50px;
+    backdrop-filter: inherit;
+    background-color: #9bb9b7;
+    border-radius: 50px;
+    height:25px;
+    padding-left:15px;
+    border: 0.5px transparent;
+}
+.confirmation{
+    width:90%;
+    height:30px;
+    display: flex;
+    position: absolute;
+    top:0;
+    left:0;
+    justify-content: center;
+    justify-content: space-evenly;
+    /* backdrop-filter: inherit; */
+    background-color: inherit;
+    margin-bottom:5px;
+    padding:3px 0;
+    border-radius: 8px;
+    transition: .5s ease-in-out;
+}
+.conf_btn{
+    height:24px;
+    padding: 0 5px;
+}
+
+.create_btn{
+    height:30px;
+    position:absolute;
+    top:6%;
+    right:10%;
+    background-color: #85bac0;
+    border-radius: 10px;
+    color:#1d1c1b;
+    border:.3px thin;
+    border-color: #feab75;
+    padding:5px 10px;
+}
+.createForm_div{
+    width:100%;
+    height:100%;
+    display:absolute;
+    /* backdrop-filter: inherit; */
+    border:inherit;
+}
+
+.create_div {
+    width: 300px;
+    /* height: 100%; */
+    padding:30px;
+    position: absolute;
+    top:5%;
+    left:30%;
+    border: inherit;
+    border-radius: 10px;
+    background-color: #85bac0;
+    /* backdrop-filter: blur(5px); */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    box-shadow: -2px 3px 9px 2px rgba(0, 0, 0, 0.5);
+    transition:.5s ease-in-out;
+}
+
+.create_div .input-box {
+    position: relative;
+}
+
+.create_div .input-box input {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 16px;
+    color: #fff;
+    margin-bottom: 30px;
+    border: none;
+    border-bottom: 1px solid #fff;
+    outline: none;
+    background: transparent;
+}
+
+.create_div .input-box label {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    padding: 10px 0;
+    font-size: 16px;
+    color: #1a1818;
+    pointer-events: none;
+    transition: .5s;
+}
+
+.create_div .input-box input:focus~label,
+.create_div .input-box input:valid~label {
+    top: -20px;
+    left: 0;
+    color: #272620;
+    font-size: 12px;
+}
+
+.radio-buttons {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+}
+
+.error_label{
+    position:relative;
+    top:-20px;
+    left:0;
+}
