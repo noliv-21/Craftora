@@ -1,0 +1,284 @@
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+    }
+</style>
+<div class="flex">
+    <!-- Sidebar -->
+    <%-include('../../partials/admin/side bar')%>
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+            <%-include('../../partials/admin/header') %>
+                <div class="flex w-full">
+                    <form class="flex-1 flex-row w-full" action="/admin/editProduct" method="post">
+                        <div class="p-6 flex-1">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-2xl font-semibold text-gray-700">Edit Product</h2>
+                            </div>
+                            <div class="mt-4 text-sm text-gray-500">
+                                <a href="/admin/home" class="text-blue-500">Dashboard</a>
+                                &gt;
+                                <a href="/admin/products" class="text-blue-500">Product List</a>
+                                &gt;
+                                <span>Edit Product</span>
+                            </div>
+                            <% if (successMessage) { %>
+                                <div id="success_div"
+                                    class="bg-green-500 text-white p-2 mb-5 text-center rounded transition-opacity duration-500 ease-in-out">
+                                    <p id="success_message">
+                                        <%= successMessage%>
+                                    </p>
+                                </div>
+                                <% } %>
+
+                                    <% if (errorMessage) { %>
+                                        <div id="error_div"
+                                            class="bg-red-600 text-white p-2 mb-5 text-center rounded transition-opacity duration-500 ease-in-out">
+                                            <p id="error_message">
+                                                <%= errorMessage %>
+                                            </p>
+                                        </div>
+                                    <% } %>
+                                    <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                                        <h3 class="text-lg font-semibold text-gray-700">General Information</h3>
+                                        <div class="mt-4">
+                                            <label class="block text-gray-600">Product Name</label>
+                                            <input type="text" name="name" value="<%= productDetails.name %>"
+                                                class="w-full mt-2 p-2 border rounded-md"
+                                                placeholder="Type product name here...">
+                                            <input type="text" name="originalName" value="<%= productDetails.name %>" hidden>
+                                        </div>
+                                        <div class="mt-4">
+                                            <label class="block text-gray-600">Description</label>
+                                            <textarea name="description"
+                                                class="w-full mt-2 p-2 border rounded-md" rows="4"
+                                                placeholder="Type product description here..."><%= productDetails.description %></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                                        <h3 class="text-lg font-semibold text-gray-700">Media</h3>
+                                        <!-- <div class="row">
+                                            <div class="card-body align-items-center" style="margin-bottom: 20px;">
+                                                <img src="" alt="image 1" id="imgView1">
+                                                <input class="form-control" type="file" name="images" id="input1"
+                                                    accept="image/png, image/jpeg, image/jpg"
+                                                    onchange="viewImage(event),viewImage(event, 1)">
+                                            </div>
+                                            <div class="image-cropper d-flex align-items-center"
+                                                style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
+                                                <img src="" id="croppedImg1" alt="">
+                                                <button type="button" id="saveButton1" class="btn-sm btn-primary">Save</button>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="card-body align-items-center" style="margin-bottom: 20px;">
+                                                <img src="" alt="" id="imgView2">
+                                                <input class="form-control" type="file" name="images" id="input2"
+                                                    accept="image/png, image/jpeg, image/jpg"
+                                                    onchange="viewImage(event),viewImage(event, 2)">
+                                            </div>
+                                            <div class="image-cropper d-flex align-items-center"
+                                                style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
+                                                <img src="" id="croppedImg2" alt="">
+                                                <button type="button" id="saveButton2" class="btn-sm btn-primary">Save</button>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="card-body align-items-center" style="margin-bottom: 20px;">
+                                                <img src="" alt="" id="imgView3">
+                                                <input class="form-control" type="file" name="images" id="input3"
+                                                    accept="image/png, image/jpeg, image/jpg"
+                                                    onchange="viewImage(event),viewImage(event, 3)">
+                                            </div>
+                                            <div class="image-cropper d-flex align-items-center"
+                                                style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
+                                                <img src="" id="croppedImg3" alt="">
+                                                <button type="button" id="saveButton3" class="btn-sm btn-primary">Save</button>
+                                            </div>
+                                        </div> --
+                                        <div
+                                            class="mt-4 border-dashed border-2 border-gray-300 p-6 rounded-md text-center">
+                                            <!-- <input type="file" name="image" multiple> -->
+                                            <i class="fas fa-image text-4xl text-gray-300"></i>
+                                            <p class="mt-2 text-gray-500">Drag and drop image here, or click add
+                                                image
+                                            </p>
+                                            <button
+                                                class="mt-4 px-4 py-2 bg-purple-500 text-white rounded-md">Add
+                                                Image
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                                        <h3 class="text-lg font-semibold text-gray-700">Pricing</h3>
+                                        <div class="mt-4 flex space-x-2">
+                                            <div class="w-1/2">
+                                                <label class="block text-gray-600">Base Price</label>
+                                                <div class="flex items-center mt-2">
+                                                    <span
+                                                        class="px-3 py-2 bg-gray-200 border border-r-0 rounded-l-md">$</span>
+                                                    <input type="number" name="price"
+                                                        value="<%= productDetails.sellingPrice %>"
+                                                        class="w-full p-2 border rounded-r-md"
+                                                        placeholder="Type base price here...">
+                                                </div>
+                                            </div>
+                                            <div class="w-1/2">
+                                                <label class="block text-gray-600">Maximum Retail Price</label>
+                                                <div class="flex items-center mt-2">
+                                                    <span
+                                                        class="px-3 py-2 bg-gray-200 border border-r-0 rounded-l-md">$</span>
+                                                    <input type="number" name="mrp"
+                                                        value="<%= productDetails.mrp %>"
+                                                        class="w-full p-2 border rounded-r-md"
+                                                        placeholder="Type maximum retail price here...">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4 flex space-x-4">
+                                            <div class="w-1/2">
+                                                <label for="offerType" class="block text-gray-600">Discount
+                                                    Type</label>
+                                                <select id="offerType" name="offerType"
+                                                    class="w-full mt-2 p-2 border rounded-md">
+                                                    <% offerTypes.forEach((type,index)=> { %>
+                                                        <option value="<%= type %>"
+                                                            <%=type===productDetails.offerType ? 'selected' : ''
+                                                            %>><%= type %>
+                                                        </option>
+                                                        <% }) %>
+                                                </select>
+                                            </div>
+                                            <div class="w-1/2">
+                                                <label class="block text-gray-600">Discount Percentage
+                                                    (%)</label>
+                                                <input type="number" name="offer"
+                                                    value="<%= productDetails.offer %>"
+                                                    class="w-full mt-2 p-2 border rounded-md"
+                                                    placeholder="Type discount percentage...">
+                                            </div>
+                                            <div class="w-1/2">
+                                                <label class="block text-gray-600">Maximum Discount
+                                                    Amount</label>
+                                                <input type="number" name="maxDiscount"
+                                                    value="<%= productDetails.maxDiscount %>"
+                                                    class="w-full mt-2 p-2 border rounded-md"
+                                                    placeholder="Type Maximum discount amount...">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                                        <h3 class="text-lg font-semibold text-gray-700">Inventory</h3>
+                                        <div class="mt-4">
+                                            <label class="block text-gray-600">Quantity</label>
+                                            <input type="number" name="stock"
+                                                value="<%= productDetails.inventory %>"
+                                                class="w-full mt-2 p-2 border rounded-md"
+                                                placeholder="Type product quantity here...">
+                                        </div>
+                                    </div>
+                        </div>
+                        <!-- Right Sidebar -->
+                        <div class="flex flex-col w-70 p-6">
+                            <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                                <h3 class="text-lg font-semibold text-gray-700">Category</h3>
+                                <div class="mt-4">
+                                    <label class="block text-gray-600">Product Category</label>
+                                    <select name="category" class="w-full mt-2 p-2 border rounded-md">
+                                        <% categories.forEach((category,index)=> { %>
+                                            <option value="<%= category._id %>" <%=category===productDetails.category
+                                                ? 'selected' : '' %>>
+                                                <%= category.name %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+                                <div class="mt-4">
+                                    <label class="block text-gray-600">Product Tags</label>
+                                    <input name="tags" placeholder="Separate the tags using Comma(,)"
+                                        value="<%= productDetails.tags.join(', ') %>"
+                                        class="w-full mt-2 p-2 border rounded-md">
+                                </div>
+                            </div>
+                            <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                                <h3 class="text-lg font-semibold text-gray-700">Status</h3>
+                                <div class="mt-4">
+                                    <label for="status" class="block text-gray-600">Product Status</label>
+                                    <select name="status" class="w-full mt-2 p-2 border rounded-md">
+                                        <% statuses.forEach(status=> { %>
+                                            <option value="<%= status %>" <%=status===productDetails.status ? 'selected'
+                                                : '' %>>
+                                                <%= status %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                                <h3 class="text-lg font-semibold text-gray-700">Is Listed</h3>
+                                <div class="mt-4">
+                                    <label class="block text-gray-600">Is Listed</label>
+                                    <select name="isListed" class="w-full mt-2 p-2 border rounded-md">
+                                        <option value="true" <%=productDetails.isListed ? 'selected' : '' %>>Yes
+                                        </option>
+                                        <option value="false" <%=!productDetails.isListed ? 'selected' : '' %>>No
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end mt-6">
+                            <button type="button" onclick="window.history.back()"
+                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md">Cancel</button>
+                            <button type="submit"
+                                class="ml-2 px-6 py-2 bg-purple-500 text-white rounded-md">Confirm Edits</button>
+                        </div>
+                    </form>
+                </div>
+        </div>
+</div>
+<script src="JS/admin/product.js"></script>
+<script>
+    function viewImage(event, index) {
+        let input = event.target;
+        let reader = new FileReader();
+        reader.onload = function () {
+            let dataURL = reader.result;
+            let image = document.getElementById('imgView' + index);
+            image.src = dataURL;
+
+            if (cropper) {
+                cropper.destroy();
+            }
+
+            cropper = new Cropper(image, {
+                aspectRatio: 1,
+                viewMode: 1,
+                background: false,
+                autoCropArea: 1,
+                zoomable: true,
+            });
+
+            let saveButton = document.querySelector('#saveButton' + index);
+            saveButton.addEventListener('click', async function () {
+                let croppedCanvas = cropper.getCroppedCanvas();
+                let croppedImage = document.getElementById('croppedImg' + index);
+                croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
+
+                let timestamp = new Date().getTime();
+                let fileName = `cropped-img-${timestamp}-${index}.png`;
+
+                await croppedCanvas.toBlob(blob => {
+                    let imgFile = new File([blob], fileName, { type: blob.type });
+                    let fileList = new DataTransfer();
+                    fileList.items.add(imgFile);
+                    input.files = fileList.files;
+                });
+
+                cropper.destroy();
+                cropper = null;
+            });
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+</script>

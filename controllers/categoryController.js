@@ -29,7 +29,7 @@ exports.addingCategory = async (req, res) => {
         const catCheck = await Categories.findOne({ name: name })
         if (!catCheck) {
             const newCategory = new Categories({
-                name: name,
+                name,
                 description: description || "No Description",
                 isListed: isListed,
                 createdAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -61,13 +61,6 @@ exports.list_unlist=async (req,res)=>{
         req.session.errorMessage='Not updated'
         res.redirect('/admin/categories')
     }
-    // const catId=req.query.id
-    // const prevListed=req.query.isListed
-    // if(prevListed){
-    //     const cat=await Categories.findByIdAndUpdate(catId,{isListed:false})
-    // }else{
-    //     const cat=await Categories.findByIdAndUpdate(catId,{isListed:true})
-    // }
 }
 
 exports.editPage = async (req, res) => {

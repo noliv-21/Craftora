@@ -14,30 +14,49 @@ const productSchema = new mongoose.Schema({
         ref: "Category",
         required: true
     },
+    tags:{
+        type:Array,
+        required:false,
+    },
     mrp: {
-        required: true,
-        type: Number
+        type: Number,
+        required: true
     },
     sellingPrice: {
         type: Number,
         required: true
+    },
+    offerType:{
+        type:String,
+        required:false,
+        enum:["Percentage","Fixed","BOGO","Free Shipping"]
     },
     offer: {
         type: Number,
         required: false,
         default: 0
     },
+    maxDiscount: {
+        type: Number,
+        required: false,
+        default: 30 // Maximum discount amount
+    },
     image: {
         type: [String],
-        required: true
+        // required: true
     },
     isListed: {
         type: Boolean,
         default: false
     },
+    inventory:{
+        type:Number,
+        required:true,
+        default:0
+    },
     status: {
         type: String,
-        enum: ["Available", "Out of Stock", "Discontinued"],
+        enum: ["Available", "Out of Stock", "Only Few Left"],
         required: true,
         default: "Available"
     },
@@ -45,9 +64,12 @@ const productSchema = new mongoose.Schema({
         type:Number,
         required:false,
         default:0
+    },
+    createdAt:{
+        type:String,
+        required:true
     }
-
-}, { timestamps: true })
+})
 
 const Product = mongoose.model("product", productSchema)
 module.exports = Product

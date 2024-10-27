@@ -18,23 +18,17 @@
                         <button class="bg-purple-600 text-white px-4 py-2 rounded-md">
                             Export
                         </button>
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-md">
+                        <a href="/admin/products/add" class="bg-blue-600 text-white px-4 py-2 rounded-md">
                             + Add Product
-                        </button>
+                        </a>
                     </div>
                 </div>
                 <div class="bg-white p-6 rounded-md shadow-md">
                     <div class="flex justify-between items-center mb-4">
-                        <div class="flex items-center space-x-2">
-                            <a class="text-gray-500" href="#">
-                                Dashboard
-                            </a>
-                            <span class="text-gray-500">
-                                /
-                            </span>
-                            <a class="text-gray-500" href="#">
-                                Product List
-                            </a>
+                        <div class="mt-4 text-sm text-gray-500">
+                            <a class="text-blue-500" href="/admin/home">Dashboard</a>
+                            &gt;
+                            <span>Product List</span>
                         </div>
                         <div class="flex items-center space-x-2">
                             <input class="border border-gray-300 rounded-md px-4 py-2" placeholder="Search product..."
@@ -47,521 +41,144 @@
                             </button>
                         </div>
                     </div>
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="text-gray-500">
-                                <th class="py-2">
-                                    <input type="checkbox" />
-                                </th>
-                                <th class="py-2">
-                                    Product
-                                </th>
-                                <th class="py-2">
-                                    SKU
-                                </th>
-                                <th class="py-2">
-                                    Category
-                                </th>
-                                <th class="py-2">
-                                    Stock
-                                </th>
-                                <th class="py-2">
-                                    Price
-                                </th>
-                                <th class="py-2">
-                                    Status
-                                </th>
-                                <th class="py-2">
-                                    Added
-                                </th>
-                                <th class="py-2">
-                                    Action
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-gray-700">
-                            <tr class="border-b">
-                                <td class="py-2">
-                                    <input type="checkbox" />
-                                </td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <img alt="Handmade Pouch" class="w-10 h-10 rounded-md mr-2" height="40"
-                                            src="https://storage.googleapis.com/a1aa/image/eAwWjtiaN4RfQ0J7l9Oxg3ADygtYzTyAAFbaFJV0ggyL09pTA.jpg"
-                                            width="40" />
-                                        <div>
-                                            <div>
-                                                Handmade Pouch
-                                            </div>
-                                            <div class="text-gray-500 text-sm">
-                                                3 Variants
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2 text-blue-500">
-                                    302012
-                                </td>
-                                <td class="py-2">
-                                    Bag &amp; Pouch
-                                </td>
-                                <td class="py-2">
-                                    10
-                                </td>
-                                <td class="py-2">
-                                    $121.00
-                                </td>
-                                <td class="py-2">
-                                    <span class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-md">
-                                        Low Stock
-                                    </span>
-                                </td>
-                                <td class="py-2">
-                                    29 Dec 2022
-                                </td>
-                                <td class="py-2">
-                                    <i class="fas fa-edit text-gray-500 mr-2">
-                                    </i>
-                                    <i class="fas fa-trash text-gray-500">
-                                    </i>
-                                </td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="py-2">
-                                    <input type="checkbox" />
-                                </td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <img alt="Wall decor" class="w-10 h-10 rounded-md mr-2" height="40"
-                                            src="https://storage.googleapis.com/a1aa/image/nAqfiyJLG2WADCyt6fnpgq6aSeeojJUjmcK2nWK6ke9iguPdC.jpg"
-                                            width="40" />
-                                        <div>
-                                            <div>
-                                                Wall decor
-                                            </div>
-                                            <div class="text-gray-500 text-sm">
-                                                2 Variants
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2 text-blue-500">
-                                    302011
-                                </td>
-                                <td class="py-2">
-                                    Watch
-                                </td>
-                                <td class="py-2">
-                                    204
-                                </td>
-                                <td class="py-2">
-                                    $590.00
-                                </td>
-                                <td class="py-2">
-                                    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-md">
-                                        Published
-                                    </span>
-                                </td>
-                                <td class="py-2">
-                                    24 Dec 2022
-                                </td>
-                                <td class="py-2">
-                                    <i class="fas fa-edit text-gray-500 mr-2">
-                                    </i>
-                                    <i class="fas fa-trash text-gray-500">
-                                    </i>
-                                </td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="py-2">
-                                    <input type="checkbox" />
-                                </td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <img alt="Handmade woollen dress" class="w-10 h-10 rounded-md mr-2" height="40"
-                                            src="https://storage.googleapis.com/a1aa/image/MYa6bt7AKF5qJtZ9wWAfneJHzNfLSXrtDzJN24c2Da6Po7TnA.jpg"
-                                            width="40" />
-                                        <div>
-                                            <div>
-                                                Handmade woollen dress
-                                            </div>
-                                            <div class="text-gray-500 text-sm">
-                                                3 Variants
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2 text-blue-500">
-                                    302002
-                                </td>
-                                <td class="py-2">
-                                    Watch
-                                </td>
-                                <td class="py-2">
-                                    48
-                                </td>
-                                <td class="py-2">
-                                    $125.00
-                                </td>
-                                <td class="py-2">
-                                    <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-md">
-                                        Draft
-                                    </span>
-                                </td>
-                                <td class="py-2">
-                                    12 Dec 2022
-                                </td>
-                                <td class="py-2">
-                                    <i class="fas fa-edit text-gray-500 mr-2">
-                                    </i>
-                                    <i class="fas fa-trash text-gray-500">
-                                    </i>
-                                </td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="py-2">
-                                    <input type="checkbox" />
-                                </td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <img alt="Candles" class="w-10 h-10 rounded-md mr-2" height="40"
-                                            src="https://storage.googleapis.com/a1aa/image/Yqyq7HEfPJRzIStjbjFuPzHlv9AYAe5qVeDwg8itRauEo7TnA.jpg"
-                                            width="40" />
-                                        <div>
-                                            <div>
-                                                Candles
-                                            </div>
-                                            <div class="text-gray-500 text-sm">
-                                                1 Variants
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2 text-blue-500">
-                                    301901
-                                </td>
-                                <td class="py-2">
-                                    Audio
-                                </td>
-                                <td class="py-2">
-                                    401
-                                </td>
-                                <td class="py-2">
-                                    $348.00
-                                </td>
-                                <td class="py-2">
-                                    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-md">
-                                        Published
-                                    </span>
-                                </td>
-                                <td class="py-2">
-                                    21 Oct 2022
-                                </td>
-                                <td class="py-2">
-                                    <i class="fas fa-edit text-gray-500 mr-2">
-                                    </i>
-                                    <i class="fas fa-trash text-gray-500">
-                                    </i>
-                                </td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="py-2">
-                                    <input type="checkbox" />
-                                </td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <img alt="Paintings" class="w-10 h-10 rounded-md mr-2" height="40"
-                                            src="https://storage.googleapis.com/a1aa/image/CdZH55KI12JfWCUIKokI2vs5GaIrRhMXDRdGd6Yu6LdE6epTA.jpg"
-                                            width="40" />
-                                        <div>
-                                            <div>
-                                                Paintings
-                                            </div>
-                                            <div class="text-gray-500 text-sm">
-                                                4 Variants
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2 text-blue-500">
-                                    301900
-                                </td>
-                                <td class="py-2">
-                                    Smartphone
-                                </td>
-                                <td class="py-2">
-                                    120
-                                </td>
-                                <td class="py-2">
-                                    $607.00
-                                </td>
-                                <td class="py-2">
-                                    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-md">
-                                        Published
-                                    </span>
-                                </td>
-                                <td class="py-2">
-                                    21 Oct 2022
-                                </td>
-                                <td class="py-2">
-                                    <i class="fas fa-edit text-gray-500 mr-2">
-                                    </i>
-                                    <i class="fas fa-trash text-gray-500">
-                                    </i>
-                                </td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="py-2">
-                                    <input type="checkbox" />
-                                </td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <img alt="Pumpkin candles" class="w-10 h-10 rounded-md mr-2" height="40"
-                                            src="https://storage.googleapis.com/a1aa/image/Rc8XQhi0Fk5cMxwrpgGVrxeLKLoDS4c9ULF517N8KO3H6epTA.jpg"
-                                            width="40" />
-                                        <div>
-                                            <div>
-                                                Pumpkin candles
-                                            </div>
-                                            <div class="text-gray-500 text-sm">
-                                                3 Variants
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2 text-blue-500">
-                                    301881
-                                </td>
-                                <td class="py-2">
-                                    Shoes
-                                </td>
-                                <td class="py-2">
-                                    432
-                                </td>
-                                <td class="py-2">
-                                    $234.00
-                                </td>
-                                <td class="py-2">
-                                    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-md">
-                                        Published
-                                    </span>
-                                </td>
-                                <td class="py-2">
-                                    21 Oct 2022
-                                </td>
-                                <td class="py-2">
-                                    <i class="fas fa-edit text-gray-500 mr-2">
-                                    </i>
-                                    <i class="fas fa-trash text-gray-500">
-                                    </i>
-                                </td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="py-2">
-                                    <input type="checkbox" />
-                                </td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <img alt="Fig tree candles" class="w-10 h-10 rounded-md mr-2" height="40"
-                                            src="https://storage.googleapis.com/a1aa/image/JPbs6mCyh9rSMtEo1zln4Z9keXRQehkUEanpsXlcT3hK09pTA.jpg"
-                                            width="40" />
-                                        <div>
-                                            <div>
-                                                Fig tree candles
-                                            </div>
-                                            <div class="text-gray-500 text-sm">
-                                                1 Variants
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2 text-blue-500">
-                                    301643
-                                </td>
-                                <td class="py-2">
-                                    PC Desktop
-                                </td>
-                                <td class="py-2">
-                                    0
-                                </td>
-                                <td class="py-2">
-                                    $760.00
-                                </td>
-                                <td class="py-2">
-                                    <span class="bg-red-100 text-red-600 px-2 py-1 rounded-md">
-                                        Out of Stock
-                                    </span>
-                                </td>
-                                <td class="py-2">
-                                    19 Sep 2022
-                                </td>
-                                <td class="py-2">
-                                    <i class="fas fa-edit text-gray-500 mr-2">
-                                    </i>
-                                    <i class="fas fa-trash text-gray-500">
-                                    </i>
-                                </td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="py-2">
-                                    <input type="checkbox" />
-                                </td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <img alt="Giftings" class="w-10 h-10 rounded-md mr-2" height="40"
-                                            src="https://storage.googleapis.com/a1aa/image/QIBDkEuE3grgANxfAtvoFbhjQOWQtQuSA56aZdbX2ubG6epTA.jpg"
-                                            width="40" />
-                                        <div>
-                                            <div>
-                                                Giftings
-                                            </div>
-                                            <div class="text-gray-500 text-sm">
-                                                3 Variants
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2 text-blue-500">
-                                    301600
-                                </td>
-                                <td class="py-2">
-                                    Shoes
-                                </td>
-                                <td class="py-2">
-                                    347
-                                </td>
-                                <td class="py-2">
-                                    $400.00
-                                </td>
-                                <td class="py-2">
-                                    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-md">
-                                        Published
-                                    </span>
-                                </td>
-                                <td class="py-2">
-                                    19 Sep 2022
-                                </td>
-                                <td class="py-2">
-                                    <i class="fas fa-edit text-gray-500 mr-2">
-                                    </i>
-                                    <i class="fas fa-trash text-gray-500">
-                                    </i>
-                                </td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="py-2">
-                                    <input type="checkbox" />
-                                </td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <img alt="Digital prints" class="w-10 h-10 rounded-md mr-2" height="40"
-                                            src="https://storage.googleapis.com/a1aa/image/NPDy6iZYSlKHHh0EfAM40AGkjH9lN4TNnIkg6aecnClF09pTA.jpg"
-                                            width="40" />
-                                        <div>
-                                            <div>
-                                                Digital prints
-                                            </div>
-                                            <div class="text-gray-500 text-sm">
-                                                2 Variants
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2 text-blue-500">
-                                    301555
-                                </td>
-                                <td class="py-2">
-                                    Toys
-                                </td>
-                                <td class="py-2">
-                                    299
-                                </td>
-                                <td class="py-2">
-                                    $812.00
-                                </td>
-                                <td class="py-2">
-                                    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-md">
-                                        Published
-                                    </span>
-                                </td>
-                                <td class="py-2">
-                                    19 Sep 2022
-                                </td>
-                                <td class="py-2">
-                                    <i class="fas fa-edit text-gray-500 mr-2">
-                                    </i>
-                                    <i class="fas fa-trash text-gray-500">
-                                    </i>
-                                </td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="py-2">
-                                    <input type="checkbox" />
-                                </td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <img alt="Keychains" class="w-10 h-10 rounded-md mr-2" height="40"
-                                            src="https://storage.googleapis.com/a1aa/image/MigkGiKvi0ZMLdPDW0C8b4VwtmuNyUixVma7B7BdpquDdf0JA.jpg"
-                                            width="40" />
-                                        <div>
-                                            <div>
-                                                Keychains
-                                            </div>
-                                            <div class="text-gray-500 text-sm">
-                                                3 Variants
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2 text-blue-500">
-                                    301002
-                                </td>
-                                <td class="py-2">
-                                    Beauty
-                                </td>
-                                <td class="py-2">
-                                    38
-                                </td>
-                                <td class="py-2">
-                                    $123.00
-                                </td>
-                                <td class="py-2">
-                                    <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-md">
-                                        Draft
-                                    </span>
-                                </td>
-                                <td class="py-2">
-                                    10 Aug 2022
-                                </td>
-                                <td class="py-2">
-                                    <i class="fas fa-edit text-gray-500 mr-2">
-                                    </i>
-                                    <i class="fas fa-trash text-gray-500">
-                                    </i>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="flex justify-between items-center mt-4">
-                        <div class="text-gray-500">
-                            Showing 1-10 from 100
+                    <% if (successMessage) { %>
+                        <div id="success_div" class="bg-green-500 text-white p-2 mb-5 text-center rounded transition-opacity duration-500 ease-in-out">
+                            <p id="success_message"><%= successMessage%></p>
                         </div>
-                        <div class="flex items-center space-x-2">
-                            <button class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">
-                                &lt;
-                            </button>
-                            <button class="bg-blue-600 text-white px-3 py-1 rounded-md">
-                                1
-                            </button>
-                            <button class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">
-                                2
-                            </button>
-                            <button class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">
-                                3
-                            </button>
-                            &lt;button class="bg
+                    <% } %>
+        
+                    <% if (errorMessage) { %>
+                        <div id="error_div" class="bg-red-600 text-white p-2 mb-5 text-center rounded transition-opacity duration-500 ease-in-out">
+                            <p id="error_message"><%= errorMessage %></p>
                         </div>
-                    </div>
+                    <% } %>
+                    <% if (products.length>0){ %>
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="text-gray-500">
+                                    <th class="py-2">Product</th>
+                                    <th class="py-2">Rating</th>
+                                    <th class="py-2">Category</th>
+                                    <th class="py-2">Stock</th>
+                                    <th class="py-2">M.R.P</th>
+                                    <th class="py-2">Price </th>
+                                    <th class="py-2">Status</th>
+                                    <th class="py-2">Added</th>
+                                    <th class="py-2">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-700">
+                                <% products.forEach((product,index)=>{ %>
+                                    <tr class="border-b">
+                                        <td class="py-2">
+                                            <div class="flex items-center">
+                                            <a href="/admin/viewProduct?id=<%= product._id %>">
+                                                <img alt="product image" class="w-10 h-10 rounded-md mr-2" height="40"
+                                                    src="https://storage.googleapis.com/a1aa/image/eAwWjtiaN4RfQ0J7l9Oxg3ADygtYzTyAAFbaFJV0ggyL09pTA.jpg"
+                                                    width="40" />
+                                                <div><%= product.name %></div>
+                                            </a>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <%= product.rating %>
+                                        </td>
+                                        <td class="py-2">
+                                            <%= product.category.name %>
+                                        </td>
+                                        <td class="py-2">
+                                            <%= product.inventory %>
+                                        </td>
+                                        <td class="py-2">
+                                            <%= product.mrp %>
+                                        </td>
+                                        <td class="py-2">
+                                            <%= product.sellingPrice %>
+                                        </td>
+                                        <% if(product.status==="Available"){ %>
+                                        <td class="py-2">
+                                            <span class="bg-green-100 text-green-600 px-2 py-1 rounded-md">
+                                                <%= product.status %>
+                                            </span>
+                                        </td>
+                                        <% } else if(product.status==="Out of Stock"){ %>
+                                            <td class="py-2">
+                                                <span class="bg-red-100 text-red-600 px-2 py-1 rounded-md">
+                                                    <%= product.status %>
+                                                </span>
+                                            </td>
+                                        <% } else { %>
+                                            <td class="py-2">
+                                                <span class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-md">
+                                                    Only <%= product.inventory %> Left
+                                                </span>
+                                            </td>
+                                        <% } %>
+                                        <td class="py-2">
+                                            <%= product.createdAt %>
+                                        </td>
+                                        <td class="py-2 flex space-x-2">
+                                            <% if (product.isListed) { %>
+                                                <form action="/admin/listProduct" method="POST"
+                                                    style="display: inline;">
+                                                    <input type="hidden" name="id" value="<%= product._id %>">
+                                                    <input type="hidden" name="isListed" value="false">
+                                                    <button type="submit"
+                                                        style="background: none; border: none; cursor: pointer;">
+                                                        <i class="fas fa-eye text-gray-500"></i>
+                                                    </button>
+                                                </form>
+                                            <% } else { %>
+                                                <form action="/admin/listProduct" method="POST"
+                                                    style="display: inline;">
+                                                    <input type="hidden" name="id" value="<%= product._id %>">
+                                                    <input type="hidden" name="isListed" value="true">
+                                                    <button type="submit"
+                                                        style="background: none; border: none; cursor: pointer;">
+                                                        <i class="fas fa-eye-slash text-gray-500"></i>
+                                                    </button>
+                                                </form>
+                                            <% } %>
+                                                <a href="/admin/editProduct?id=<%= product._id %>">
+                                                    <i class="fas fa-edit text-gray-500"></i>
+                                                </a>
+                                                <a href="/admin/deleteProduct?id=<%= product._id %>"
+                                                    onclick="confirmDelete(event,this.href)">
+                                                    <i class="fas fa-trash text-gray-500"></i>
+                                                </a>
+                                            </td>
+                                    </tr>
+                                    <% }); %>
+                            </tbody>
+                        </table>
+                        <% } else{ %>
+                            <div class="flex items-center justify-center">
+                                <img class="h-auto w-[300px]" src="images/noResults.png" alt="">
+                            </div>
+                            <% } %>
+                                <div class="flex justify-between items-center mt-4">
+                                    <div class="text-gray-500">
+                                        Showing 1-10 from 100
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">
+                                            &lt;
+                                        </button>
+                                        <button class="bg-blue-600 text-white px-3 py-1 rounded-md">
+                                            1
+                                        </button>
+                                        <button class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">
+                                            2
+                                        </button>
+                                        <button class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">
+                                            3
+                                        </button>
+                                        <button class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">
+                                            &gt;
+                                        </button>
+                                    </div>
+                                </div>
                 </div>
         </div>
 </div>
+<script src="JS/admin/product.js"></script>

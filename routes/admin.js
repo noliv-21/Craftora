@@ -15,8 +15,6 @@ admin.get('/logout', adminController.logout)
 admin.get('/users',adminController.users)
 admin.get('/search-users',adminController.searchUsers)
 
-admin.get('/products',productController.products)
-
 admin.get('/categories',categoryController.categories)
 admin.get('/categories/add',categoryController.addCategory)
 admin.post('/categories/add',categoryController.addingCategory)
@@ -24,6 +22,17 @@ admin.get('/deleteCategory',categoryController.deleteCategory)
 admin.get('/editCategory',categoryController.editPage)
 admin.post('/editCategory',categoryController.edittingCategory)
 admin.post('/listCategory',categoryController.list_unlist)
+
+admin.get('/products',productController.products)
+admin.get('/products/add',productController.addProductPage)
+admin.post('/products/add',productController.addProduct)
+admin.post('/listProduct',productController.list_unlist)
+admin.get('/deleteProduct',productController.deleteProduct)
+admin.get('/editProduct',productController.editPage)
+admin.post('/editProduct',productController.edittingProduct)
+admin.get('/viewProduct',productController.productDetails)
+
+// admin.post('/products/add-image',productController.upload.single('image'))
 
 // admin.post('/update',adminController.update_details)
 

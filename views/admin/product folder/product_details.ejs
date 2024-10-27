@@ -1,254 +1,125 @@
 <style>
-   body {
-            font-family: 'Inter', sans-serif;
-        }
-  </style>
-  <div class="flex">
-   <!-- Sidebar -->
-   <%-include('../partials/admin/side bar')%>
-   <!-- Main Content -->
-   <div class="flex-1 p-6">
-    <div class="flex justify-between items-center mb-6">
-     <h2 class="text-2xl font-semibold text-gray-700">
-      Add Product
-     </h2>
-     <div class="flex items-center space-x-4">
-      <button class="text-gray-500 hover:text-gray-700">
-       <i class="fas fa-search">
-       </i>
-      </button>
-      <button class="text-gray-500 hover:text-gray-700">
-       <i class="fas fa-bell">
-       </i>
-      </button>
-      <div class="relative">
-       <img alt="User Avatar" class="rounded-full" height="40" src="https://storage.googleapis.com/a1aa/image/g2qw1NXsIcJ9EZjwTisK50fb7GuPHlgqmDuGuGvqNdk9UfpTA.jpg" width="40"/>
-       <span class="absolute bottom-0 right-0 bg-green-500 rounded-full w-3 h-3 border-2 border-white">
-       </span>
-      </div>
-      <div>
-       <p class="text-gray-700 font-medium">
-        Jay Hargudon
-       </p>
-       <p class="text-gray-500 text-sm">
-        Manager
-       </p>
-      </div>
-     </div>
-    </div>
-    <div class="bg-white p-6 rounded-lg shadow-md">
-     <div class="flex justify-between items-center mb-6">
-      <div>
-       <nav class="text-sm text-gray-500">
-        <a class="hover:underline" href="#">
-         Dashboard
-        </a>
-        &gt;
-        <a class="hover:underline" href="#">
-         Product List
-        </a>
-        &gt;
-        <span class="text-gray-700">
-         Add Product
-        </span>
-       </nav>
-      </div>
-      <div class="flex space-x-4">
-       <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
-        Cancel
-       </button>
-       <button class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-        Add Product
-       </button>
-      </div>
-     </div>
-     <div class="space-y-6">
-      <!-- General Information -->
-      <div>
-       <h3 class="text-lg font-semibold text-gray-700 mb-2">
-        General Information
-       </h3>
-       <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <div class="mb-4">
-         <label class="block text-gray-600 mb-1">
-          Product Name
-         </label>
-         <input class="w-full p-2 border border-gray-300 rounded-md" placeholder="Type product name here..." type="text"/>
+    body {
+        font-family: 'Inter', sans-serif;
+    }
+</style>
+<div class="flex">
+    <!-- Sidebar -->
+    <%-include('../../partials/admin/side bar')%>
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+            <%-include('../../partials/admin/header') %>
+                <div class="flex w-full">
+                    <div class="flex-1 flex-row w-full">
+                        <div class="p-6 flex-1">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-2xl font-semibold text-gray-700">Product Details</h2>
+                            </div>
+                            <div class="mt-4 text-sm text-gray-500">
+                                <a href="/admin/home" class="text-blue-500">Dashboard</a>
+                                &gt;
+                                <a href="/admin/products" class="text-blue-500">Product List</a>
+                                &gt;
+                                <span>Product Details</span>
+                            </div>
+                            <% if (successMessage) { %>
+                                <div id="success_div"
+                                    class="bg-green-500 text-white p-2 mb-5 text-center rounded transition-opacity duration-500 ease-in-out">
+                                    <p id="success_message">
+                                        <%= successMessage %>
+                                    </p>
+                                </div>
+                            <% } %>
+
+                            <% if (errorMessage) { %>
+                                <div id="error_div"
+                                    class="bg-red-600 text-white p-2 mb-5 text-center rounded transition-opacity duration-500 ease-in-out">
+                                    <p id="error_message">
+                                        <%= errorMessage %>
+                                    </p>
+                                </div>
+                            <% } %>
+                            <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                                <h3 class="text-lg font-semibold text-gray-700">General Information</h3>
+                                <div class="mt-4">
+                                    <b><h4 class="block text-gray-600">Product Name</h4></b>
+                                    <p class="text-gray-800 mt-2"><%= productDetails.name %></p>
+                                </div>
+                                <div class="mt-4">
+                                    <b><h4 class="block text-gray-600">Description</h4></b>
+                                    <p class="text-gray-800 mt-2"><%= productDetails.description %></p>
+                                </div>
+                            </div>
+                            <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                                <h3 class="text-lg font-semibold text-gray-700">Media</h3>
+                                <b><h4 class="text-gray-800 mt-2">Image Preview:</h4></b>
+                                <img src="#" alt="Product Image" class="mt-4 w-32 h-32">
+                            </div>
+                            <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                                <h3 class="text-lg font-semibold text-gray-700">Pricing</h3>
+                                <div class="mt-4">
+                                    <b><h4 class="block text-gray-600">Base Price</h4></b>
+                                    <p class="text-gray-800 mt-2">$<%= productDetails.sellingPrice %></p>
+                                </div>
+                                <div class="mt-4">
+                                    <b><h4 class="block text-gray-600">Maximum Retail Price</h4></b>
+                                    <p class="text-gray-800 mt-2">$<%= productDetails.mrp %></p>
+                                </div>
+                                <div class="mt-4">
+                                    <b><h4 class="block text-gray-600">Discount Type</h4></b>
+                                    <p class="text-gray-800 mt-2"><%= productDetails.offerType %></p>
+                                </div>
+                                <div class="mt-4">
+                                    <b><h4 class="block text-gray-600">Discount Percentage</h4></b>
+                                    <p class="text-gray-800 mt-2"><%= productDetails.offer %>%</p>
+                                </div>
+                                <div class="mt-4">
+                                    <b><h4 class="block text-gray-600">Maximum Discount Amount</h4></b>
+                                    <p class="text-gray-800 mt-2">$<%= productDetails.maxDiscount %></p>
+                                </div>
+                            </div>
+                            <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                                <h3 class="text-lg font-semibold text-gray-700">Inventory</h3>
+                                <div class="mt-4">
+                                    <b><h4 class="block text-gray-600">Quantity</h4></b>
+                                    <p class="text-gray-800 mt-2"><%= productDetails.inventory %></p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Right Sidebar -->
+                        <div class="flex flex-col w-70 p-6">
+                            <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                                <h3 class="text-lg font-semibold text-gray-700">Category</h3>
+                                <div class="mt-4">
+                                    <b><h4 class="block text-gray-600">Product Category</h4></b>
+                                    <p class="text-gray-800 mt-2"><%= productDetails.category.name %></p>
+                                </div>
+                                <div class="mt-4">
+                                    <b><h4 class="block text-gray-600">Product Tags</h4></b>
+                                    <p class="text-gray-800 mt-2"><%= productDetails.tags.join(', ') %></p>
+                                </div>
+                            </div>
+                            <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                                <h3 class="text-lg font-semibold text-gray-700">Status</h3>
+                                <div class="mt-4">
+                                    <b><h4 class="block text-gray-600">Product Status</h4></b>
+                                    <p class="text-gray-800 mt-2"><%= productDetails.status %></p>
+                                </div>
+                            </div>
+                            <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                                <h3 class="text-lg font-semibold text-gray-700">Is Listed</h3>
+                                <div class="mt-4">
+                                    <b><h4 class="block text-gray-600">Is Listed</h4></b>
+                                    <p class="text-gray-800 mt-2"><%= productDetails.isListed ? 'Yes' : 'No' %></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end mt-6">
+                            <a href="/admin/editProduct/?id=<%= productDetails._id %>"
+                                class="ml-2 px-6 py-2 bg-purple-500 text-white rounded-md">Edit?</a>
+                        </div>
+                    </div>
+                </div>
         </div>
-        <div>
-         <label class="block text-gray-600 mb-1">
-          Description
-         </label>
-         <textarea class="w-full p-2 border border-gray-300 rounded-md" placeholder="Type product description here..." rows="4"></textarea>
-        </div>
-       </div>
-      </div>
-      <!-- Media -->
-      <div>
-       <h3 class="text-lg font-semibold text-gray-700 mb-2">
-        Media
-       </h3>
-       <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <label class="block text-gray-600 mb-1">
-         Photo
-        </label>
-        <div class="border-2 border-dashed border-gray-300 p-6 rounded-lg text-center">
-         <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2">
-         </i>
-         <p class="text-gray-500 mb-2">
-          Drag and drop image here, or click add image
-         </p>
-         <button class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-          Add Image
-         </button>
-        </div>
-       </div>
-      </div>
-      <!-- Pricing -->
-      <div>
-       <h3 class="text-lg font-semibold text-gray-700 mb-2">
-        Pricing
-       </h3>
-       <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <div class="grid grid-cols-2 gap-4">
-         <div>
-          <label class="block text-gray-600 mb-1">
-           Base Price
-          </label>
-          <div class="relative">
-           <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-            $
-           </span>
-           <input class="w-full pl-8 p-2 border border-gray-300 rounded-md" placeholder="Type base price here..." type="text"/>
-          </div>
-         </div>
-         <div>
-          <label class="block text-gray-600 mb-1">
-           Discount Percentage (%)
-          </label>
-          <input class="w-full p-2 border border-gray-300 rounded-md" placeholder="Type discount percentage..." type="text"/>
-         </div>
-         <div>
-          <label class="block text-gray-600 mb-1">
-           Discount Type
-          </label>
-          <select class="w-full p-2 border border-gray-300 rounded-md">
-           <option>
-            Select a discount type
-           </option>
-          </select>
-         </div>
-        </div>
-       </div>
-      </div>
-      <!-- Inventory -->
-      <div>
-       <h3 class="text-lg font-semibold text-gray-700 mb-2">
-        Inventory
-       </h3>
-       <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <label class="block text-gray-600 mb-1">
-         Quantity
-        </label>
-        <input class="w-full p-2 border border-gray-300 rounded-md" placeholder="Type product quantity here..." type="text"/>
-       </div>
-      </div>
-      <!-- Variation -->
-      <div>
-       <h3 class="text-lg font-semibold text-gray-700 mb-2">
-        Variation
-       </h3>
-       <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-        <div class="grid grid-cols-2 gap-4">
-         <div>
-          <label class="block text-gray-600 mb-1">
-           Variation Type
-          </label>
-          <select class="w-full p-2 border border-gray-300 rounded-md">
-           <option>
-            Select a variation
-           </option>
-          </select>
-         </div>
-         <div class="relative">
-          <label class="block text-gray-600 mb-1">
-           Variation
-          </label>
-          <input class="w-full p-2 border border-gray-300 rounded-md" placeholder="Variation..." type="text"/>
-          <button class="absolute top-0 right-0 mt-2 mr-2 text-red-500 hover:text-red-700">
-           <i class="fas fa-times">
-           </i>
-          </button>
-         </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-         <div>
-          <label class="block text-gray-600 mb-1">
-           Variation Type
-          </label>
-          <select class="w-full p-2 border border-gray-300 rounded-md">
-           <option>
-            Select a variation
-           </option>
-          </select>
-         </div>
-         <div class="relative">
-          <label class="block text-gray-600 mb-1">
-           Variation
-          </label>
-          <input class="w-full p-2 border border-gray-300 rounded-md" placeholder="Variation..." type="text"/>
-          <button class="absolute top-0 right-0 mt-2 mr-2 text-red-500 hover:text-red-700">
-           <i class="fas fa-times">
-           </i>
-          </button>
-         </div>
-        </div>
-        <button class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-         + Add Variant
-        </button>
-       </div>
-      </div>
-      <!-- Shipping -->
-      <div>
-       <h3 class="text-lg font-semibold text-gray-700 mb-2">
-        Shipping
-       </h3>
-       <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <div class="flex items-center mb-4">
-         <input class="mr-2" type="checkbox"/>
-         <label class="text-gray-600">
-          This is a physical product
-         </label>
-        </div>
-        <div class="grid grid-cols-4 gap-4">
-         <div>
-          <label class="block text-gray-600 mb-1">
-           Weight
-          </label>
-          <input class="w-full p-2 border border-gray-300 rounded-md" placeholder="Product weight..." type="text"/>
-         </div>
-         <div>
-          <label class="block text-gray-600 mb-1">
-           Height
-          </label>
-          <input class="w-full p-2 border border-gray-300 rounded-md" placeholder="Height (cm)..." type="text"/>
-         </div>
-         <div>
-          <label class="block text-gray-600 mb-1">
-           Length
-          </label>
-          <input class="w-full p-2 border border-gray-300 rounded-md" placeholder="Length (cm)..." type="text"/>
-         </div>
-         <div>
-          <label class="block text-gray-600 mb-1">
-           Width
-          </label>
-          <input class="w-full p-2 border border-gray-300 rounded-md" placeholder="Width (cm)..." type="text"/>
-         </div>
-        </div>
-       </div>
-      </div>
-     </div>
-    </div>
-   </div>
-  </div>
+</div>
+<script src="JS/admin/product.js"></script>
