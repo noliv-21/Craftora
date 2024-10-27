@@ -3,17 +3,11 @@ const users = require('../models/userSchema')
 const bcrypt = require('bcrypt')
 
 exports.login = async (req, res) => {
-    console.log("working");
-
-    if (req.session.admin) {
-        res.redirect('/admin/home');
+    if (req.session.passwordwrong) {
+        req.session.passwordwrong = false;
+        res.render('admin/login', { msg: "Invalid Credentials" });
     } else {
-        if (req.session.passwordwrong) {
-            res.render('admin/login', { msg: "Invalid Credentials" });
-            req.session.passwordwrong = false;
-        } else {
-            res.render('admin/login')
-        }
+        res.render('admin/login')
     }
 }
 
@@ -48,13 +42,6 @@ exports.home = (req, res) => {
     res.render('admin/dashboard', {
         isSelected: "dashboard"
     });
-    // if (req.session.admin) {
-    //     res.render('admin/dashboard', {
-    //         isSelected:"dashboard"
-    //     });
-    // } else {
-    //     res.redirect('/admin/login')
-    // }
 };
 
 exports.logout = (req, res) => {

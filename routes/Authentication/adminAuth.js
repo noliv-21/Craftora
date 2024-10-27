@@ -1,11 +1,15 @@
 const express = require('express')
 const adminAuth = express.Router();
 
-adminAuth.use('/',express.static('public'));
+adminAuth.use('/', express.static('public'));
 
 adminAuth.use((req, res, next) => {
     if (req.path === '/login' || req.path.startsWith('/public')) {
-        next();
+        if (req.session.admin) {
+            res.redirect('/admin/home')
+        } else {
+            next();
+        }
     } else if (req.session.admin) {
         next();
     } else {

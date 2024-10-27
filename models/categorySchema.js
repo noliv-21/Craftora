@@ -13,14 +13,11 @@ const categorySchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    categoryOffer: {
+    offer: {
         type: Number,
         default: 0
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
+    createdAt: { type: String }
 })
 
 const Category = mongoose.model("Category", categorySchema)

@@ -12,6 +12,17 @@
                             Category</a>
                     </div>
                 </div>
+                <% if (successMessage) { %>
+                    <div id="success_div" class="bg-green-500 text-white p-2 mb-5 text-center rounded transition-opacity duration-500 ease-in-out">
+                        <p id="success_message"><%= successMessage%></p>
+                    </div>
+                <% } %>
+    
+                <% if (errorMessage) { %>
+                    <div id="error_div" class="bg-red-600 text-white p-2 mb-5 text-center rounded transition-opacity duration-500 ease-in-out">
+                        <p id="error_message"><%= errorMessage %></p>
+                    </div>
+                <% } %>
                 <div class="bg-white p-6 rounded-md shadow-md">
                     <div class="flex items-center mb-4">
                         <input type="text" placeholder="Search category..."
@@ -20,230 +31,64 @@
                             <i class="fas fa-filter"></i> Filters
                         </button>
                     </div>
+                    <% if (categories.length>0){ %>
                     <table class="w-full text-left">
                         <thead>
                             <tr class="text-gray-500">
-                                <th class="py-2"><input type="checkbox"></th>
                                 <th class="py-2">Category</th>
-                                <th class="py-2">Sales</th>
-                                <th class="py-2">Stock</th>
+                                <th class="py-2">Offer</th>
                                 <th class="py-2">Added</th>
                                 <th class="py-2">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="border-t">
-                                <td class="py-2"><input type="checkbox"></td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <div class="bg-gray-200 w-10 h-10 rounded-full mr-3"></div>
-                                        <div>
-                                            <div class="font-semibold">Bag & Pouch</div>
-                                            <div class="text-gray-500 text-sm">Great fashion, great selections, great
-                                                prices.</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2">15,020</td>
-                                <td class="py-2">901</td>
-                                <td class="py-2">29 Dec 2022</td>
-                                <td class="py-2 flex space-x-2">
-                                    <i class="fas fa-eye text-gray-500"></i>
-                                    <i class="fas fa-edit text-gray-500"></i>
-                                    <i class="fas fa-trash text-gray-500"></i>
-                                </td>
-                            </tr>
-                            <tr class="border-t">
-                                <td class="py-2"><input type="checkbox"></td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <div class="bg-gray-200 w-10 h-10 rounded-full mr-3"></div>
-                                        <div>
-                                            <div class="font-semibold">Watch</div>
-                                            <div class="text-gray-500 text-sm">Our range of watches are perfect whether
-                                                you're looking to upgrade.</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2">4,901</td>
-                                <td class="py-2">451</td>
-                                <td class="py-2">24 Dec 2022</td>
-                                <td class="py-2 flex space-x-2">
-                                    <i class="fas fa-eye text-gray-500"></i>
-                                    <i class="fas fa-edit text-gray-500"></i>
-                                    <i class="fas fa-trash text-gray-500"></i>
-                                </td>
-                            </tr>
-                            <tr class="border-t">
-                                <td class="py-2"><input type="checkbox"></td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <div class="bg-gray-200 w-10 h-10 rounded-full mr-3"></div>
-                                        <div>
-                                            <div class="font-semibold">Audio</div>
-                                            <div class="text-gray-500 text-sm">Our big range of audio devices makes it
-                                                easy to upgrade your device at a great price.</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2">10,405</td>
-                                <td class="py-2">400</td>
-                                <td class="py-2">12 Dec 2022</td>
-                                <td class="py-2 flex space-x-2">
-                                    <i class="fas fa-eye text-gray-500"></i>
-                                    <i class="fas fa-edit text-gray-500"></i>
-                                    <i class="fas fa-trash text-gray-500"></i>
-                                </td>
-                            </tr>
-                            <tr class="border-t">
-                                <td class="py-2"><input type="checkbox"></td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <div class="bg-gray-200 w-10 h-10 rounded-full mr-3"></div>
-                                        <div>
-                                            <div class="font-semibold">Smartphone</div>
-                                            <div class="text-gray-500 text-sm">Our smartphone include all the big
-                                                brands.</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2">3,245</td>
-                                <td class="py-2">132</td>
-                                <td class="py-2">21 Oct 2022</td>
-                                <td class="py-2 flex space-x-2">
-                                    <i class="fas fa-eye text-gray-500"></i>
-                                    <i class="fas fa-edit text-gray-500"></i>
-                                    <i class="fas fa-trash text-gray-500"></i>
-                                </td>
-                            </tr>
-                            <tr class="border-t">
-                                <td class="py-2"><input type="checkbox"></td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <div class="bg-gray-200 w-10 h-10 rounded-full mr-3"></div>
-                                        <div>
-                                            <div class="font-semibold">Shoes</div>
-                                            <div class="text-gray-500 text-sm">Whatever your activity needs are, we've
-                                                got you covered.</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2">11,902</td>
-                                <td class="py-2">1,201</td>
-                                <td class="py-2">21 Oct 2022</td>
-                                <td class="py-2 flex space-x-2">
-                                    <i class="fas fa-eye text-gray-500"></i>
-                                    <i class="fas fa-edit text-gray-500"></i>
-                                    <i class="fas fa-trash text-gray-500"></i>
-                                </td>
-                            </tr>
-                            <tr class="border-t">
-                                <td class="py-2"><input type="checkbox"></td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <div class="bg-gray-200 w-10 h-10 rounded-full mr-3"></div>
-                                        <div>
-                                            <div class="font-semibold">PC Desktop</div>
-                                            <div class="text-gray-500 text-sm">Our computers include all the big brands.
+                            <% categories.forEach((cat,index)=>{ %>
+                                <tr class="border-t">
+                                    <td class="py-2">
+                                        <div class="flex items-center">
+                                            <div class="bg-gray-200 w-10 h-10 rounded-full mr-3"></div>
+                                            <div>
+                                                <div class="font-semibold"><%= cat.name %></div>
+                                                <div class="text-gray-500 text-sm"><%= cat.description %></div>
                                             </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td class="py-2">1,100</td>
-                                <td class="py-2">98</td>
-                                <td class="py-2">21 Oct 2022</td>
-                                <td class="py-2 flex space-x-2">
-                                    <i class="fas fa-eye text-gray-500"></i>
-                                    <i class="fas fa-edit text-gray-500"></i>
-                                    <i class="fas fa-trash text-gray-500"></i>
-                                </td>
-                            </tr>
-                            <tr class="border-t">
-                                <td class="py-2"><input type="checkbox"></td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <div class="bg-gray-200 w-10 h-10 rounded-full mr-3"></div>
-                                        <div>
-                                            <div class="font-semibold">Toys</div>
-                                            <div class="text-gray-500 text-sm">Get the perfect gift for the little ones.
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2">900</td>
-                                <td class="py-2">234</td>
-                                <td class="py-2">19 Sep 2022</td>
-                                <td class="py-2 flex space-x-2">
-                                    <i class="fas fa-eye text-gray-500"></i>
-                                    <i class="fas fa-edit text-gray-500"></i>
-                                    <i class="fas fa-trash text-gray-500"></i>
-                                </td>
-                            </tr>
-                            <tr class="border-t">
-                                <td class="py-2"><input type="checkbox"></td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <div class="bg-gray-200 w-10 h-10 rounded-full mr-3"></div>
-                                        <div>
-                                            <div class="font-semibold">Beauty</div>
-                                            <div class="text-gray-500 text-sm">Love yourself with a perfect beauty
-                                                product.</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2">1,200</td>
-                                <td class="py-2">2,403</td>
-                                <td class="py-2">19 Sep 2022</td>
-                                <td class="py-2 flex space-x-2">
-                                    <i class="fas fa-eye text-gray-500"></i>
-                                    <i class="fas fa-edit text-gray-500"></i>
-                                    <i class="fas fa-trash text-gray-500"></i>
-                                </td>
-                            </tr>
-                            <tr class="border-t">
-                                <td class="py-2"><input type="checkbox"></td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <div class="bg-gray-200 w-10 h-10 rounded-full mr-3"></div>
-                                        <div>
-                                            <div class="font-semibold">Hat</div>
-                                            <div class="text-gray-500 text-sm">Great fashion, great selections, great
-                                                prices.</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2">720</td>
-                                <td class="py-2">720</td>
-                                <td class="py-2">19 Sep 2022</td>
-                                <td class="py-2 flex space-x-2">
-                                    <i class="fas fa-eye text-gray-500"></i>
-                                    <i class="fas fa-edit text-gray-500"></i>
-                                    <i class="fas fa-trash text-gray-500"></i>
-                                </td>
-                            </tr>
-                            <tr class="border-t">
-                                <td class="py-2"><input type="checkbox"></td>
-                                <td class="py-2">
-                                    <div class="flex items-center">
-                                        <div class="bg-gray-200 w-10 h-10 rounded-full mr-3"></div>
-                                        <div>
-                                            <div class="font-semibold">Camera</div>
-                                            <div class="text-gray-500 text-sm">You'll find exactly what you're looking
-                                                for with our huge range of cameras.</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-2">329</td>
-                                <td class="py-2">199</td>
-                                <td class="py-2">10 Aug 2022</td>
-                                <td class="py-2 flex space-x-2">
-                                    <i class="fas fa-eye text-gray-500"></i>
-                                    <i class="fas fa-edit text-gray-500"></i>
-                                    <i class="fas fa-trash text-gray-500"></i>
-                                </td>
-                            </tr>
+                                    </td>
+                                    <td class="py-2"><%= cat.offer %></td>
+                                    <td class="py-2"><%= cat.createdAt %></td>
+                                    <td class="py-2 flex space-x-2">
+                                        <% if (cat.isListed) { %>
+                                            <form action="/admin/listCategory" method="POST" style="display: inline;">
+                                                <input type="hidden" name="id" value="<%= cat._id %>">
+                                                <input type="hidden" name="isListed" value="false">
+                                                <button type="submit" style="background: none; border: none; cursor: pointer;">
+                                                    <i class="fas fa-eye text-gray-500"></i>
+                                                </button>
+                                            </form>
+                                        <% } else { %>
+                                            <form action="/admin/listCategory" method="POST" style="display: inline;">
+                                                <input type="hidden" name="id" value="<%= cat._id %>">
+                                                <input type="hidden" name="isListed" value="true">
+                                                <button type="submit" style="background: none; border: none; cursor: pointer;">
+                                                    <i class="fas fa-eye-slash text-gray-500"></i>
+                                                </button>
+                                            </form>
+                                        <% } %>
+                                        <a href="/admin/editCategory?id=<%= cat._id %>">
+                                            <i class="fas fa-edit text-gray-500"></i>
+                                        </a>
+                                        <a href="/admin/deleteCategory?id=<%= cat._id %>" onclick="confirmDelete(event,this.href)">
+                                            <i class="fas fa-trash text-gray-500"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <% }); %>
                         </tbody>
                     </table>
+                    <% } else{ %>
+                        <div class="flex items-center justify-center">
+                            <img class="h-auto w-[300px]" src="images/noResults.png" alt="">
+                        </div>
+                    <% } %>
                     <div class="mt-4 flex justify-between items-center">
                         <span class="text-gray-500">Showing 1-10 from 15</span>
                         <div class="flex space-x-2">
@@ -260,3 +105,4 @@
                 </div>
         </div>
 </div>
+<script src="JS/admin/category.js"></script>
