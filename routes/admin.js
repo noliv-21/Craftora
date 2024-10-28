@@ -3,6 +3,7 @@ const admin = express.Router();
 const productController = require('../controllers/productController');
 const adminController = require('../controllers/adminController');
 const categoryController = require('../controllers/categoryController');
+const userController = require('../controllers/userController')
 
 admin.use('/',express.static('public'));
 
@@ -12,8 +13,9 @@ admin.post('/login', adminController.login_verify)
 admin.get('/home', adminController.home)
 admin.get('/logout', adminController.logout)
 
-admin.get('/users',adminController.users)
-admin.get('/search-users',adminController.searchUsers)
+admin.get('/users',userController.users)
+admin.post('/blockUser',userController.block_unblock)
+// admin.get('/search-users',adminController.searchUsers)
 
 admin.get('/categories',categoryController.categories)
 admin.get('/categories/add',categoryController.addCategory)

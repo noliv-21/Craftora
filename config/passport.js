@@ -7,7 +7,7 @@ const env=require('dotenv').config()
 passport.use(new GoogleStrategy({
     clientID:process.env.GOOGLE_CLIENT_ID,
     clientSecret:process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:'http://localhost:3010/auth/google/callback'
+    callbackURL:'http://localhost:4004/auth/google/callback'
 },
 async (AccessToken,refreshToken,profile,done)=>{
     try {
@@ -19,6 +19,8 @@ async (AccessToken,refreshToken,profile,done)=>{
                 name:profile.displayName,
                 email:profile.emails[0].value,
                 googleId:profile.id,
+                isGoogleUser:true,
+                createdAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
             })
             await user.save()
             return done(null,{user,isNewUser:true})

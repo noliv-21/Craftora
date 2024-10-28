@@ -124,6 +124,7 @@ exports.editPage = async (req, res) => {
 
 exports.edittingProduct = async (req, res) => {
     const { originalName,name, description, price, mrp, offerType, offer, maxDiscount, category, stock, tags, status, isListed } = req.body;
+    const tagsArray = tags ? tags.split(',').map(tag => tag.trim()) : [];
     try {
             await Products.findOneAndUpdate({ name: originalName}, {
             name, description, offerType, offer, isListed, status, maxDiscount, mrp, category,

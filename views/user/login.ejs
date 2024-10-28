@@ -3,10 +3,10 @@
 <div class="container">
     <div class="login-box" id="login-box">
       <h2>Login</h2>
-      <h4 class="text-danger"><%=msg%></h4>
+      <h3 class="text-danger"><% msg ? 'msg' : '' %></h3>
       <form action="/user/login" id="loginForm" method="post">
         <div class="user-box">
-          <input type="text" name="cred" id="login_cred-input" oninput="validate_login_cred()" required="">
+          <input autocomplete="off" type="text" name="cred" id="login_cred-input" oninput="validate_login_cred()" required="">
           <label>Username or E-Mail</label>
           <span id="login_cred_error"></span>
         </div>
@@ -25,7 +25,7 @@
       <p class="or">Or</p>
       <a href="/auth/google" class="btn btn-outline-light" id="google-login"><img src="images/user/google_logo.png" style="width:24px; height:24px">Sign In with Google</a>
       <form action="/user/login" method="post" class="demo-form">
-        <input type="hidden" name="cred" value="mishal">
+        <input type="hidden" name="cred" value="rone">
         <input type="hidden" name="password" value="User@123">
         <button class="btn btn-secondary" type="submit">Demo</button>
       </form>
@@ -34,7 +34,7 @@
     <div class="signUp-box" id="signUp-box">
       <h2>Sign Up</h2>
       <h5>Join us to enjoy all the services</h5>
-      <h4 class="text-danger"><%%= signUp_msg %></h4>
+      <h4 class="text-danger"><% signUp_msg?'signUp_msg':'' %></h4>
       <form action="/user/signUp" id="signUpForm" method="post">
         <div class="user-box">
           <input type="text" name="email" id="email-input" oninput="validate_email()" required="">
@@ -76,7 +76,11 @@
     </div>
 
 </div>
-
+<!-- input:-webkit-autofill {
+  background-color: #f0f0f0 !important; /* Change to your preferred background color */
+  color: #000 !important; /* Adjust text color if needed */
+  box-shadow: 0 0 0 1000px #f0f0f0 inset !important; /* Remove default shadow */
+} -->
 
 <script>
   const passwordInputs = document.querySelectorAll('.password-input');

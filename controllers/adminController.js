@@ -49,26 +49,6 @@ exports.logout = (req, res) => {
     res.redirect('/admin/login');
 }
 
-exports.users = async (req, res) => {
-    if (req.session.admin) {
-        try {
-            // Fetching the users from the database
-            const result = await users.find({}).lean();
-            // Rendering the 'admin/users.hbs' page and passing the 'result' to the template
-            console.log(result);
-            res.render('admin/user folder/users', {
-                users: result,
-                isSelected: "customers"
-            });
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: "Error fetching users from the database" });
-        }
-    } else {
-        res.redirect('/admin/login');
-    }
-}
-
 exports.searchUsers = async (req, res) => {
     const searchQuery = req.query.query || '';
     // console.log(searchQuery);

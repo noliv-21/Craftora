@@ -1,4 +1,4 @@
-const users = require('../models/userSchema')
+const Users = require('../models/userSchema')
 const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer');
 const crypto = require('crypto'); // To generate OTP
@@ -10,10 +10,14 @@ exports.login = async (req, res) => {
         res.redirect('/user/home');
     } else {
         if (req.session.errorMsg) {
-            res.render('user/login', { msg: "Invalid Credentials" });
             req.session.errorMsg = false;
+            res.render('user/login', { msg: "Invalid Credentials", signUp_msg:''});
+        } else if(req.session.signUp_msg){
+            const signUp_msg=req.session.signUp_msg
+            req.session.signUp_msg=null;
+            res.render('user/login',{signUp_msg, msg:''})
         } else {
-            res.render('user/login', { msg: "" })
+            res.render('user/login', { msg: '', signUp_msg:''})
         }
     }
 }
@@ -25,7 +29,7 @@ exports.login_verify = async (req, res) => {
     const Password = req.body.password;
 
     try {
-        const userCred = await users.findOne({ $or: [{ username: Cred }, { email: Cred }] });
+        const userCred = await Users.findOne({ $or: [{ username: Cred }, { email: Cred }] });
         if (userCred) {
             const match = await bcrypt.compare(Password, userCred.password);
             const isVerified = userCred.isVerified
@@ -67,7 +71,7 @@ exports.logout = (req, res) => {
 
 exports.otp = async (req, res) => {
     const email = req.query.email;
-    res.render('user/email_cfm.hbs', { email })
+    res.render('user/email_cfm', { email })
 }
 
 // Function to generate a random OTP
@@ -120,9 +124,9 @@ exports.signup_verify = async (req, res) => {
     try {
         console.log(req.body);
 
-        const usernamechk = await users.findOne({ username: req.body.username });
+        const usernamechk = await Users.findOne({ username: req.body.username });
         if (!usernamechk) {
-            const newuser = new users({
+            const newuser = new Users({
                 username: req.body.username,
                 password: await bcrypt.hash(req.body.password, 10),  // Hashing password for security
                 email: req.body.email,
@@ -150,18 +154,20 @@ exports.signup_verify = async (req, res) => {
                 })
                 .catch((error) => {
                     console.error('Error sending OTP email:', error);
-                    // Optionally, you could log this error or retry sending the email
                 });
 
             // Redirect to OTP page
             res.redirect(`/user/otp`);
         } else {
+            req.session.signUp_msg = "User already exists"
+            console.error('user already exists');
             res.redirect('/user/login'); // User already exists
         }
 
     } catch (err) {
         console.error("Error during sign up:", err);
-        res.status(500).send("Server error");
+        req.session.signUp_msg='Email or username already exists'
+        res.redirect('/user/login')
     }
 };
 
@@ -173,7 +179,7 @@ exports.verify_otp = async (req, res) => {
             req.session.otpExpires = null;
 
             // Verify user in database
-            await users.findOneAndUpdate({ email: req.session.otp_cred }, { isVerified: true });
+            await Users.findOneAndUpdate({ email: req.session.otp_cred }, { isVerified: true });
             res.redirect('/user/login');
         } else if (req.session.otpExpires < Date.now()) {
             alert('OTP Expired')
@@ -227,26 +233,55 @@ exports.resend_otp = async (req, res) => {
     res.redirect(`/user/otp`);
 }
 
-exports.google_login = async (req, res) => {
-    const { email, displayName, isSignUp } = req.body;
-    console.log(req.body);
-    try {
-        let user = await users.findOne({ email });
-        if (!user && isSignUp) {
-            user = new users({
-                username: displayName,
-                email,
-                createdAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-                isGoogleUser: true
-            });
-            await user.save(); // Save new user
-            console.log("New Google user saved");
-        }
-        req.session.user = user.username;
-        return res.redirect('/user/home');
-    } catch (err) {
-        console.error("Error during Google login:", err);
-        res.status(500).send("Server error");
-    }
-};
+// exports.google_login = async (req, res) => {
+//     const { email, displayName, isSignUp } = req.body;
+//     console.log(req.body);
+//     try {
+//         let user = await Users.findOne({ email });
+//         if (!user && isSignUp) {
+//             user = new Users({
+//                 username: displayName,
+//                 email,
+//                 createdAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+//                 isGoogleUser: true
+//             });
+//             await user.save(); // Save new user
+//             console.log("New Google user saved");
+//         }
+//         req.session.user = user.username;
+//         return res.redirect('/user/home');
+//     } catch (err) {
+//         console.error("Error during Google login:", err);
+//         res.status(500).send("Server error");
+//     }
+// };
 
+exports.users = async (req, res) => {
+    if (req.session.admin) {
+        try {
+            const result = await Users.find({})
+            res.render('admin/user folder/users', {
+                users: result
+            });
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: "Error fetching users from the database" });
+        }
+    } else {
+        res.redirect('/admin/login');
+    }
+}
+
+exports.block_unblock = async (req,res)=>{
+    const Id=req.body.id
+    const isBlocked=req.body.isBlocked==='true'
+    try {
+        await Users.findByIdAndUpdate(Id, { isBlocked:isBlocked });
+        // req.session.successMessage='Successfully updated'
+        res.redirect('/admin/users')
+    } catch (error) {
+        console.error(error);
+        // req.session.errorMessage='Not updated'
+        res.redirect('/admin/users')
+    }
+}
