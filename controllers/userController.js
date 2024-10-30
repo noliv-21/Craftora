@@ -11,13 +11,13 @@ exports.login = async (req, res) => {
     } else {
         if (req.session.errorMsg) {
             req.session.errorMsg = false;
-            res.render('user/login', { msg: "Invalid Credentials", signUp_msg:''});
-        } else if(req.session.signUp_msg){
-            const signUp_msg=req.session.signUp_msg
-            req.session.signUp_msg=null;
-            res.render('user/login',{signUp_msg, msg:''})
+            res.render('user/login', { msg: "Invalid Credentials", signUp_msg: '' });
+        } else if (req.session.signUp_msg) {
+            const signUp_msg = req.session.signUp_msg
+            req.session.signUp_msg = null;
+            res.render('user/login', { signUp_msg, msg: '' })
         } else {
-            res.render('user/login', { msg: '', signUp_msg:''})
+            res.render('user/login', { msg: '', signUp_msg: '' })
         }
     }
 }
@@ -33,8 +33,8 @@ exports.login_verify = async (req, res) => {
         if (userCred) {
             const match = await bcrypt.compare(Password, userCred.password);
             const isVerified = userCred.isVerified
-            const isGoogleUser= userCred.isGoogleUser
-            const isBlocked= userCred.isBlocked
+            const isGoogleUser = userCred.googleId
+            const isBlocked = userCred.isBlocked
             if (match && (isVerified || isGoogleUser) && !isBlocked) {
                 req.session.user = userCred.username;
                 return res.redirect('/user/home');
@@ -54,12 +54,12 @@ exports.login_verify = async (req, res) => {
 
 exports.home = (req, res) => {
     if (req.session.user) {
-        res.render('user/home',{
-            greetName:req.session.user
+        res.render('user/home', {
+            greetName: req.session.user
         });
     } else {
-        res.render('user/home',{
-            greetName:null
+        res.render('user/home', {
+            greetName: null
         })
     }
 };
@@ -166,7 +166,7 @@ exports.signup_verify = async (req, res) => {
 
     } catch (err) {
         console.error("Error during sign up:", err);
-        req.session.signUp_msg='Email or username already exists'
+        req.session.signUp_msg = 'Email or username already exists'
         res.redirect('/user/login')
     }
 };
@@ -257,26 +257,37 @@ exports.resend_otp = async (req, res) => {
 // };
 
 exports.users = async (req, res) => {
-    if (req.session.admin) {
-        try {
-            const result = await Users.find({})
-            res.render('admin/user folder/users', {
-                users: result
-            });
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: "Error fetching users from the database" });
-        }
-    } else {
-        res.redirect('/admin/login');
+    try {
+        let search = req.query.search || '';
+
+        // Pagination
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+        const skip = (page - 1) * limit;
+
+        const errorMessage = req.session.errorMessage
+        const successMessage = req.session.successMessage
+        req.session.errorMessage = null
+        req.session.successMessage = null
+        const users = await Users.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit)
+        const totalUsers = await Users.countDocuments();
+        const totalPages = Math.ceil(totalUsers / limit)
+        const reversedUser = users.reverse();
+
+        res.render('admin/user folder/users', {
+            users: reversedUser, errorMessage, successMessage, page, limit, totalPages, totalUsers
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500)
     }
 }
 
-exports.block_unblock = async (req,res)=>{
-    const Id=req.body.id
-    const isBlocked=req.body.isBlocked==='true'
+exports.block_unblock = async (req, res) => {
+    const Id = req.body.id
+    const isBlocked = req.body.isBlocked === 'true'
     try {
-        await Users.findByIdAndUpdate(Id, { isBlocked:isBlocked });
+        await Users.findByIdAndUpdate(Id, { isBlocked: isBlocked });
         // req.session.successMessage='Successfully updated'
         res.redirect('/admin/users')
     } catch (error) {

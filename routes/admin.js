@@ -1,5 +1,8 @@
 const express = require('express');
 const admin = express.Router();
+const multer=require('multer')
+const storage=require('../helpers/multer')
+const uploads=multer({storage:storage});
 const productController = require('../controllers/productController');
 const adminController = require('../controllers/adminController');
 const categoryController = require('../controllers/categoryController');
@@ -27,7 +30,7 @@ admin.post('/listCategory',categoryController.list_unlist)
 
 admin.get('/products',productController.products)
 admin.get('/products/add',productController.addProductPage)
-admin.post('/products/add',productController.addProduct)
+admin.post('/products/add',uploads.array('images',4),productController.addProduct)
 admin.post('/listProduct',productController.list_unlist)
 admin.get('/deleteProduct',productController.deleteProduct)
 admin.get('/editProduct',productController.editPage)

@@ -1,14 +1,28 @@
 const Categories = require('../models/categorySchema')
 
 exports.categories = async (req, res) => {
-    const categories = await Categories.find({});
-    const errorMessage = req.session.errorMessage
-    const successMessage = req.session.successMessage
-    req.session.errorMessage = null
-    req.session.successMessage = null
-    res.render('admin/category folder/category_list', {
-        categories, errorMessage, successMessage
-    })
+    try {
+        let search = req.query.search || '';
+
+        // Pagination
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+        const skip = (page - 1) * limit;
+        const categories = await Categories.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit)
+        const totalCategories = await Categories.countDocuments();
+        const totalPages = Math.ceil(totalCategories / limit)
+        const reversedCategory = categories.reverse();
+
+        const errorMessage = req.session.errorMessage
+        const successMessage = req.session.successMessage
+        req.session.errorMessage = null
+        req.session.successMessage = null
+        res.render('admin/category folder/category_list', {
+            categories: reversedCategory, errorMessage, successMessage, page, totalPages, limit, totalCategories
+        })
+    } catch (error) {
+        console.error(error)
+    }
 }
 
 exports.addCategory = (req, res) => {
@@ -36,29 +50,29 @@ exports.addingCategory = async (req, res) => {
             })
             await newCategory.save();
             console.log("Category created successfully");
-            req.session.successMessage="Category added successfully"
+            req.session.successMessage = "Category added successfully"
             res.redirect('/admin/categories')
         } else {
-            req.session.errorMessage="Category with same name already exists"
+            req.session.errorMessage = "Category with same name already exists"
             res.redirect('/admin/categories/add')
         }
     } catch (error) {
         console.error("Error during user creation:", error);
-        req.session.errorMessage="Error saving user"
+        req.session.errorMessage = "Error saving user"
         res.redirect('/admin/categories/add')
     }
 }
 
-exports.list_unlist=async (req,res)=>{
-    const catId=req.body.id
-    const isListed=req.body.isListed==='true'
+exports.list_unlist = async (req, res) => {
+    const catId = req.body.id
+    const isListed = req.body.isListed === 'true'
     try {
         await Categories.findByIdAndUpdate(catId, { isListed: isListed });
-        req.session.successMessage='Successfully updated'
+        req.session.successMessage = 'Successfully updated'
         res.redirect('/admin/categories')
     } catch (error) {
         console.error(error);
-        req.session.errorMessage='Not updated'
+        req.session.errorMessage = 'Not updated'
         res.redirect('/admin/categories')
     }
 }

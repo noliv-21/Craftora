@@ -3,6 +3,7 @@
         font-family: 'Inter', sans-serif;
     }
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
 <div class="flex">
     <!-- Sidebar -->
     <%-include('../../partials/admin/side bar')%>
@@ -10,7 +11,7 @@
         <div class="flex-1 p-6">
             <%-include('../../partials/admin/header') %>
                 <div class="flex w-full">
-                    <form class="flex w-full" action="/admin/products/add" method="post">
+                    <form class="flex w-full" action="/admin/products/add" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
                         <div class="p-6 flex-1">
                             <div class="flex justify-between items-center">
                                 <h2 class="text-2xl font-semibold text-gray-700">Add Product</h2>
@@ -56,12 +57,12 @@
                                             </div>
                                             <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
                                                 <h3 class="text-lg font-semibold text-gray-700">Media</h3>
-                                                <!-- <div class="row">
-                                                    <div class="card-body align-items-center" style="margin-bottom: 20px;">
+                                                <div class="row">
+                                                    <div class="card-body flex align-items-center" id="previewImage1" style="margin-bottom: 20px;">
                                                         <img src="" alt="image 1" id="imgView1">
                                                         <input class="form-control" type="file" name="images" id="input1"
                                                             accept="image/png, image/jpeg, image/jpg"
-                                                            onchange="viewImage(event),viewImage(event, 1)">
+                                                            onchange="viewImage(event, 1)">
                                                     </div>
                                                     <div class="image-cropper d-flex align-items-center"
                                                         style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
@@ -70,11 +71,11 @@
                                                     </div>
                                                 </div>
                                                 <div class="row">
-                                                    <div class="card-body align-items-center" style="margin-bottom: 20px;">
+                                                    <div class="card-body align-items-center" id="previewImage2" style="margin-bottom: 20px;">
                                                         <img src="" alt="" id="imgView2">
                                                         <input class="form-control" type="file" name="images" id="input2"
                                                             accept="image/png, image/jpeg, image/jpg"
-                                                            onchange="viewImage(event),viewImage(event, 2)">
+                                                            onchange="viewImage(event, 2)">
                                                     </div>
                                                     <div class="image-cropper d-flex align-items-center"
                                                         style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
@@ -83,22 +84,22 @@
                                                     </div>
                                                 </div>
                                                 <div class="row">
-                                                    <div class="card-body align-items-center" style="margin-bottom: 20px;">
+                                                    <div class="card-body align-items-center" id="previewImage3" style="margin-bottom: 20px;">
                                                         <img src="" alt="" id="imgView3">
                                                         <input class="form-control" type="file" name="images" id="input3"
                                                             accept="image/png, image/jpeg, image/jpg"
-                                                            onchange="viewImage(event),viewImage(event, 3)">
+                                                            onchange="viewImage(event, 3)">
                                                     </div>
                                                     <div class="image-cropper d-flex align-items-center"
                                                         style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
                                                         <img src="" id="croppedImg3" alt="">
                                                         <button type="button" id="saveButton3" class="btn-sm btn-primary">Save</button>
                                                     </div>
-                                                </div> -->
+                                                </div>
 
 
-                                                <div class="mt-4 border-dashed border-2 border-gray-300 p-6 rounded-md text-center">
-                                                    <!-- <input type="file" name="image" multiple> -->
+                                                <!-- <div class="mt-4 border-dashed border-2 border-gray-300 p-6 rounded-md text-center">
+                                                    <input type="file" name="image" multiple>
                                                     <i class="fas fa-image text-4xl text-gray-300"></i>
                                                     <p class="mt-2 text-gray-500">Drag and drop image here, or click add
                                                         image
@@ -106,7 +107,7 @@
                                                     <button class="mt-4 px-4 py-2 bg-purple-500 text-white rounded-md">Add
                                                         Image
                                                     </button>
-                                                </div>
+                                                </div> -->
                                             </div>
                                             <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
                                                 <h3 class="text-lg font-semibold text-gray-700">Pricing</h3>
@@ -171,7 +172,10 @@
                                             <div class="flex justify-end mt-6">
                                                 <button type="button" onclick="window.history.back()"
                                                     class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md">Cancel</button>
-                                                <button type="submit"
+                                                <!-- <button type="button" onclick="validateAndSubmit()"
+                                                    class="ml-2 px-6 py-2 bg-purple-500 text-white rounded-md">+ Add
+                                                    Product</button> -->
+                                                    <button type="submit"
                                                     class="ml-2 px-6 py-2 bg-purple-500 text-white rounded-md">+ Add
                                                     Product</button>
                                             </div>
@@ -225,6 +229,206 @@
         </div>
 </div>
 <script src="JS/admin/product.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+<script>
+    function validateAndSubmit() {
+        if (validateForm()) {
+            document.forms[0].submit();
+        }
+    }
+
+   //function viewImage1(event){
+   //    documet.getElementById("imgView1").src=URL.createObjectURL(event.target.files[0])
+   //}
+   //function viewImage2(event){
+   //    documet.getElementById("imgView2").src=URL.createObjectURL(event.target.files[0])
+   //}
+   //function viewImage3(event){
+   //    documet.getElementById("imgView3").src=URL.createObjectURL(event.target.files[0])
+   //}
+   
+   let cropper;
+
+   function viewImage(event, index) {
+       let input = event.target;
+       let reader = new FileReader();
+       
+       reader.onload = function () {
+           let dataURL = reader.result;
+           let image = document.getElementById('imgView' + index);
+           let previewImage = document.getElementById('previewImage' + index);
+           image.src = dataURL;
+
+           if (cropper) {
+               cropper.destroy(); // Destroy previous cropper instance
+           }
+
+           cropper = new Cropper(image, {
+               aspectRatio: 1,
+               viewMode: 1,
+               background: false,
+               autoCropArea: 1,
+               zoomable: true,
+           });
+
+           let saveButton = document.querySelector('#saveButton' + index);
+           saveButton.onclick = async function () {
+               let croppedCanvas = cropper.getCroppedCanvas();
+               let croppedImage = document.getElementById('croppedImg' + index);
+               croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
+               
+               let timestamp = new Date().getTime();
+               let fileName = `cropped-img-${timestamp}-${index}.png`;
+               
+               
+               //let image = document.getElementById('imgView' + index);
+               //image.style.display='none'
+               
+               await croppedCanvas.toBlob(blob => {
+                   let imgFile = new File([blob], fileName, { type: blob.type });
+                   let fileList = new DataTransfer();
+                   fileList.items.add(imgFile);
+                   input.files = fileList.files;
+                });
+                
+                previewImage.style.display = 'none'
+                // Hide the original image view and show the cropped image view
+                // image.style.display = 'none';
+                // document.querySelector('#croppedImg' + index).style.display = 'block';
+                // document.querySelector('#saveButton' + index).style.display = 'none';
+                // document.querySelector('.image-cropper.d-flex.align-items-center').style.display = 'block';
+                cropper.destroy(); // Clean up the cropper instance
+                cropper = null; // Reset the cropper variable
+           };   
+       };
+       reader.readAsDataURL(input.files[0]);
+   }
+
+        const selectedImages=[];
+        dcument.getElementById('input1').addEventListener('change',handleFileSelect);
+
+        function handleFileSelect(event){
+            const addedImagesContainer=dcument.getElementById('addedImagesContainer');
+            addedImagesContainer.innerHTML=''
+            const files=event.target.files;
+            for (let i=0;i<files.length;i++){
+                const file=files[i]
+                selectedImages.push(file)
+                const thumbnail=document.createElement('div')
+                thumbnail.classList.add('thumbnail')
+
+                const img=document.createElement('img')
+                img.src=URL.createObjectURL(file);
+                img.alt='thumbnail'
+                img.style.width='50px'
+                img.style.height='auto';
+                const removeIcon=document.createElement('span')
+                removeIcon.classList.add('remove-icon')
+                removeIcon.innerHTML='&times;'
+                removeIcon.addEventListener('click',function(){
+                    const index=selectedImages.indexOf(file);
+                    if(index!==-1){
+                        selectedImages.splice(index,1)
+                    }
+                    thumbnail.remove()
+                })
+                thumbnail.appendChild(img)
+                thumbnail.appendChild(removeIcon)
+                addedImagesContainer.appendChild(thumbnail)
+            }
+        }
+    
+
+    function validateForm() {
+        clearErrorMessages();
+        const name = document.getElementsByName('productName')[0].value;
+        const description = document.getElementById('descriptionid').value;
+        const brand = document.getElementsByName('brand')[0].value;
+        const price = document.getElementsByName('regularPrice')[0].value;
+        const saleprice = document.getElementsByName('salePrice')[0].value;
+        const color = document.getElementsByName('color')[0].value;
+        const category = document.getElementsByName('category')[0].value;
+        const images = document.getElementById('input1')
+        const quantity = document.getElementsByName('quantity')
+        let isValid = true
+        if (name.trim() === "") {
+            displayErrorMessage('productName-error', 'Please enter a product name.');
+            isValid = false;
+        } else if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
+            displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
+            isValid = false;
+        }
+
+        if (description.trim() === "") {
+            displayErrorMessage('description-error', 'Please enter a product description.');
+            isValid = false;
+        } else if (!/^[a-zA-Z\s]+$/.test(description.trim())) {
+            displayErrorMessage('description-error', 'Product description should contain only alphabetic characters.');
+            isValid = false;
+        }
+
+
+
+
+
+        if (parseInt(quantity) < 0) {
+            displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
+            isValid = false;
+        }
+
+
+
+
+        if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
+            displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
+            isValid = false;
+        }
+
+
+
+
+        if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
+            displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
+            isValid = false;
+        }
+        if (parseFloat(price) <= parseFloat(saleprice)) {
+            displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
+            isValid = false;
+        }
+
+
+        if (color.trim() === "") {
+            displayErrorMessage('color-error', 'Please enter a color.');
+            isValid = false;
+        }
+
+
+        if (images.files.length === 0) {
+            displayErrorMessage("images-error", 'Please select an image.');
+            isValid = false;
+        }
+        return isValid;
+    }
+
+
+    function displayErrorMessage(elementId, message) {
+        var errorElement = document.getElementById(elementId);
+        errorElement.innerText = message;
+        errorElement.style.display = "block";
+    }
+
+
+    function clearErrorMessages() {
+        const errorElements = document.getElementsByClassName('error-message');
+        Array.from(errorElements).forEach(element => {
+            element.innerText = '';
+        });
+        const errorMessage = document.getElementById('errorMessage');
+
+
+    }
+
+</script>
 <script>
     function viewImage(event, index) {
         let input = event.target;

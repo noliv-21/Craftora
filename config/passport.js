@@ -16,10 +16,10 @@ async (AccessToken,refreshToken,profile,done)=>{
             return done(null,{user,isNewUser:false});
         }else{
             user=new User({
-                name:profile.displayName,
+                fullname:profile.displayName,
                 email:profile.emails[0].value,
                 googleId:profile.id,
-                isGoogleUser:true,
+                isVerified:true,
                 createdAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
             })
             await user.save()

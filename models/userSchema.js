@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema({
     isVerified: { type: Boolean },
     googleId:{
         type:String,
-        sparse:true
+        unique:false
     }
 })
 

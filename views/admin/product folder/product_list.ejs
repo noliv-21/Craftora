@@ -74,7 +74,7 @@
                                             <div class="flex items-center">
                                             <a href="/admin/viewProduct?id=<%= product._id %>">
                                                 <img alt="product image" class="w-10 h-10 rounded-md mr-2" height="40"
-                                                    src="https://storage.googleapis.com/a1aa/image/eAwWjtiaN4RfQ0J7l9Oxg3ADygtYzTyAAFbaFJV0ggyL09pTA.jpg"
+                                                    src="<%= product.image && product.image.length ? 'uploads/product-images/' + product.image[0] : '/images/no_productImage.png' %>" 
                                                     width="40" />
                                                 <div><%= product.name %></div>
                                             </a>
@@ -155,29 +155,27 @@
                             <div class="flex items-center justify-center">
                                 <img class="h-auto w-[300px]" src="images/noResults.png" alt="">
                             </div>
-                            <% } %>
-                                <div class="flex justify-between items-center mt-4">
-                                    <div class="text-gray-500">
-                                        Showing 1-10 from 100
-                                    </div>
-                                    <div class="flex items-center space-x-2">
-                                        <button class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">
-                                            &lt;
-                                        </button>
-                                        <button class="bg-blue-600 text-white px-3 py-1 rounded-md">
-                                            1
-                                        </button>
-                                        <button class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">
-                                            2
-                                        </button>
-                                        <button class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">
-                                            3
-                                        </button>
-                                        <button class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">
-                                            &gt;
-                                        </button>
-                                    </div>
-                                </div>
+                        <% } %>
+                        <!-- Pagination -->
+                        <div class="flex justify-between items-center mt-4">
+                            <div class="text-gray-500">
+                                Showing <%= (page - 1) * limit + 1 %>-<%= Math.min(page * limit, totalProducts) %> of <%= totalProducts %>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <% if (page > 1) { %>
+                                    <a href="?page=<%= page - 1 %>" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">&lt;</a>
+                                <% } %>
+                        
+                                <% for (let i = 1; i <= totalPages; i++) { %>
+                                    <a href="?page=<%= i %>" class="px-3 py-1 rounded-md <%= i === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' %>"><%= i %></a>
+                                <% } %>
+                        
+                                <% if (page < totalPages) { %>
+                                    <a href="?page=<%= page + 1 %>" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">&gt;</a>
+                                <% } %>
+                            </div>
+                        </div>
+                        
                 </div>
         </div>
 </div>

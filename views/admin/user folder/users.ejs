@@ -100,15 +100,23 @@
                             <% }); %>
                         </tbody>
                     </table>
+                    <!-- Pagination -->
                     <div class="flex justify-between items-center mt-4">
-                        <span class="text-gray-500">Showing 1-10 from 100</span>
-                        <div class="flex space-x-2">
-                            <button class="bg-blue-100 text-blue-500 px-3 py-1 rounded-lg">1</button>
-                            <button class="bg-gray-100 text-gray-500 px-3 py-1 rounded-lg">2</button>
-                            <button class="bg-gray-100 text-gray-500 px-3 py-1 rounded-lg">3</button>
-                            <button class="bg-gray-100 text-gray-500 px-3 py-1 rounded-lg">4</button>
-                            <button class="bg-gray-100 text-gray-500 px-3 py-1 rounded-lg">5</button>
-                            <button class="bg-gray-100 text-gray-500 px-3 py-1 rounded-lg">&gt;</button>
+                        <div class="text-gray-500">
+                            Showing <%= (page - 1) * limit + 1 %>-<%= Math.min(page * limit, totalUsers) %> of <%= totalUsers %>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <% if (page > 1) { %>
+                                <a href="?page=<%= page - 1 %>" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">&lt;</a>
+                            <% } %>
+                    
+                            <% for (let i = 1; i <= totalPages; i++) { %>
+                                <a href="?page=<%= i %>" class="px-3 py-1 rounded-md <%= i === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' %>"><%= i %></a>
+                            <% } %>
+                    
+                            <% if (page < totalPages) { %>
+                                <a href="?page=<%= page + 1 %>" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">&gt;</a>
+                            <% } %>
                         </div>
                     </div>
                 </div>

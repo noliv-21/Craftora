@@ -94,17 +94,23 @@
                             <img class="h-auto w-[300px]" src="images/noResults.png" alt="">
                         </div>
                     <% } %>
-                    <div class="mt-4 flex justify-between items-center">
-                        <span class="text-gray-500">Showing 1-10 from 15</span>
-                        <div class="flex space-x-2">
-                            <button class="bg-gray-200 p-2 rounded-md">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <button class="bg-blue-500 text-white p-2 rounded-md">1</button>
-                            <button class="bg-gray-200 p-2 rounded-md">2</button>
-                            <button class="bg-gray-200 p-2 rounded-md">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
+                    <!-- Pagination -->
+                    <div class="flex justify-between items-center mt-4">
+                        <div class="text-gray-500">
+                            Showing <%= (page - 1) * limit + 1 %>-<%= Math.min(page * limit, totalCategories) %> of <%= totalCategories %>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <% if (page > 1) { %>
+                                <a href="?page=<%= page - 1 %>" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">&lt;</a>
+                            <% } %>
+                    
+                            <% for (let i = 1; i <= totalPages; i++) { %>
+                                <a href="?page=<%= i %>" class="px-3 py-1 rounded-md <%= i === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' %>"><%= i %></a>
+                            <% } %>
+                    
+                            <% if (page < totalPages) { %>
+                                <a href="?page=<%= page + 1 %>" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">&gt;</a>
+                            <% } %>
                         </div>
                     </div>
                 </div>
