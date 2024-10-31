@@ -1,0 +1,20 @@
+.thumbnail {
+    opacity: 0.6; /* Dim by default */
+    transition: opacity 0.3s;
+}
+
+.thumbnail.active {
+    opacity: 1; /* Brighten when active */
+    border: 2px solid #ff1493; /* Optional: highlight border for active thumbnail */
+}
+.zoom-container {
+    position: relative;
+    overflow: hidden;
+    width: 400px; /* Match the main image size */
+    height: 400px;
+    cursor: zoom-in;
+}
+
+.zoom-container img {
+    transition: transform 0.2s ease;
+}

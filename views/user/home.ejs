@@ -1,254 +1,146 @@
-<title>CRAFTORA Home</title>
 <%-include('../partials/user/header')%>
-<% if (greetName ){ %>
-  <section class="bg-yellow-100 text-center py-8">
-    <h1 class="text-3xl font-playfair">
-      Welcome, <%= greetName %>
-    </h1>
-  </section>
-<% } %>
+  <% if (greetName){ %>
+    <section class="bg-yellow-100 text-center py-8">
+      <h1 class="text-3xl font-playfair">Welcome <%= greetName %> !</h1>
+    </section>
+    <% } %>
+      <!-- Carousel -->
+      <section class="relative">
+        <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+          </div>
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <img src="images/carousel/Halloween candles.avif" class="d-block w-full h-[350px]" alt="...">
+              <div class="carousel-caption d-none d-md-block">
+                <h5>First slide label</h5>
+                <p>Some representative placeholder content for the first slide.</p>
+              </div>
+            </div>
+            <div class="carousel-item">
+              <img src="images/carousel/elephant sculpture.jpg" class="d-block w-full h-[350px]" alt="...">
+              <div class="carousel-caption d-none d-md-block">
+                <h5>Second slide label</h5>
+                <p>Some representative placeholder content for the second slide.</p>
+              </div>
+            </div>
+            <div class="carousel-item">
+              <img src="images/carousel/wolf printed shirt.webp" class="d-block w-full h-[350px]" alt="...">
+              <div class="carousel-caption d-none d-md-block">
+                <h5>Third slide label</h5>
+                <p>Some representative placeholder content for the third slide.</p>
+              </div>
+            </div>
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
+      </section>
 
-  
-  <section class="relative">
-    <div class="carousel w-full h-[350px]">
-      <img alt="Carousel image of candles shaped like ghosts" class="w-full h-full object-cover"
-        src="https://storage.googleapis.com/a1aa/image/ddJTZ3JXPMZgKlZwfBzRMeMmo0NKpZ7IvEuSqeeA2VGfNcPdC.jpg"
-        width="1200" />
-    </div>
-    <div class="absolute inset-0 flex justify-between items-center px-4">
-      <button class="text-3xl text-white">
-        &lt;
-      </button>
-      <button class="text-3xl text-white">
-        &gt;
-      </button>
-    </div>
-  </section>
-  <section class="container mx-auto py-8">
-    <h2 class="text-2xl font-bold mb-4">
-      Featured Categories
-    </h2>
-    <div class="grid grid-cols-6 gap-4">
-      <div class="text-center">
-        <img alt="Digital prints" class="mx-auto" height="100"
-          src="https://storage.googleapis.com/a1aa/image/4jCITnqLj0pFIl4jciHtebl3QQIg5ikNdOTi20y1qcoyw90JA.jpg"
-          width="100" />
-        <p>
-          Digital prints
-        </p>
-      </div>
-      <div class="text-center">
-        <img alt="Signs" class="mx-auto" height="100"
-          src="https://storage.googleapis.com/a1aa/image/7ggvwE5bap5mL99eeepCYmf99731T3Oq02faSifIebWEzw90JA.jpg"
-          width="100" />
-        <p>
-          Signs
-        </p>
-      </div>
-      <div class="text-center">
-        <img alt="Custom Clothing" class="mx-auto" height="100"
-          src="https://storage.googleapis.com/a1aa/image/8vPZq6fUvXSbDq6b9oWwnbcWWZgZEoNTERaa1aqsu6N2w90JA.jpg"
-          width="100" />
-        <p>
-          Custom Clothing
-        </p>
-      </div>
-      <div class="text-center">
-        <img alt="Decors" class="mx-auto" height="100"
-          src="https://storage.googleapis.com/a1aa/image/Icet4cusscwMbKiXspNjlUioVLFhCBrBcmzcz5f4lZZzh7pTA.jpg"
-          width="100" />
-        <p>
-          Decors
-        </p>
-      </div>
-      <div class="text-center">
-        <img alt="Paintings" class="mx-auto" height="100"
-          src="https://storage.googleapis.com/a1aa/image/anvQac4cvn4uGh0hQBikBGVlKJTKIB8ODAp6kp5Tcfz8w90JA.jpg"
-          width="100" />
-        <p>
-          Paintings
-        </p>
-      </div>
-    </div>
-  </section>
-  <section class="container mx-auto py-8">
-    <h2 class="text-2xl font-bold mb-4">
-      Daily Deals
-    </h2>
-    <div class="grid grid-cols-5 gap-4">
-      <div class="text-center">
-        <img alt="Drawing" class="mx-auto" height="100"
-          src="https://storage.googleapis.com/a1aa/image/VZGUUh3W2ybiENV6k9iCUDbSWHIHIgfs9JLE2Lzn9Os4w90JA.jpg"
-          width="100" />
-        <p>
-          Drawing
-        </p>
-        <p>
-          $59
-        </p>
-      </div>
-      <div class="text-center">
-        <img alt="Digital Print" class="mx-auto" height="100"
-          src="https://storage.googleapis.com/a1aa/image/GTzIPdDcfF2QekKTjYfi4zCeCr5USFEGgCHLCjJIoaHBGunOB.jpg"
-          width="100" />
-        <p>
-          Digital Print
-        </p>
-        <p>
-          $75
-        </p>
-      </div>
-      <div class="text-center">
-        <img alt="Keychains" class="mx-auto" height="100"
-          src="https://storage.googleapis.com/a1aa/image/XizUjU5scrLaHRetcCozV2XOWe1IVe4OoFbsXQxc4AVTD3TnA.jpg"
-          width="100" />
-        <p>
-          Keychains
-        </p>
-        <p>
-          $10
-        </p>
-      </div>
-      <div class="text-center">
-        <img alt="Ornaments" class="mx-auto" height="100"
-          src="https://storage.googleapis.com/a1aa/image/AjkuZdy6fwwe1EFSkHy59BMqsrJuzP9FKnh305Qef8hBHunOB.jpg"
-          width="100" />
-        <p>
-          Ornaments
-        </p>
-        <p>
-          $77
-        </p>
-      </div>
-      <div class="text-center">
-        <img alt="Candles" class="mx-auto" height="100"
-          src="https://storage.googleapis.com/a1aa/image/4V0q1BUyz17fQ6xIfZqv1Nao1j6QIBsBgtQ5vGX4MekvD3TnA.jpg"
-          width="100" />
-        <p>
-          Candles
-        </p>
-        <p>
-          $68
-        </p>
-      </div>
-    </div>
-  </section>
-  <section class="bg-orange-500 text-white py-8">
-    <div class="container mx-auto text-center">
-      <h2 class="text-2xl font-bold mb-4">
-        Discover the latest trends from small shops
-      </h2>
-      <div class="flex justify-center space-x-8">
-        <div class="text-center">
-          <img alt="Marble earrings" class="mx-auto rounded-full" height="100"
-            src="https://storage.googleapis.com/a1aa/image/ON43A51Ozlo0F9Rn11mzSNUQK0eqIIB5fmexnBTkmhltD3TnA.jpg"
-            width="100" />
-          <p>
-            Marble earrings
-          </p>
+      <section class="container mx-auto py-8" style="padding:30px 150px">
+        <h2 class="text-2xl font-bold mb-4">Featured Categories</h2>
+        <div class="grid grid-cols-<%= categories.length%> gap-4">
+            <% categories.forEach((cat,index)=>{ %>
+            <div class="text-center">
+              <img alt="Category Image" class="mx-auto rounded-md" height="200" width="200"
+                src="https://storage.googleapis.com/a1aa/image/4jCITnqLj0pFIl4jciHtebl3QQIg5ikNdOTi20y1qcoyw90JA.jpg"/>
+              <p><%= cat.name %></p>
+            </div>
+            <% }) %>
+          </div>
+      </section>
+
+      <section class="container mx-auto py-8" style="padding:30px 150px">
+        <h2 class="text-2xl font-bold mb-4">
+          Daily Deals
+        </h2>
+        <div class="grid grid-cols-5 gap-4">
+          <% products.forEach((product,index)=>{ %>
+            <a href="/user/product/<%= product._id %>">
+              <div class="text-center">
+                <img alt="" class="mx-auto rounded-md" height="200" width="200"
+                  src="<%= product.image && product.image.length ? '/uploads/product-images/' + product.image[0] : '/images/no_productImage.png' %>"/>
+                <p><%= product.name %></p>
+                <p><b>₹</b> <%= product.sellingPrice %></p>
+              </div>
+            </a>
+          <% }) %>
         </div>
-        <div class="text-center">
-          <img alt="Pumpkin Spice" class="mx-auto rounded-full" height="100"
-            src="https://storage.googleapis.com/a1aa/image/lZecKyWIHsX5TSqAmqswAZNwH69MSv9fVSaop26596Vjh7pTA.jpg"
-            width="100" />
-          <p>
-            Pumpkin Spice
-          </p>
+      </section>
+
+      <section class="text-white py-8 h-96 relative">
+        <div class="container mx-auto text-center h-full flex flex-col justify-center">
+          <!-- Background div -->
+          <div class="absolute top-0 left-0 w-full h-[60%] bg-orange-500"></div>
+          
+          <!-- Heading -->
+          <div class="z-10 mb-4">
+            <h2 class="text-2xl font-bold">Discover the latest trends from small shops</h2>
+          </div>
+          
+          <!-- Images Section -->
+          <div class="flex justify-evenly z-10 mt-4">
+            <div class="text-center">
+              <img alt="Marble earrings" class="mx-auto rounded-full" height="200" width="200"
+                   src="https://storage.googleapis.com/a1aa/image/ON43A51Ozlo0F9Rn11mzSNUQK0eqIIB5fmexnBTkmhltD3TnA.jpg"/>
+              <p class="text-gray-800 font-bold mt-2">Marble Earrings</p>
+            </div>
+            <div class="text-center">
+              <img alt="Pumpkin Spice" class="mx-auto rounded-full" height="200" width="200"
+                   src="https://storage.googleapis.com/a1aa/image/lZecKyWIHsX5TSqAmqswAZNwH69MSv9fVSaop26596Vjh7pTA.jpg"/>
+              <p class="text-gray-800 font-bold mt-2">Pumpkin Spice</p>
+            </div>
+            <div class="text-center">
+              <img alt="Suede Handbags" class="mx-auto rounded-full" height="200" width="200"
+                   src="https://storage.googleapis.com/a1aa/image/Ikb15aof3GzSOiQ2eTPBRQ9JDoxtowAbJljwEjafNf4gGunOB.jpg"/>
+              <p class="text-gray-800 font-bold mt-2">Suede Handbags</p>
+            </div>
+          </div>
         </div>
-        <div class="text-center">
-          <img alt="Suede Handbags" class="mx-auto rounded-full" height="100"
-            src="https://storage.googleapis.com/a1aa/image/Ikb15aof3GzSOiQ2eTPBRQ9JDoxtowAbJljwEjafNf4gGunOB.jpg"
-            width="100" />
-          <p>
-            Suede Handbags
-          </p>
+      </section>
+      
+
+      <section class="container mx-auto py-8" style="padding:30px 150px">
+        <h2 class="text-2xl font-bold mb-4">
+          Shop extra-ordinary items at special prices
+        </h2>
+        <div class="grid grid-cols-5 gap-4">
+          <% products.forEach((product,index)=>{ %>
+            <div class="text-center">
+              <img alt="" class="mx-auto rounded-md" height="200" width="200"
+                src="<%= product.image && product.image.length ? 'uploads/product-images/' + product.image[0] : 'images/no_productImage.png' %>"/>
+              <p><%= product.name %></p>
+              <p><b>₹</b> <%= product.sellingPrice %></p>
+            </div>
+          <% }) %>
         </div>
-      </div>
-    </div>
-  </section>
-  <section class="container mx-auto py-8">
-    <h2 class="text-2xl font-bold mb-4">
-      Shop extra-ordinary items at special prices
-    </h2>
-    <div class="grid grid-cols-6 gap-4">
-      <div class="text-center">
-        <img alt="Halloween decor" class="mx-auto" height="100"
-          src="https://storage.googleapis.com/a1aa/image/Oy9bdAg0niqeRaTSYKZxpal1xK85ZtJPx1R1chcdjq72w90JA.jpg"
-          width="100" />
-        <p>
-          Halloween decor
-        </p>
-        <p>
-          $25
-        </p>
-      </div>
-      <div class="text-center">
-        <img alt="Custom clothing" class="mx-auto" height="100"
-          src="https://storage.googleapis.com/a1aa/image/QG2AxmdBxa7cNhPU1Mm2ibIgQoWeszpxlb7silmHagF1w90JA.jpg"
-          width="100" />
-        <p>
-          Custom clothing
-        </p>
-        <p>
-          $40
-        </p>
-      </div>
-      <div class="text-center">
-        <img alt="Wreaths" class="mx-auto" height="100"
-          src="https://storage.googleapis.com/a1aa/image/QoeHKFfCEVqwDkUYwQx6z6kCMxiNSyFsrCw4EZCZUVI0h7pTA.jpg"
-          width="100" />
-        <p>
-          Wreaths
-        </p>
-        <p>
-          $30
-        </p>
-      </div>
-      <div class="text-center">
-        <img alt="Autumn table decor" class="mx-auto" height="100"
-          src="https://storage.googleapis.com/a1aa/image/dt5S2qyWgC6xJdQhaDIHw2dF0vlMb0mAmIfbtcAk8cZ9w90JA.jpg"
-          width="100" />
-        <p>
-          Autumn table decor
-        </p>
-        <p>
-          $35
-        </p>
-      </div>
-      <div class="text-center">
-        <img alt="Zodiac jewelry" class="mx-auto" height="100"
-          src="https://storage.googleapis.com/a1aa/image/7eR0SXBKeFhas04bnJKH4ulMLEYQlGMxBVaYGwZeX33FD3TnA.jpg"
-          width="100" />
-        <p>
-          Zodiac jewelry
-        </p>
-        <p>
-          $20
-        </p>
-      </div>
-    </div>
-  </section>
-  <section class="bg-yellow-100 py-8">
-    <div class="container mx-auto text-center">
-      <h2 class="text-2xl font-bold mb-4">
-        What is CRAFTORA?
-      </h2>
-      <p class="mb-4">
-        Craftora is a global marketplace for creative and one-of-a-kind goods. It's home to a universe of special,
-        extraordinary items, from unique home decor pieces to trending fashion finds. It was founded in 2020.
-      </p>
-      <p class="mb-4">
-        Craftora is a place where creativity lives and thrives because it's powered by people just like you. We help
-        our
-        community of sellers turn their ideas into successful businesses. Our platform connects them with 89.9 million
-        active buyers looking for something special with creative items to express their unique identity.
-      </p>
-      <p class="mb-4">
-        Have a question? Well, we've got some answers.
-      </p>
-      <button class="bg-gray-800 text-white px-4 py-2 rounded-full">
-        Go to help center
-      </button>
-    </div>
-  </section>
-  <%-include('../partials/user/footer')%>
+      </section>
+
+      <section class="bg-yellow-100 py-8">
+        <div class="container mx-auto text-center">
+          <h2 class="text-2xl font-bold mb-4">What is CRAFTORA?</h2>
+          <p class="mb-4">
+            Craftora is a global marketplace for creative and one-of-a-kind goods. It's home to a universe of special,
+            extraordinary items, from unique home decor pieces to trending fashion finds. It was founded in 2020.
+          </p>
+          <p class="mb-4">
+            Craftora is a place where creativity lives and thrives because it's powered by people just like you. We help
+            our
+            community of sellers turn their ideas into successful businesses. Our platform connects them with 89.9
+            million
+            active buyers looking for something special with creative items to express their unique identity.
+          </p>
+          <p class="mb-4">Have a question? Well, we've got some answers.</p>
+          <button class="bg-gray-800 text-white px-4 py-2 rounded-full">Go to help center</button>
+        </div>
+      </section>
+      <%-include('../partials/user/footer')%>

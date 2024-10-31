@@ -1,0 +1,212 @@
+<link rel="stylesheet" href="/css/user/product_details.css">
+<!-- Header -->
+<%-include('../../partials/user/header')%>
+<!-- Main Content -->
+<main class="p-8">
+    <div class="flex justify-center gap-x-10 sm:gap-x-20" style="padding:30px 150px">
+        <!-- Product Image -->
+        <div class="w-1/3">
+            <div class="zoom-container" onmousemove="zoomIn(event)" onmouseleave="resetZoom()">
+                    <img id="zoomable-image" 
+                         alt="zoomable-image"
+                         class="rounded-lg"
+                         height="400" width="400"
+                         src="<%= product.image && product.image.length ? '/uploads/product-images/' + product.image[0] : 'images/no_productImage.png' %>"/>
+            </div>
+            <!-- Thumbnail     -->
+            <div class="flex space-x-2 mt-4">
+                <% product.image.forEach((image,index)=>{%>
+                    <img alt="Thumbnail <% index %>" class="thumbnail w-20 h-20 rounded-lg" height="70" width="70"
+                        src="/uploads/product-images/<%= image %>"
+                        onclick="updateMainImage(this,'<%= image %>')"/>
+                <% }) %>
+            </div>
+        </div>              
+        <!-- Product Details -->
+        <div class="w-2/3">
+            <div class="text-sm text-gray-500">
+                <a href="/user/home">Home</a> &gt; <a href="/user/categories/<%= product.category?.name %>"><%= product.category?.name %></a>
+            </div>
+            <h1 class="text-2xl font-bold mt-2"><%= product.name %></h1>
+            <div class="flex items-center mt-2">
+                <div class="bg-green-500 text-white px-2 py-1 rounded">Rating <%= product.rating %> <i class="fas fa-star"></i></div>
+            </div>
+            <div class="text-3xl font-bold text-green-600 mt-4">
+                <b>₹</b> <%= product.sellingPrice %>
+                <span class="line-through text-gray-500">₹ <%= product.mrp %></span>
+            </div>
+            <div class="text-sm text-gray-500 mt-2">Special Price</div>
+            <div class="mt-4">
+                <div class="text-sm text-gray-500">Delivery &amp; return policies</div>
+                <ul class="list-disc list-inside text-gray-700 mt-2">
+                    <li>
+                        Order today to get it by <b class="text-green-600"><%= deliveryDate %></b>
+                    </li>
+                    <li>
+                        Returns and exchanges are not accepted
+                    </li>
+                    <li>
+                        Delivery cost: free
+                    </li>
+                    <li>
+                        Dispatches from: Ernakulam
+                    </li>
+                </ul>
+            </div>
+            <div class="flex space-x-4 mt-4">
+                <button class="bg-orange-500 text-white px-4 py-2 rounded">
+                    Add to Cart
+                </button>
+                <button class="bg-orange-500 text-white px-4 py-2 rounded">
+                    Buy Now
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- User Ratings and Reviews -->
+    <section class="mt-8">
+        <h2 class="text-xl font-bold">
+            User ratings and reviews
+        </h2>
+        <div class="bg-orange-200 p-4 rounded-lg mt-4">
+            <div class="flex items-center space-x-2">
+                <div class="flex space-x-1 text-yellow-500">
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                </div>
+            </div>
+            <p class="mt-2">
+                They are so beautiful and the packaging was so good. Will buy the product again.
+            </p>
+            <div class="flex items-center mt-2">
+                <i class="fas fa-user-circle text-gray-500">
+                </i>
+                <span class="ml-2 font-bold">
+                    Lindsey McNeese
+                </span>
+            </div>
+        </div>
+        <div class="bg-orange-200 p-4 rounded-lg mt-4">
+            <div class="flex items-center space-x-2">
+                <div class="flex space-x-1 text-yellow-500">
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                </div>
+            </div>
+            <p class="mt-2">
+                They are so beautiful and the packaging was so good. Will buy the product again.
+            </p>
+            <div class="flex items-center mt-2">
+                <i class="fas fa-user-circle text-gray-500">
+                </i>
+                <span class="ml-2 font-bold">
+                    Lindsey McNeese
+                </span>
+            </div>
+        </div>
+        <div class="bg-orange-200 p-4 rounded-lg mt-4">
+            <div class="flex items-center space-x-2">
+                <div class="flex space-x-1 text-yellow-500">
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                    <i class="fas fa-star">
+                    </i>
+                </div>
+            </div>
+            <p class="mt-2">
+                They are so beautiful and the packaging was so good. Will buy the product again.
+            </p>
+            <div class="flex items-center mt-2">
+                <i class="fas fa-user-circle text-gray-500">
+                </i>
+                <span class="ml-2 font-bold">
+                    Lindsey McNeese
+                </span>
+            </div>
+        </div>
+    </section>
+    <!-- You may also like -->
+    <section class="mt-8" style="padding:30px 150px">
+        <h2 class="text-xl font-bold">
+            You may also like...
+        </h2>
+        <div class="grid grid-cols-<%= Math.min(relatedProducts.length, 5) %> gap-4 mt-4">
+            <% relatedProducts.slice(0, 10).forEach((relProd, index) => { %>
+                <% if (index > 0 && index % 5 === 0) { %> 
+                    </div><div class="grid grid-cols-<%= Math.min(relatedProducts.length - index, 5) %> gap-4 mt-4">
+                <% } %>
+                <div>
+                    <a href="/user/product/<%= relProd._id %>">
+                        <img alt="Related product image" class="rounded-lg" width="200" height="200"
+                             src="<%= relProd.image && relProd.image.length ? '/uploads/product-images/' + relProd.image[0] : '/images/no_productImage.png' %>"/>
+                        <div class="mt-2"><%= relProd.name %></div>
+                    </a>
+                </div>
+            <% }) %>
+        </div>        
+    </section>
+</main>
+<%-include('../../partials/user/footer')%>
+<script>
+    function updateMainImage(selectedThumbnail,imageSrc) {
+        document.getElementById('zoomable-image').src = '/uploads/product-images/' + imageSrc;
+    
+        document.querySelectorAll('.thumbnail').forEach(thumbnail => {
+            thumbnail.classList.remove('active');
+        });
+        selectedThumbnail.classList.add('active');
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+        const firstThumbnail = document.querySelector('.thumbnail');
+        if (firstThumbnail) {
+            firstThumbnail.classList.add('active');
+        }
+    });
+    const zoomFactor = 2.5;
+
+    function zoomIn(event) {
+        const zoomableImage = document.getElementById('zoomable-image');
+        
+        // Get the bounding rectangle of the image
+        const rect = zoomableImage.getBoundingClientRect();
+        
+        // Calculate the mouse position relative to the image
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate the transform origin to keep the zoom centered on the cursor
+        const originX = (x / rect.width) * 100;
+        const originY = (y / rect.height) * 100;
+
+        // Apply transform with scale and origin
+        zoomableImage.style.transformOrigin = `${originX}% ${originY}%`;
+        zoomableImage.style.transform = `scale(${zoomFactor})`;
+    }
+
+    function resetZoom() {
+        const zoomableImage = document.getElementById('zoomable-image');
+        zoomableImage.style.transform = 'scale(1)';
+    }
+</script>

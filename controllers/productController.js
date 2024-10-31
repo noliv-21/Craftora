@@ -2,7 +2,6 @@ const Products = require('../models/productSchema')
 const Categories = require('../models/categorySchema')
 const sharp = require('sharp')
 const path = require('path')
-const Category = require('../models/categorySchema')
 
 
 exports.products = async (req, res) => {
@@ -176,4 +175,24 @@ exports.productDetails = async (req, res) => {
     res.render('admin/product folder/product_details', {
         productDetails, errorMessage, successMessage
     })
+}
+
+exports.productDetailsUser = async (req, res) => {
+    try {
+        const productId = req.params.productId;
+        const deliveryDate = new Date(new Date().setDate(new Date().getDate() + 5))
+            .toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        const productDetails = await Products.findById(productId).populate('category', 'name');
+        const relatedProducts = await Products.find({
+            category:productDetails.category._id,
+            _id: { $ne: productId }
+        }).sort({createdAt:-1}).limit(10)
+        const title = productDetails.name
+        greetName = req.session.user || null;
+        res.render('user/product folder/product', {
+            title, greetName, product: productDetails, deliveryDate, relatedProducts
+        })
+    } catch (error) {
+        console.error(error)
+    }
 }

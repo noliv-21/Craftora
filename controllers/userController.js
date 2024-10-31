@@ -1,8 +1,18 @@
 const Users = require('../models/userSchema')
+const Categories = require('../models/categorySchema')
+const Products = require('../models/productSchema')
 const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer');
 const crypto = require('crypto'); // To generate OTP
 const env = require('dotenv').config();
+
+exports.userAuth = async (req, res, next) => {
+    if (req.session.user) {
+        next();
+    } else {
+        res.redirect('/user/login')
+    }
+}
 
 exports.login = async (req, res) => {
 
@@ -52,15 +62,16 @@ exports.login_verify = async (req, res) => {
     }
 };
 
-exports.home = (req, res) => {
-    if (req.session.user) {
+exports.home = async (req, res) => {
+    try {
+        const title = 'Craftora Home'
+        const products = await Products.find({}).sort({ createdAt: -1 }).limit(5)
+        const categories = await Categories.find({}).sort({ createdAt: -1 }).limit(5)
         res.render('user/home', {
-            greetName: req.session.user
+            title, greetName: req.session.user, products, categories,
         });
-    } else {
-        res.render('user/home', {
-            greetName: null
-        })
+    } catch (error) {
+        console.error(error)
     }
 };
 
@@ -233,29 +244,6 @@ exports.resend_otp = async (req, res) => {
     res.redirect(`/user/otp`);
 }
 
-// exports.google_login = async (req, res) => {
-//     const { email, displayName, isSignUp } = req.body;
-//     console.log(req.body);
-//     try {
-//         let user = await Users.findOne({ email });
-//         if (!user && isSignUp) {
-//             user = new Users({
-//                 username: displayName,
-//                 email,
-//                 createdAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-//                 isGoogleUser: true
-//             });
-//             await user.save(); // Save new user
-//             console.log("New Google user saved");
-//         }
-//         req.session.user = user.username;
-//         return res.redirect('/user/home');
-//     } catch (err) {
-//         console.error("Error during Google login:", err);
-//         res.status(500).send("Server error");
-//     }
-// };
-
 exports.users = async (req, res) => {
     try {
         let search = req.query.search || '';
@@ -275,7 +263,7 @@ exports.users = async (req, res) => {
         const reversedUser = users.reverse();
 
         res.render('admin/user folder/users', {
-            users: reversedUser, errorMessage, successMessage, page, limit, totalPages, totalUsers
+            title, users: reversedUser, errorMessage, successMessage, page, limit, totalPages, totalUsers
         });
     } catch (err) {
         console.error(err);
@@ -296,3 +284,4 @@ exports.block_unblock = async (req, res) => {
         res.redirect('/admin/users')
     }
 }
+
