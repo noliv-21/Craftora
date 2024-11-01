@@ -40,7 +40,7 @@ exports.addingCategory = async (req, res) => {
     const description = req.body.description
     const isListed = req.body.status
     try {
-        const catCheck = await Categories.findOne({ name: name })
+        const catCheck = await Categories.findOne({ name: new RegExp(`^${name}$`, 'i') })
         if (!catCheck) {
             const newCategory = new Categories({
                 name,
@@ -58,7 +58,7 @@ exports.addingCategory = async (req, res) => {
         }
     } catch (error) {
         console.error("Error during user creation:", error);
-        req.session.errorMessage = "Error saving user"
+        req.session.errorMessage = "Category with same name already exists"
         res.redirect('/admin/categories/add')
     }
 }

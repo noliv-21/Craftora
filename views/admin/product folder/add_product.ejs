@@ -59,7 +59,7 @@
                                                 <h3 class="text-lg font-semibold text-gray-700">Media</h3>
                                                 <div class="row">
                                                     <div class="card-body flex align-items-center" id="previewImage1" style="margin-bottom: 20px;">
-                                                        <img src="" alt="image 1" id="imgView1">
+                                                        <img src="" alt="" id="imgView1">
                                                         <input class="form-control" type="file" name="images" id="input1"
                                                             accept="image/png, image/jpeg, image/jpg"
                                                             onchange="viewImage(event, 1)">
@@ -228,8 +228,8 @@
                 </div>
         </div>
 </div>
-<script src="JS/admin/product.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+<script src="JS/admin/product.js"></script>
 <script>
     function validateAndSubmit() {
         if (validateForm()) {
@@ -237,16 +237,6 @@
         }
     }
 
-   //function viewImage1(event){
-   //    documet.getElementById("imgView1").src=URL.createObjectURL(event.target.files[0])
-   //}
-   //function viewImage2(event){
-   //    documet.getElementById("imgView2").src=URL.createObjectURL(event.target.files[0])
-   //}
-   //function viewImage3(event){
-   //    documet.getElementById("imgView3").src=URL.createObjectURL(event.target.files[0])
-   //}
-   
    let cropper;
 
    function viewImage(event, index) {
@@ -280,10 +270,6 @@
                let timestamp = new Date().getTime();
                let fileName = `cropped-img-${timestamp}-${index}.png`;
                
-               
-               //let image = document.getElementById('imgView' + index);
-               //image.style.display='none'
-               
                await croppedCanvas.toBlob(blob => {
                    let imgFile = new File([blob], fileName, { type: blob.type });
                    let fileList = new DataTransfer();
@@ -292,11 +278,6 @@
                 });
                 
                 previewImage.style.display = 'none'
-                // Hide the original image view and show the cropped image view
-                // image.style.display = 'none';
-                // document.querySelector('#croppedImg' + index).style.display = 'block';
-                // document.querySelector('#saveButton' + index).style.display = 'none';
-                // document.querySelector('.image-cropper.d-flex.align-items-center').style.display = 'block';
                 cropper.destroy(); // Clean up the cropper instance
                 cropper = null; // Reset the cropper variable
            };   
@@ -428,48 +409,4 @@
 
     }
 
-</script>
-<script>
-    function viewImage(event, index) {
-        let input = event.target;
-        let reader = new FileReader();
-        reader.onload = function () {
-            let dataURL = reader.result;
-            let image = document.getElementById('imgView' + index);
-            image.src = dataURL;
-    
-            if (cropper) {
-                cropper.destroy();
-            }
-    
-            cropper = new Cropper(image, {
-                aspectRatio: 1,
-                viewMode: 1,
-                background: false,
-                autoCropArea: 1,
-                zoomable: true,
-            });
-    
-            let saveButton = document.querySelector('#saveButton' + index);
-            saveButton.addEventListener('click', async function () {
-                let croppedCanvas = cropper.getCroppedCanvas();
-                let croppedImage = document.getElementById('croppedImg' + index);
-                croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
-    
-                let timestamp = new Date().getTime();
-                let fileName = `cropped-img-${timestamp}-${index}.png`;
-    
-                await croppedCanvas.toBlob(blob => {
-                    let imgFile = new File([blob], fileName, { type: blob.type });
-                    let fileList = new DataTransfer();
-                    fileList.items.add(imgFile);
-                    input.files = fileList.files;
-                });
-    
-                cropper.destroy();
-                cropper = null;
-            });
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
 </script>

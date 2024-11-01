@@ -62,7 +62,7 @@ exports.addProduct = async (req, res) => {
         // console.log("catId",catId);
         // if (!catId) throw new Error('Category not found');
         const tagsArray = tags ? tags.split(',').map(tag => tag.trim()) : [];
-        const productChk = await Products.findOne({ name })
+        const productChk = await Products.findOne({ name: new RegExp(`^${name}$`, 'i') })
         if (!productChk) {
             const images = [];
             if (req.files && req.files.length > 0) {
