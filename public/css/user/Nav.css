@@ -1,0 +1,19 @@
+.navbar {
+    background-image: url('/images/user/navbar Image.png');
+    padding: 0;
+}
+.navHeader {
+    background-color: transparent;
+    backdrop-filter: blur(2px);
+}
+.glass_btn{
+    background-color: black;
+    backdrop-filter: blur(3px);
+    filter:opacity(.8);
+    color: azure;
+    border: .5px azure solid;
+}
+.glass_btn:hover{
+    filter:none;
+    color:blanchedalmond
+}

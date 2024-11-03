@@ -108,13 +108,13 @@
                             </div>
                             <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
                                 <b><h4 class="block text-gray-600">Product Status</h4></b>
-                                <% if(productDetails.status==="Available"){ %>
+                                <% if(productDetails.isAvailable==="Available"){ %>
                                     <span class="bg-green-100 text-green-600 px-2 py-1 mt-4 rounded-md">
-                                        <%= productDetails.status %>
+                                        <%= productDetails.isAvailable %>
                                     </span>
-                                <% } else if(productDetails.status==="Out of Stock"){ %>
+                                <% } else if(productDetails.isAvailable==="Out of Stock"){ %>
                                         <span class="bg-red-100 text-red-600 px-2 py-1 mt-4 rounded-md">
-                                            <%= productDetails.status %>
+                                            <%= productDetails.isAvailable %>
                                         </span>
                                 <% } else { %>
                                         <span class="bg-yellow-100 text-yellow-600 px-2 py-1 mt-4 rounded-md">

@@ -1,21 +1,15 @@
-<header class="bg-pink-500 text-white">
-    <div class="container mx-auto flex justify-between items-center py-4 px-6">
+<link rel="stylesheet" href="/css/user/Nav.css">
+<div class="navbar ">
+    <header class="navHeader w-full p-4 flex justify-between items-center text-white">
         <div><img class="w-[120px] h-auto" src="/images/Craftora_logo.png" alt="brand icon"></div>
         <div class="flex items-center space-x-4">
-
-            <input class="px-4 py-2 rounded-full" placeholder="Search" type="text" />
-            <button class="bg-white text-pink-500 px-4 py-2 rounded-full">
-                Search
-            </button>
+            <input class="px-4 py-2 text-orange-500 rounded-full" placeholder="Search" type="search" />
+            <button class="bg-white text-pink-500 px-3 py-1 rounded-full"><i class="fas fa-search"></i></button>
         </div>
-        <nav class="flex space-x-4">
-            <a class="hover:underline" href="#">Home</a>
-            <a class="hover:underline" href="#">Products</a>
-            <a class="hover:underline" href="#">About</a>
-            <a class="hover:underline" href="#">Contact </a>
-            <% if (!greetName || typeof greetName === 'undefined'){ %>
-                <a class="hover:underline" href="/user/login">Sign Up</a>
-                <a class="hover:underline" href="/user/login">Sign In</a>
+        <div class="flex space-x-4">
+            <% if (!session || typeof session==='undefined' ){ %>
+                <a class="hover:underline" href="/user/login"><button class="glass_btn text-white-500 px-2 py-1 rounded-full">Sign Up</button></a>
+                <a class="hover:underline" href="/user/login"><button class="glass_btn text-white-500 px-2 py-1 rounded-full">Sign In</button></a>
             <% } else{ %>
                 <div class="text-white space-x-2">
                     <a href="/user/wishlist"><i class="fas fa-heart"></i></a>
@@ -23,8 +17,16 @@
                     <a href="/user/dashboard"><i class="fas fa-user"></i></a>
                 </div>
                 <a class="flex items-center text-gray-600 hover:bg-gray-200 rounded-md" href="/user/logout">
-                    <i class="fas fa-sign-out-alt mr-3"></i>Log out</a>
+                    <button class="bg-white text-orange-500 px-2 py-1 rounded-full"><i class="fas fa-sign-out-alt mr-3"></i>Log out</button>
+                    </a>
             <% } %>
-        </nav>
-    </div>
-</header>
+        </div>
+    </header>
+    <!-- Navigation -->
+    <nav class="w-full bg-orange-400 p-2 flex justify-center space-x-8">
+        <a class="hover:underline" href="/user/home">Home</a>
+        <a class="hover:underline" href="/user/products">Products</a>
+        <a class="hover:underline" href="#about">About</a>
+        <a class="hover:underline" href="#contact">Contact </a>
+    </nav>
+</div>

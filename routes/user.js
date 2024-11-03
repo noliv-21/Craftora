@@ -17,6 +17,7 @@ user.post('/otp_resend',userController.resend_otp)
 user.get('/home', userController.home)
 user.get('/logout', userController.logout)
 
+user.get('/products',productController.showProducts)
 user.get('/product/:productId',productController.productDetailsUser)
 
 module.exports = user;

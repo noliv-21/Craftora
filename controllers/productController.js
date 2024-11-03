@@ -85,7 +85,8 @@ exports.addProduct = async (req, res) => {
             await newProduct.save()
             console.log("Product added successfully");
             req.session.successMessage = "Product added successfully"
-            res.redirect('/admin/products')
+            res.status(200).json("successful").redirect('/admin/products')
+            // res.redirect('/admin/products')
         } else {
             console.log('Product with same name exists');
             req.session.errorMessage = 'A Product with same name exists'
@@ -139,18 +140,18 @@ exports.editPage = async (req, res) => {
     req.session.successMessage = null
     const categories = await Categories.find({}, { name: 1 })
     const offerTypes = Products.schema.path('offerType').enumValues;
-    const statuses = Products.schema.path('status').enumValues;
+    const isAvailable = Products.schema.path('isAvailable').enumValues;
     res.render('admin/product folder/edit_product', {
-        productDetails, successMessage, errorMessage, offerTypes, statuses, categories
+        productDetails, successMessage, errorMessage, offerTypes, isAvailable, categories
     })
 }
 
 exports.edittingProduct = async (req, res) => {
-    const { originalName, name, description, price, mrp, offerType, offer, maxDiscount, category, stock, tags, status, isListed } = req.body;
+    const { originalName, name, description, price, mrp, offerType, offer, maxDiscount, category, stock, tags, isAvailable, isListed } = req.body;
     const tagsArray = tags ? tags.split(',').map(tag => tag.trim()) : [];
     try {
         await Products.findOneAndUpdate({ name: originalName }, {
-            name, description, offerType, offer, isListed, status, maxDiscount, mrp, category,
+            name, description, offerType, offer, isListed, isAvailable, maxDiscount, mrp, category,
             tags: tagsArray,
             sellingPrice: price,
             inventory: stock
@@ -188,11 +189,32 @@ exports.productDetailsUser = async (req, res) => {
             _id: { $ne: productId }
         }).sort({createdAt:-1}).limit(10)
         const title = productDetails.name
-        greetName = req.session.user || null;
+        const session = req.session.user || null;
         res.render('user/product folder/product', {
-            title, greetName, product: productDetails, deliveryDate, relatedProducts
+            title, session, product: productDetails, deliveryDate, relatedProducts
         })
     } catch (error) {
         console.error(error)
+    }
+}
+
+exports.showProducts = async (req,res)=>{
+    try {
+        let search = req.query.search || '';
+        const session = req.session.user;
+        const title = "All products";
+        // Pagination
+        const page = parseInt(req.query.page) || 1;
+        const limit = 8;
+        const skip = (page - 1) * limit;
+        const products = await Products.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('category', 'name')
+        const totalProducts = await Products.countDocuments();
+        const totalPages = Math.ceil(totalProducts / limit)
+        const reversedProduct = products.reverse();
+        res.render('user/product folder/products',{
+            title, session, limit, products, totalProducts, totalPages, page
+        })
+    } catch (error) {
+        console.log(error)
     }
 }

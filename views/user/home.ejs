@@ -1,7 +1,7 @@
 <%-include('../partials/user/header')%>
-  <% if (greetName){ %>
+  <% if (session){ %>
     <section class="bg-yellow-100 text-center py-8">
-      <h1 class="text-3xl font-playfair">Welcome <%= greetName %> !</h1>
+      <h1 class="text-3xl font-playfair">Welcome <%= session %> !</h1>
     </section>
     <% } %>
       <!-- Carousel -->
@@ -125,7 +125,7 @@
         </div>
       </section>
 
-      <section class="bg-yellow-100 py-8">
+      <section id="about" class="bg-yellow-100 py-8">
         <div class="container mx-auto text-center">
           <h2 class="text-2xl font-bold mb-4">What is CRAFTORA?</h2>
           <p class="mb-4">

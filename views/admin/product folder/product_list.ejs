@@ -95,23 +95,23 @@
                                         <td class="py-2">
                                             <%= product.sellingPrice %>
                                         </td>
-                                        <% if(product.status==="Available"){ %>
+                                        <% if(product.isAvailable==="Available"){ %>
                                         <td class="py-2">
-                                            <span class="bg-green-100 text-green-600 px-2 py-1 rounded-md">
-                                                <%= product.status %>
-                                            </span>
+                                            <div class="bg-green-100 text-green-600 px-2 py-1 rounded-md">
+                                                <%= product.isAvailable %>
+                                            </div>
                                         </td>
-                                        <% } else if(product.status==="Out of Stock"){ %>
+                                        <% } else if(product.isAvailable==="Out of Stock"){ %>
                                             <td class="py-2">
-                                                <span class="bg-red-100 text-red-600 px-2 py-1 rounded-md">
-                                                    <%= product.status %>
-                                                </span>
+                                                <div class="bg-red-100 text-red-600 px-2 py-1 rounded-md">
+                                                    <%= product.isAvailable %>
+                                                </div>
                                             </td>
                                         <% } else { %>
                                             <td class="py-2">
-                                                <span class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-md">
+                                                <div class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-md">
                                                     Only <%= product.inventory %> Left
-                                                </span>
+                                                </div>
                                             </td>
                                         <% } %>
                                         <td class="py-2">

@@ -1,0 +1,169 @@
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+    }
+</style>
+<!-- Header -->
+<%-include('../../partials/user/header')%>
+<!-- Breadcrumb and Sort -->
+<div class="bg-orange-100 p-2 flex justify-between items-center">
+    <div class="text-gray-600">
+        <a href="/user/home">Home</a> &gt; <a href="/user/products">Products</a>
+    </div>
+    <div>
+        <select class="p-2 border border-gray-300 rounded">
+            <option>
+                Sort by: Recommended
+            </option>
+        </select>
+    </div>
+</div>
+<!-- Main Content -->
+<div class="flex">
+    <!-- Sidebar -->
+    <aside class="w-1/6 bg-yellow-100 p-4">
+        <h2 class="text-xl font-bold mb-4">
+            Filters
+        </h2>
+        <div class="mb-4">
+            <h3 class="font-bold mb-2">
+                Categories
+            </h3>
+            <ul class="space-y-1">
+                <li>
+                    Halloween candles
+                </li>
+                <li>
+                    Autumn candles
+                </li>
+                <li>
+                    Mushroom candles
+                </li>
+                <li>
+                    Fig tree candles
+                </li>
+                <li>
+                    Pine cone candles
+                </li>
+                <li>
+                    Ghost candles
+                </li>
+                <li>
+                    Designed candles
+                </li>
+            </ul>
+        </div>
+        <div class="mb-4">
+            <h3 class="font-bold mb-2">
+                Price
+            </h3>
+            <input class="w-full" max="399" min="50" type="range" />
+            <div class="text-center">
+                $50 - $399+
+            </div>
+        </div>
+        <div class="mb-4">
+            <h3 class="font-bold mb-2">
+                Colours
+            </h3>
+            <ul class="space-y-1">
+                <li>
+                    Orange
+                </li>
+                <li>
+                    Green
+                </li>
+                <li>
+                    Blue
+                </li>
+                <li>
+                    Red
+                </li>
+                <li>
+                    White
+                </li>
+                <li>
+                    Pink
+                </li>
+                <li>
+                    Brown
+                </li>
+            </ul>
+        </div>
+        <div>
+            <h3 class="font-bold mb-2">
+                Offers
+            </h3>
+            <ul class="space-y-1">
+                <li>
+                    10% and above
+                </li>
+                <li>
+                    20% and above
+                </li>
+                <li>
+                    30% and above
+                </li>
+                <li>
+                    40% and above
+                </li>
+                <li>
+                    50% and above
+                </li>
+                <li>
+                    60% and above
+                </li>
+                <li>
+                    70% and above
+                </li>
+                <li>
+                    80% and above
+                </li>
+            </ul>
+        </div>
+    </aside>
+    <!-- Products -->
+    <div class="flex flex-col w-5/6 justify-between">
+        <main class="w-full p-4 grid grid-cols-4 gap-4">
+            <!-- Product Item -->
+            <% products.forEach((product,index)=>{ %>
+                <a href="/user/product/<%= product._id %>">
+                    <div class="bg-white p-4 rounded shadow">
+                        <img alt="Product Image" class="w-full h-48 object-cover rounded mb-2" height="200" width="200"
+                            src="<%= product.image && product.image.length ? '/uploads/product-images/'+product.image[0] : '/images/no_productImage.png' %>"/>
+                        <div class="text-center">
+                            <h3 class="font-bold"><%= product.name %></h3>
+                            <div class="text-green-500"><b>₹</b> <%= product.sellingPrice %>
+                                <span class="line-through text-gray-500">₹ <%= product.mrp %></span>
+                                <% if(product.offer) { %>
+                                    <span class="text-red-500">(<%= product.offer %> % off)</span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            <% }) %>
+        </main>
+        <!-- Pagination -->
+        <div class="flex justify-between items-center my-4 mx-5">
+            <div class="text-gray-500">
+                Showing <%= (page - 1) * limit + 1 %>-<%= Math.min(page * limit, totalProducts) %> of <%= totalProducts %>
+            </div>
+            <div class="flex items-center space-x-2">
+                <% if (page > 1) { %>
+                    <a href="?page=<%= page - 1 %>" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">&lt;</a>
+                <% } %>
+                
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <a href="?page=<%= i %>" class="px-3 py-1 rounded-md <%= i === page ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700' %>"><%= i %></a>
+                <% } %>
+                
+                <% if (page < totalPages) { %>
+                    <a href="?page=<%= page + 1 %>" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">&gt;</a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Footer -->
+<%-include('../../partials/user/footer')%>

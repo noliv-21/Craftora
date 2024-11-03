@@ -68,7 +68,7 @@ exports.home = async (req, res) => {
         const products = await Products.find({}).sort({ createdAt: -1 }).limit(5)
         const categories = await Categories.find({}).sort({ createdAt: -1 }).limit(5)
         res.render('user/home', {
-            title, greetName: req.session.user, products, categories,
+            title, session: req.session.user, products, categories,
         });
     } catch (error) {
         console.error(error)

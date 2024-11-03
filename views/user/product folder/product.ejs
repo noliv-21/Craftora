@@ -25,7 +25,7 @@
         <!-- Product Details -->
         <div class="w-2/3">
             <div class="text-sm text-gray-500">
-                <a href="/user/home">Home</a> &gt; <a href="/user/categories/<%= product.category?.name %>"><%= product.category?.name %></a>
+                <a href="/user/home">Home</a> &gt; <a href="/user/products">Products</a> &gt; <a href="/user/categories/<%= product.category?.name %>"><%= product.category?.name %></a>
             </div>
             <h1 class="text-2xl font-bold mt-2"><%= product.name %></h1>
             <div class="flex items-center mt-2">
@@ -33,9 +33,25 @@
             </div>
             <div class="text-3xl font-bold text-green-600 mt-4">
                 <b>₹</b> <%= product.sellingPrice %>
-                <span class="line-through text-gray-500">₹ <%= product.mrp %></span>
+                <span class="line-through text-gray-500 text-[20px]">₹ <%= product.mrp %></span>
             </div>
-            <div class="text-sm text-gray-500 mt-2">Special Price</div>
+            <span class="inline-flex gap-1 flex-col">
+                <div class="text-sm text-gray-500 mt-2">Special Price</div>
+                <% if(product.inventory>=11){ %>
+                    <div class="bg-green-100 inline text-green-600 px-2 py-1 my-1 rounded-md">
+                        <%= product.isAvailable %>
+                    </div>
+                <% } else if(product.inventory<=0) { %>
+                        <div class="bg-red-100 inline text-red-600 px-2 py-1 my-1 rounded-md">
+                            Out of Stock
+                            <!-- <%= product.isAvailable %> -->
+                        </div>
+                <% } else { %>
+                        <div class="bg-yellow-100 inline text-yellow-600 px-2 py-1 my-1 rounded-md">
+                            Only <%= product.inventory %> Left
+                        </div>
+                <% } %>
+            </span>
             <div class="mt-4">
                 <div class="text-sm text-gray-500">Delivery &amp; return policies</div>
                 <ul class="list-disc list-inside text-gray-700 mt-2">
