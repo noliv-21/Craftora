@@ -2,6 +2,7 @@ const Products = require('../models/productSchema')
 const Categories = require('../models/categorySchema')
 const sharp = require('sharp')
 const path = require('path')
+const fs = require('fs').promises;
 
 
 exports.products = async (req, res) => {
@@ -53,14 +54,8 @@ exports.addProductPage = async (req, res) => {
 }
 
 exports.addProduct = async (req, res) => {
-    // console.log(req.body);
     const { name, description, price, mrp, offerType, offer, maxDiscount, category, stock, tags, status, isListed } = req.body;
-    // const category=req.body.category
     try {
-        console.log("category", category);
-        // const catId = await Categories.findOne({ name: category }, { _id: 1 });
-        // console.log("catId",catId);
-        // if (!catId) throw new Error('Category not found');
         const tagsArray = tags ? tags.split(',').map(tag => tag.trim()) : [];
         const productChk = await Products.findOne({ name: new RegExp(`^${name}$`, 'i') })
         if (!productChk) {
@@ -147,14 +142,107 @@ exports.editPage = async (req, res) => {
 }
 
 exports.edittingProduct = async (req, res) => {
-    const { originalName, name, description, price, mrp, offerType, offer, maxDiscount, category, stock, tags, isAvailable, isListed } = req.body;
+    const { originalName, name, description, price, mrp, offerType, offer, maxDiscount, category, stock, tags, isAvailable, isListed, removedImages } = req.body;
     const tagsArray = tags ? tags.split(',').map(tag => tag.trim()) : [];
+    // console.log(req.body.images);
     try {
+        // Fetch the product first
+        const product = await Products.findOne({ name: originalName.trim() });
+        if (!product) {
+            req.session.errorMessage = "Product not found";
+            return res.redirect('/admin/products');
+        }
+        async function saveBase64Image(base64String, filename) {
+            const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
+            const buffer = Buffer.from(base64Data, 'base64');
+            await fs.writeFile(`public/uploads/product-images/${filename}`, buffer);
+        }
+        const { images } = req.body; // This should match the hidden input name
+
+        try {
+            if (images && Array.isArray(images)) {
+                for (const [index, base64Image] of images.entries()) {
+                    const filename = `product_${Date.now()}_${index}.png`;
+                    await saveBase64Image(base64Image, filename);
+                    product.image.push(filename);
+                }
+            }
+        } catch (saveError) {
+            console.error('Error saving base64 image:', saveError);
+            req.session.errorMessage = "Error while saving base64 images";
+            return res.redirect('/admin/products');
+        }
+        
+        
+        // Check for new file uploads
+        if (req.files && req.files.length > 0) {
+            for (let i = 0; i < req.files.length; i++) {
+                try {
+                    const originalImagePath = req.files[i].path;
+                    const resizedImagePath = path.join('public', 'uploads', 'product-images', req.files[i].filename);
+                    
+                    // Resize the image using sharp
+                    await sharp(originalImagePath).resize({ width: 440, height: 440 }).toFile(resizedImagePath);
+                    
+                    // Add the new image filename to the images array
+                    product.image.push(req.files[i].filename);
+                } catch (imgError) {
+                    console.error(`Error processing image ${req.files[i].filename}:`, imgError);
+                    req.session.errorMessage = "Error while processing one or more images";
+                    return res.redirect('/admin/products');
+                }
+            }
+        }
+
+        // if (removedImages) {
+        //     const imagesToRemove = Array.isArray(removedImages) ? removedImages : [removedImages];
+        //     imagesToRemove.forEach((img) => {
+        //         const index = product.image.indexOf(img);
+        //         if (index > -1) {
+        //             product.image.splice(index, 1); // Remove from images array
+        //             // Delete the file from the filesystem
+        //             fs.unlink(path.join('public', 'uploads', 'product-images', img), (err) => {
+        //                 if (err) {
+        //                     console.error(`Error deleting image ${img}:`, err);
+        //                 } else {
+        //                     console.log(`Deleted image: ${img}`);
+        //                 }
+        //             });
+        //         }
+        //     });
+        // }
+
+        if (removedImages) {
+            const imagesToRemove = Array.isArray(removedImages) ? removedImages : [removedImages];
+            for (const img of imagesToRemove) {
+                const index = product.image.indexOf(img);
+                if (index > -1) {
+                    product.image.splice(index, 1); // Remove from images array
+                    
+                    // Construct the full path to the image
+                    const imagePath = path.join('public', 'uploads', 'product-images', img);
+                    
+                    // Check if the file exists before trying to delete it
+                    try {
+                        await fs.access(imagePath); // Check if the file exists
+                        await fs.unlink(imagePath); // Delete the file
+                        console.log(`Deleted image: ${img}`);
+                    } catch (err) {
+                        if (err.code === 'ENOENT') {
+                            console.log(`Image not found, skipping deletion: ${img}`);
+                        } else {
+                            console.error(`Error deleting image ${img}:`, err);
+                        }
+                    }
+                }
+            }
+        }
         await Products.findOneAndUpdate({ name: originalName }, {
             name, description, offerType, offer, isListed, isAvailable, maxDiscount, mrp, category,
             tags: tagsArray,
             sellingPrice: price,
-            inventory: stock
+            inventory: stock,
+            image:product.image
         })
         console.log("Product edited successfully");
         req.session.successMessage = "Product Edited"

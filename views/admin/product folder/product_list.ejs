@@ -86,25 +86,16 @@
                                         <td class="py-2">
                                             <%= product.category?.name %>
                                         </td>
-                                        <td class="py-2">
-                                            <%= product.inventory %>
-                                        </td>
-                                        <td class="py-2">
-                                            <%= product.mrp %>
-                                        </td>
-                                        <td class="py-2">
-                                            <%= product.sellingPrice %>
-                                        </td>
                                         <% if(product.isAvailable==="Available"){ %>
                                         <td class="py-2">
                                             <div class="bg-green-100 text-green-600 px-2 py-1 rounded-md">
-                                                <%= product.isAvailable %>
+                                                <%= product.inventory %> <%= product.isAvailable %>
                                             </div>
                                         </td>
-                                        <% } else if(product.isAvailable==="Out of Stock"){ %>
+                                        <% } else if(product.isAvailable==="Out of Stock" || product.inventory<1){ %>
                                             <td class="py-2">
                                                 <div class="bg-red-100 text-red-600 px-2 py-1 rounded-md">
-                                                    <%= product.isAvailable %>
+                                                    Out of Stock
                                                 </div>
                                             </td>
                                         <% } else { %>
@@ -113,6 +104,17 @@
                                                     Only <%= product.inventory %> Left
                                                 </div>
                                             </td>
+                                        <% } %>
+                                        <td class="py-2">
+                                            <%= product.mrp %>
+                                        </td>
+                                        <td class="py-2">
+                                            <%= product.sellingPrice %>
+                                        </td>
+                                        <% if(product.isListed){%>
+                                            <td class="py-2">Listed</td>
+                                        <% } else { %>
+                                            <td class="py-2">Not listed</td>
                                         <% } %>
                                         <td class="py-2">
                                             <%= product.createdAt %>

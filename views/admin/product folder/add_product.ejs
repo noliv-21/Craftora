@@ -286,10 +286,10 @@
    }
 
         const selectedImages=[];
-        dcument.getElementById('input1').addEventListener('change',handleFileSelect);
+        document.getElementById('input1').addEventListener('change',handleFileSelect);
 
         function handleFileSelect(event){
-            const addedImagesContainer=dcument.getElementById('addedImagesContainer');
+            const addedImagesContainer=document.getElementById('addedImagesContainer');
             addedImagesContainer.innerHTML=''
             const files=event.target.files;
             for (let i=0;i<files.length;i++){
