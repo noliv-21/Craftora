@@ -300,7 +300,7 @@ exports.showProducts = async (req,res)=>{
         const totalPages = Math.ceil(totalProducts / limit)
         const reversedProduct = products.reverse();
         res.render('user/product folder/products',{
-            title, session, limit, products, totalProducts, totalPages, page
+            title, session:session.username, limit, products, totalProducts, totalPages, page
         })
     } catch (error) {
         console.log(error)

@@ -1,0 +1,21 @@
+<aside class="bg-orange-100 p-6 w-1/5">
+    <div class="mb-6 flex flex-col justify-center text-center w-full">
+        <h2 class="text-xl font-bold mb-3 bg-orange-200 p-2 rounded">Account</h2>
+        <ul class="flex flex-col mx-auto justify-center w-4/5">
+            <li class="mb-2"><a href="/user/profile" class="block w-full p-2 rounded-full text-center <%= activeTab === 'profile' ? 'bg-orange-300' : 'bg-orange-200' %>">Information</a></li>
+            <li class="mb-2"><a href="/user/addresses" class="block w-full p-2 rounded-full text-center <%= activeTab === 'addresses' ? 'bg-orange-300' : 'bg-orange-200' %>">Manage address</a></li>
+            <li class="mb-2"><a href="/user/orders" class="block w-full p-2 rounded-full text-center <%= activeTab === 'orders' ? 'bg-orange-300' : 'bg-orange-200' %>">Order History</a></li>
+        </ul>
+    </div>
+    <div class="mb-6 flex flex-col justify-center text-center w-full">
+        <h2 class="text-xl font-bold mb-4 bg-orange-200 p-2 rounded">Payments</h2>
+        <ul class="flex flex-col mx-auto justify-center w-4/5">
+            <li class="mb-2"><a href="/user/debit_card" class="block w-full bg-orange-200 p-2 rounded-full text-center">Debit card</a></li>
+            <li class="mb-2"><a href="/user/wallets" class="block w-full bg-orange-200 p-2 rounded-full text-center">Wallet</a></li>
+            <li class="mb-2"><a href="/user/internetBanking" class="block w-full bg-orange-200 p-2 rounded-full text-center">Internet Banking</a></li>
+        </ul>
+    </div>
+    <div class="mb-6 flex flex-col justify-center text-center w-full">
+        <h2 class="text-xl font-bold mb-4 bg-orange-200 p-2 rounded">Sign Out?</h2>
+    </div>
+</aside>

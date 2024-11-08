@@ -46,7 +46,7 @@ exports.login_verify = async (req, res) => {
             const isGoogleUser = userCred.googleId
             const isBlocked = userCred.isBlocked
             if (match && (isVerified || isGoogleUser) && !isBlocked) {
-                req.session.user = userCred.username;
+                req.session.user = userCred;
                 return res.redirect('/user/home');
             } else {
                 req.session.errorMsg = true;
@@ -64,11 +64,13 @@ exports.login_verify = async (req, res) => {
 
 exports.home = async (req, res) => {
     try {
+        const session = req.session.user
         const title = 'Craftora Home'
+        const userGreet = req.session.user ? session.username : 'Guest';
         const products = await Products.find({}).sort({ createdAt: -1 }).limit(5)
         const categories = await Categories.find({}).sort({ createdAt: -1 }).limit(5)
         res.render('user/home', {
-            title, session: req.session.user, products, categories,
+            title, session:userGreet, products, categories,
         });
     } catch (error) {
         console.error(error)
@@ -285,3 +287,57 @@ exports.block_unblock = async (req, res) => {
     }
 }
 
+exports.dashboard = async (req,res)=>{
+    try {
+        const session= req.session.user;
+        const errorMessage = req.session.user.errorMess;
+        console.log(errorMessage);
+        const successMessage = req.session.user.successMess;
+        const user = await Users.findOne({email:session.email})
+        console.log("user:",user);
+        console.log("session",session);
+        res.render('user/dashboard/profile',{
+            session:session.email,user,errorMessage,successMessage,activeTab:'profile'
+        })
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+exports.saveUserDetails = async (req,res)=>{
+    const userDet = req.body;
+    const session = req.session.user;
+    try {
+        const usernameChk = await Users.findOne({ username: userDet.username, email: { $ne: session.email } })
+        if(!usernameChk){
+            await Users.findOneAndUpdate({email:session.email},{
+                username:userDet.username,
+                fullname:userDet.fullname,
+                gender:userDet.gender,
+                phone:userDet.phone
+            })
+            res.redirect(`/user/profile`)
+        }else{
+            req.session.user.errorMess = 'Username already exists'
+            res.redirect(`/user/profile`)
+            // return res.status(404).json({msg:'Username already exists'})
+        }
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+exports.changePassword = async (req,res)=>{
+    console.log(req.body)
+    const session = req.session.user;
+    try {
+        const user = await Users.findOne({ email:session.email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        await Users.findOneAndUpdate({email:session.email},{password: await bcrypt.hash(req.body.password,10)})
+        res.status(200).json('Password edited succesfully')
+    } catch (error) {
+        console.log(error)
+    }
+}

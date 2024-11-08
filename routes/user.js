@@ -2,6 +2,8 @@ const express = require('express');
 const user = express.Router();
 const userController = require('../controllers/userController');
 const productController = require('../controllers/productController')
+const addressController = require('../controllers/addressController')
+const cartController = require('../controllers/cartController');
 const passport = require('passport');
 
 user.use('/',express.static('public'));
@@ -19,5 +21,19 @@ user.get('/logout', userController.logout)
 
 user.get('/products',productController.showProducts)
 user.get('/product/:productId',productController.productDetailsUser)
+
+user.get('/profile',userController.userAuth,userController.dashboard)
+user.post('/dash/saveUserDetails',userController.saveUserDetails)
+user.post('/changePassword',userController.changePassword)
+
+user.get('/addresses',userController.userAuth,addressController.showUserAddresses)
+user.post('/addAddress',addressController.addAddress)
+user.delete('/deleteAddress',addressController.deleteAddress)
+user.patch('/user/editAddress/:addressId',addressController.editAddress)
+
+user.get('/cart',userController.userAuth,cartController.getCart)
+user.post('/addToCart',cartController.addToCart)
+user.patch('/cart/update-quantity',cartController.updateQuantity)
+user.delete('/cart/removeProduct',cartController.removeProduct)
 
 module.exports = user;

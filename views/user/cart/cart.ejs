@@ -1,0 +1,98 @@
+<div class="min-h-screen flex flex-col">
+<!-- Header -->
+<%- include('../../partials/user/header') %>
+
+    <!-- Main Content -->
+    <main class="p-8 flex-grow justify-center">
+        <div class="w-full mx-auto max-w-4xl">
+            <h1 class="text-2xl mb-4 text-center"><%= countOfProducts %> ITEM IN YOUR CART</h1>
+            <% products.forEach((product,index)=>{ %>
+            <div id="product-<%= product.productId._id %>" class="border rounded-lg p-4 flex bg-orange-200 shadow-md">
+                <img alt="Product image" class="w-48 h-48 rounded-lg"
+                    src="/uploads/product-images/<%= product.productId.image[0] %>" />
+                <div class="flex-1 ml-4">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                        <div class="mb-4 w-4/5 md:mb-0">
+                            <h2 class="text-xl font-bold"><%= product.productId.name %></h2>
+                            <p class="mt-2 text-gray-600"><%= product.productId.description %></p>
+                        </div>
+                        <div class="text-right w-1/5 md:ml-4">
+                            <p class="text-lg font-bold">Total: ₹<span id="total-price-<%= product.productId._id %>"><%= product.productId.sellingPrice * product.quantity %></span></p>
+                            <p class="text-gray-500">(₹<%= product.productId.sellingPrice %> each)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4 mt-4">
+                        <!-- Quantity Controls -->
+                        <button onclick="updateQuantity('<%= product.productId._id %>', -1,'<%= product.productId.inventory %>','<%= product.productId.sellingPrice %>')" class="bg-gray-300 px-2 py-1 rounded-lg">-</button>
+                        <div class="bg-gray-200 px-4 py-2 rounded-lg">
+                            <span id="quantity-<%= product.productId._id %>"><%= product.quantity %></span>
+                        </div>
+                        <button onclick="updateQuantity('<%= product.productId._id %>', 1,'<%= product.productId.inventory %>','<%= product.productId.sellingPrice %>')" class="bg-gray-300 px-2 py-1 rounded-lg">+</button>
+                        <button class="text-gray-500" onclick="removeProduct('<%= product.productId._id %>')">Remove</button>
+                        <button class="bg-orange-300 text-white px-4 py-2 rounded-lg">Buy Now</button>
+                    </div>
+                </div>
+            </div>
+            <% }) %>
+            <% if(countOfProducts>0){ %>
+            <div class="mt-8 flex justify-center">
+                <button class="bg-orange-300 text-black px-8 py-4 rounded-lg text-xl">Check out</button>
+            </div>
+            <% } %>
+        </div>
+    </main>
+
+<!-- Footer -->
+<%- include('../../partials/user/footer') %>
+</div>
+
+
+<script>
+    // Function to update quantity
+    async function updateQuantity(productId, change, stock, price) {
+        const quantityElement = document.getElementById(`quantity-${productId}`);
+        const totalPriceElement = document.getElementById(`total-price-${productId}`);
+        let currentQuantity = parseInt(quantityElement.textContent);
+
+        if (currentQuantity + change < 1) return; // Prevent quantity from dropping below 1
+        if (currentQuantity + change > stock) return;
+        try {
+            const response = await fetch(`/user/cart/update-quantity`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId, change })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                const newQuantity = currentQuantity + change;
+                quantityElement.textContent = newQuantity;
+                totalPriceElement.textContent = price * newQuantity;
+            } else {
+                console.error('Error updating quantity:', data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    async function removeProduct(id) {
+    try {
+        const response = await axios.delete('/user/cart/removeProduct', {
+            data: { id } // Pass `id` (productId) as data in the request body
+        });
+        if (response.data.success) {
+            console.log('Product removed from cart');
+            const productElement = document.getElementById(`product-${id}`);
+            if (productElement) {
+                productElement.remove();
+            }
+        } else {
+            console.error('Failed to remove product:', response.data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+</script>

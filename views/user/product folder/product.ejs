@@ -70,10 +70,10 @@
                 </ul>
             </div>
             <div class="flex space-x-4 mt-4">
-                <button class="bg-orange-500 text-white px-4 py-2 rounded">
+                <button class="btn bg-orange-500 text-white px-4 py-2 rounded" onclick="addToCart('<%= product._id %>')">
                     Add to Cart
                 </button>
-                <button class="bg-orange-500 text-white px-4 py-2 rounded">
+                <button class="btn bg-orange-500 text-white px-4 py-2 rounded">
                     Buy Now
                 </button>
             </div>
@@ -224,5 +224,14 @@
     function resetZoom() {
         const zoomableImage = document.getElementById('zoomable-image');
         zoomableImage.style.transform = 'scale(1)';
+    }
+
+    async function addToCart(productId){
+        try {
+            const response = await axios.post('/user/addToCart', { productId });
+            console.log(response.data)
+        } catch (error) {
+            console.error(error)
+        }
     }
 </script>

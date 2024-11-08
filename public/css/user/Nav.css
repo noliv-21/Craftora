@@ -1,3 +1,6 @@
+body {
+    font-family: 'Playfair Display', serif;
+}
 .navbar {
     background-image: url('/images/user/navbar Image.png');
     padding: 0;
