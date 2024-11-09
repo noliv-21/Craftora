@@ -1,0 +1,39 @@
+<!-- Header -->
+<%- include('../../partials/user/header') %>
+
+<!-- Main Content -->
+<div class="flex">
+    <!-- Sidebar -->
+    <%- include('../../partials/user/dashboard_sideBar') %>
+    <!-- Main Section -->
+    <main class="p-6 w-4/5">
+        <h2 class="text-2xl font-bold mb-4">Order History</h2>
+        <div class="space-y-4">
+            <!-- Order Item 1 -->
+            <% orders.forEach((order,index)=>{ %>
+            <div class="flex items-center p-4 border rounded">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <% order.products.forEach((product,ind)=>{ %>
+                    <div class="my-3 mx-3 flex-col">
+                        <a href="/user/product/<%= product.productId._id %>"><img alt="Container Candles" class="w-16 h-16 rounded mr-4" height="100" width="100" 
+                        src="<%= product.productId.image && product.productId.image.length ? '/uploads/product-images/'+product.productId.image[0] : '/images/no_productImage.png' %>"/>
+                        <h3 class="text-xl font-bold"><%= product.productId.name %></h3></a>
+                    </div>
+                    <% }) %>
+                </div>
+                <div class="flex-1">
+                    <p>Order ID: <%= order._id %></p>
+                    <p>Order created on: <%= new Date(order.createdAt).toLocaleDateString() %></p>
+                </div>
+                <div class="text-xl font-bold">Total: ₹<%= order.totalAmount %></div>
+                <div class="flex items-center ml-4">
+                    <!-- <span class="text-red-500 mr-2">●</span> -->
+                    <span><%= order.status %> on <%= new Date(order.updatedAt).toLocaleDateString() %></span>
+                </div>
+            </div>
+            <% }) %>
+        </div>
+    </main>
+</div>
+<!-- Footer -->
+<%- include('../../partials/user/footer') %>

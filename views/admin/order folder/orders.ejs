@@ -1,0 +1,110 @@
+<!-- Header -->
+<%- include('../../partials/admin/header') %>
+<div class="flex">
+    <!-- Sidebar -->
+    <%- include('../../partials/admin/side bar') %>
+    <!-- Main Content -->
+    <div class="flex-1 p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-semibold">Order</h2>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="mt-4 text-sm text-gray-500">
+                <a href="/admin/home" class="text-blue-500">Dashboard</a>
+                &gt;
+                <span>Order List</span>
+            </div>
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex space-x-2">
+                    <button class="bg-blue-100 text-blue-600 px-4 py-2 rounded-lg">
+                        All Time
+                    </button>
+                    <button class="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg">
+                        12 Months
+                    </button>
+                    <button class="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg">
+                        30 Days
+                    </button>
+                    <button class="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg">
+                        7 Days
+                    </button>
+                    <button class="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg">
+                        24 Hour
+                    </button>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg">
+                        Select Dates
+                    </button>
+                    <button class="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg">
+                        Filters
+                    </button>
+                </div>
+            </div>
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="text-gray-600">
+                        <th class="py-2">Order ID</th>
+                        <th class="py-2">Product</th>
+                        <th class="py-2">Date</th>
+                        <th class="py-2">Customer</th>
+                        <th class="py-2">Total</th>
+                        <th class="py-2">Payment</th>
+                        <th class="py-2">Status</th>
+                        <th class="py-2">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700">
+                    <% orders.forEach((order,index)=>{ %>
+                    <tr class="border-b">
+                        <td class="py-2">
+                            <a class="text-blue-500" href="#"><%= order._id %></a>
+                        </td>
+                        <td class="py-2">
+                            <% if (order.products.length > 0) { %>
+                                <%= order.products[0].productId.name %>
+                                <% if (order.products.length > 1) { %>
+                                    <br />
+                                    <span class="text-gray-500 text-sm">+ <%= order.products.length - 1 %> other products</span>
+                                <% } %>
+                            <% } %>
+                        </td>                                                
+                        <td class="py-2"><%= new Date(order.createdAt).toLocaleString() %></td>
+                        <td class="py-2"><%= order.userId.username %>
+                            <br />
+                            <span class="text-gray-500 text-sm"><%= order.userId.email %></span>
+                        </td>
+                        <td class="py-2"><%= order.totalAmount %></td>
+                        <td class="py-2"><%= order.paymentMethod %></td>
+                        <td class="py-2">
+                            <select name="status" class="bg-orange-100 text-orange-600 px-2 py-1 rounded-lg" onchange="updateOrderStatus('<%= order._id %>', this.value)">
+                                <% orderStatuses.forEach((status, index) => { %>
+                                    <% if (status !== "Returned") { %>
+                                        <option value="<%= status %>" <%= order.status === status ? 'selected' : '' %>><%= status %></option>
+                                    <% } %>
+                                <% }) %>
+                            </select>
+                        </td>                        
+                        <td class="py-2"><button onclick="updateOrderStatus('<%= order._id %>', 'Cancelled')"><i class="fas fa-ban text-red-600"></i></button></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateOrderStatus(orderId, status) {
+        axios.patch(`/admin/updateOrderStatus/${orderId}`, { status: status })
+            .then(response => {
+                if (response.status === 200) {
+                    console.log("Order status updated successfully.");
+                }
+            })
+            .catch(error => {
+                console.error("Error updating order status:", error);
+                alert("Failed to update order status.");
+            });
+    }
+</script>

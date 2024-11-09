@@ -4,6 +4,7 @@ const userController = require('../controllers/userController');
 const productController = require('../controllers/productController')
 const addressController = require('../controllers/addressController')
 const cartController = require('../controllers/cartController');
+const orderController = require('../controllers/orderController')
 const passport = require('passport');
 
 user.use('/',express.static('public'));
@@ -35,5 +36,11 @@ user.get('/cart',userController.userAuth,cartController.getCart)
 user.post('/addToCart',cartController.addToCart)
 user.patch('/cart/update-quantity',cartController.updateQuantity)
 user.delete('/cart/removeProduct',cartController.removeProduct)
+
+user.get('/order/addressPage',userController.userAuth,orderController.getAddressPage)
+user.get('/order/dispatch',userController.userAuth,orderController.cfmPage)
+user.get('/order/payment',userController.userAuth,orderController.paymentPage)
+user.post('/order/creation',orderController.orderCreation)
+user.get('/orders',userController.userAuth,orderController.showOrdersUser)
 
 module.exports = user;

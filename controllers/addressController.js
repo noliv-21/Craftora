@@ -22,7 +22,7 @@ exports.addAddress = async (req,res)=>{
         const address = req.body;
         const newAddress = new Addresses({
             name:address.name, streetAddress:address.streetAddress, city:address.city,
-            state:address.state, country:address.country, pincode:address.pincode, phone:address.pincode,
+            state:address.state, country:address.country, pincode:address.pincode, phone:address.phone,
             userId:req.session.user._id
         })
         await newAddress.save()

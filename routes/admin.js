@@ -6,7 +6,8 @@ const uploads=multer({storage:storage});
 const productController = require('../controllers/productController');
 const adminController = require('../controllers/adminController');
 const categoryController = require('../controllers/categoryController');
-const userController = require('../controllers/userController')
+const userController = require('../controllers/userController');
+const orderController = require('../controllers/orderController')
 
 admin.use('/',express.static('public'));
 
@@ -37,12 +38,10 @@ admin.get('/editProduct',productController.editPage)
 admin.post('/editProduct',uploads.array('images',10),productController.edittingProduct)
 admin.get('/viewProduct',productController.productDetails)
 
+admin.get('/orders',orderController.getOrdersAdmin)
+admin.post('/cancelOrder/:orderID',orderController.cancelOrder)
+admin.patch('/updateOrderStatus/:orderId',orderController.updateStatus)
+
 // admin.post('/products/add-image',productController.upload.single('image'))
-
-// admin.post('/update',adminController.update_details)
-
-// admin.post('/delete-user',adminController.deleting)
-
-// admin.post('/create_verify',adminController.create_verify)
 
 module.exports = admin;
