@@ -116,7 +116,7 @@
                                                         <label class="block text-gray-600">Base Price</label>
                                                         <div class="flex items-center mt-2">
                                                             <span
-                                                                class="px-3 py-2 bg-gray-200 border border-r-0 rounded-l-md">$</span>
+                                                                class="px-3 py-2 bg-gray-200 border border-r-0 rounded-l-md">₹</span>
                                                             <input type="number" name="price"
                                                                 class="w-full p-2 border rounded-r-md"
                                                                 placeholder="Type base price here...">
@@ -126,7 +126,7 @@
                                                         <label class="block text-gray-600">Maximum Retail Price</label>
                                                         <div class="flex items-center mt-2">
                                                             <span
-                                                                class="px-3 py-2 bg-gray-200 border border-r-0 rounded-l-md">$</span>
+                                                                class="px-3 py-2 bg-gray-200 border border-r-0 rounded-l-md">₹</span>
                                                             <input type="number" name="mrp"
                                                                 class="w-full p-2 border rounded-r-md"
                                                                 placeholder="Type maximum retail price here...">
@@ -205,7 +205,7 @@
                                 <div class="mt-4">
                                     <label for="status" class="block text-gray-600">Product Status</label>
                                     <select name="status" class="w-full mt-2 p-2 border rounded-md">
-                                        <% statuses.forEach(status=> { %>
+                                        <% stockSelection.forEach(status=> { %>
                                             <option value="<%= status %>" <%=status==='Available' ? 'selected' : '' %>>
                                                 <%= status %>
                                             </option>

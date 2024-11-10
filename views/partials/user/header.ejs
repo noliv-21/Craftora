@@ -3,9 +3,19 @@
     <header class="navHeader w-full p-4 flex justify-between items-center text-white">
         <div><img class="w-[120px] h-auto" src="/images/Craftora_logo.png" alt="brand icon"></div>
         <div class="flex items-center space-x-4">
-            <input class="px-4 py-2 text-orange-500 rounded-full" placeholder="Search" type="search" />
-            <button class="bg-white text-pink-500 px-3 py-1 rounded-full"><i class="fas fa-search"></i></button>
-        </div>
+            <form id="searchForm" class="flex items-center">
+                <input 
+                    name="search" 
+                    id="searchInput"
+                    class="px-4 py-2 text-orange-500 rounded-full" 
+                    placeholder="Search for products..." 
+                    type="search" oninput="searchProducts()"
+                />
+                <button type="submit" class="bg-white text-pink-500 px-3 py-1 rounded-full">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>               
         <div class="flex space-x-4">
             <% if (!session || typeof session==='undefined' || session === 'Guest' ){ %>
                 <a class="hover:underline" href="/user/login"><button class="glass_btn text-white-500 px-2 py-1 rounded-full">Sign Up</button></a>

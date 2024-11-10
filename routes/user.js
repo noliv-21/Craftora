@@ -20,7 +20,8 @@ user.post('/otp_resend',userController.resend_otp)
 user.get('/home', userController.home)
 user.get('/logout', userController.logout)
 
-user.get('/products',productController.showProducts)
+user.get('/products',productController.showProductsPage)
+user.get('/api/products', productController.fetchProducts);
 user.get('/product/:productId',productController.productDetailsUser)
 
 user.get('/profile',userController.userAuth,userController.dashboard)

@@ -2,6 +2,7 @@ const Carts = require('../models/cartSchema')
 const Orders = require('../models/orderSchema')
 const Addresses = require('../models/addressSchema')
 const Users = require('../models/userSchema')
+const Products = require('../models/productSchema')
 
 exports.getAddressPage = async (req,res)=>{
     try {
@@ -76,9 +77,18 @@ exports.orderCreation = async (req,res)=>{
 
         await newOrder.save();
 
+        for (const item of cart.products) {
+            const productId = item.productId._id;
+            const quantityOrdered = item.quantity;
+
+            await Products.findByIdAndUpdate(productId, {
+                $inc: { inventory: -quantityOrdered }
+            });
+        }
+
         await Carts.deleteOne({ userId });
         // await Carts.findOneAndUpdate({ userId }, { $set: { products: [] }, totalAmount: 0 });
-
+        
         res.status(200).json({ message: "Order placed successfully" });
     } catch (error) {
         console.error("Error creating order:", error);

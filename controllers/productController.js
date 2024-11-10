@@ -13,7 +13,7 @@ exports.products = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
         const skip = (page - 1) * limit;
-        const products = await Products.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('category', 'name')
+        const products = await Products.find({name: { $regex: search, $options: 'i' }}).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('category', 'name')
         const totalProducts = await Products.countDocuments();
         const totalPages = Math.ceil(totalProducts / limit)
         const reversedProduct = products.reverse();
@@ -31,6 +31,54 @@ exports.products = async (req, res) => {
     }
 }
 
+// exports.products = async (req, res) => {
+//     try {
+//         const search = req.query.search || '';
+//         const page = parseInt(req.query.page) || 1;
+//         const limit = 5;
+//         const skip = (page - 1) * limit;
+
+//         // Fetch products with pagination and search
+//         const products = await Products.find({
+//             name: { $regex: search, $options: 'i' }
+//         })
+//         .sort({ createdAt: -1 })
+//         .skip(skip)
+//         .limit(limit)
+//         .populate('category', 'name');
+
+//         const totalProducts = await Products.countDocuments({
+//             name: { $regex: search, $options: 'i' }
+//         });
+//         const totalPages = Math.ceil(totalProducts / limit);
+//         const reversedProduct = products.reverse();
+
+//         // Send JSON response for AJAX requests
+//         if (req.headers['x-requested-with'] === 'XMLHttpRequest') {
+//             return res.json({ products: reversedProduct, page, totalPages, totalProducts });
+//         }
+
+//         // Regular rendering for non-AJAX requests
+//         const errorMessage = req.session.errorMessage;
+//         const successMessage = req.session.successMessage;
+//         req.session.errorMessage = null;
+//         req.session.successMessage = null;
+
+//         res.render('admin/product folder/product_list', {
+//             products: reversedProduct, 
+//             errorMessage, 
+//             successMessage, 
+//             page, 
+//             totalPages, 
+//             limit, 
+//             totalProducts
+//         });
+//     } catch (error) {
+//         console.error("Error fetching products:", error);
+//         res.status(500).json({ message: "Unable to retrieve products." });
+//     }
+// };
+
 exports.addProductPage = async (req, res) => {
     try {
         //error message handling
@@ -44,12 +92,12 @@ exports.addProductPage = async (req, res) => {
         const categories = await Categories.find({}, { name: 1 })
         // const categories = (await Categories.find({}, { name: 1, _id: 0 })).map(category => category.name);
         const offerTypes = Products.schema.path('offerType').enumValues;
-        const statuses = Products.schema.path('status').enumValues;
+        const stockSelection = Products.schema.path('isAvailable').enumValues;
         res.render('admin/product folder/add_product', {
-            successMessage, errorMessage, offerTypes, statuses, categories
+            successMessage, errorMessage, offerTypes, stockSelection, categories
         })
     } catch (error) {
-
+        console.error(error)
     }
 }
 
@@ -286,23 +334,64 @@ exports.productDetailsUser = async (req, res) => {
     }
 }
 
-exports.showProducts = async (req,res)=>{
+// exports.showProducts = async (req,res)=>{
+//     try {
+//         let search = req.query.search || '';
+//         const session = req.session.user;
+//         const title = "All products";
+//         // Pagination
+//         const page = parseInt(req.query.page) || 1;
+//         const limit = 8;
+//         const skip = (page - 1) * limit;
+//         const products = await Products.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('category', 'name')
+//         const totalProducts = await Products.countDocuments();
+//         const totalPages = Math.ceil(totalProducts / limit)
+//         const reversedProduct = products.reverse();
+//         res.render('user/product folder/products',{
+//             title, session:session.username, limit, products, totalProducts, totalPages, page
+//         })
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
+
+// Product page
+exports.showProductsPage = (req, res) => {
+    const session = req.session.user || {}; // Check if a user is logged in
+    const title = "All Products";
+
+    res.render('user/product folder/products', {
+        title,
+        session: session.username || null, // Use null if session or username is undefined
+    });
+};
+
+// Dynamic product update
+exports.fetchProducts = async (req, res) => {
     try {
         let search = req.query.search || '';
-        const session = req.session.user;
-        const title = "All products";
-        // Pagination
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
         const skip = (page - 1) * limit;
-        const products = await Products.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('category', 'name')
-        const totalProducts = await Products.countDocuments();
-        const totalPages = Math.ceil(totalProducts / limit)
-        const reversedProduct = products.reverse();
-        res.render('user/product folder/products',{
-            title, session:session.username, limit, products, totalProducts, totalPages, page
-        })
+        
+        const products = await Products.find({ name: { $regex: search, $options: 'i' } })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate('category', 'name');
+        
+        const totalProducts = await Products.countDocuments({ name: { $regex: search, $options: 'i' } });
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        res.json({
+            products: products,
+            totalProducts: totalProducts,
+            totalPages: totalPages,
+            page: page,
+            limit: limit // Sending limit for client-side calculation of displayed range
+        });
     } catch (error) {
-        console.log(error)
+        console.log("Error in fetchProducts:", error);
+        res.status(500).json({ message: "An error occurred while loading the products." });
     }
-}
+};
