@@ -5,134 +5,136 @@
 </style>
 <!-- Header -->
 <%-include('../../partials/user/header')%>
-<!-- Breadcrumb and Sort -->
-<div class="bg-orange-100 p-2 flex justify-between items-center">
-    <div class="text-gray-600">
-        <a href="/user/home">Home</a> &gt; <a href="/user/products">Products</a>
-    </div>
-    <div>
-        <select class="p-2 border border-gray-300 rounded">
-            <option>
-                Sort by: Recommended
-            </option>
-        </select>
-    </div>
-</div>
-<!-- Main Content -->
-<div class="flex">
-    <!-- Sidebar -->
-    <aside class="w-1/6 bg-yellow-100 p-4">
-        <h2 class="text-xl font-bold mb-4">
-            Filters
-        </h2>
-        <div class="mb-4">
-            <h3 class="font-bold mb-2">
-                Categories
-            </h3>
-            <ul class="space-y-1">
-                <li>
-                    Halloween candles
-                </li>
-                <li>
-                    Autumn candles
-                </li>
-                <li>
-                    Mushroom candles
-                </li>
-                <li>
-                    Fig tree candles
-                </li>
-                <li>
-                    Pine cone candles
-                </li>
-                <li>
-                    Ghost candles
-                </li>
-                <li>
-                    Designed candles
-                </li>
-            </ul>
-        </div>
-        <div class="mb-4">
-            <h3 class="font-bold mb-2">
-                Price
-            </h3>
-            <input class="w-full" max="399" min="50" type="range" />
-            <div class="text-center">
-                $50 - $399+
+    <!-- Main Content -->
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-1/6 bg-yellow-100 p-4">
+            <h2 class="text-xl font-bold mb-4">
+                Filters
+            </h2>
+            <div class="mb-4">
+                <h3 class="font-bold mb-2">
+                    Categories
+                </h3>
+                <ul class="space-y-1">
+                    <li>
+                        Halloween candles
+                    </li>
+                    <li>
+                        Autumn candles
+                    </li>
+                    <li>
+                        Mushroom candles
+                    </li>
+                    <li>
+                        Fig tree candles
+                    </li>
+                    <li>
+                        Pine cone candles
+                    </li>
+                    <li>
+                        Ghost candles
+                    </li>
+                    <li>
+                        Designed candles
+                    </li>
+                </ul>
+            </div>
+            <div class="mb-4">
+                <h3 class="font-bold mb-2">
+                    Price
+                </h3>
+                <input class="w-full" max="399" min="50" type="range" />
+                <div class="text-center">
+                    $50 - $399+
+                </div>
+            </div>
+            <div class="mb-4">
+                <h3 class="font-bold mb-2">
+                    Colours
+                </h3>
+                <ul class="space-y-1">
+                    <li>
+                        Orange
+                    </li>
+                    <li>
+                        Green
+                    </li>
+                    <li>
+                        Blue
+                    </li>
+                    <li>
+                        Red
+                    </li>
+                    <li>
+                        White
+                    </li>
+                    <li>
+                        Pink
+                    </li>
+                    <li>
+                        Brown
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-bold mb-2">
+                    Offers
+                </h3>
+                <ul class="space-y-1">
+                    <li>
+                        10% and above
+                    </li>
+                    <li>
+                        20% and above
+                    </li>
+                    <li>
+                        30% and above
+                    </li>
+                    <li>
+                        40% and above
+                    </li>
+                    <li>
+                        50% and above
+                    </li>
+                    <li>
+                        60% and above
+                    </li>
+                    <li>
+                        70% and above
+                    </li>
+                    <li>
+                        80% and above
+                    </li>
+                </ul>
+            </div>
+        </aside>
+        <div class="flex flex-col w-5/6">
+            <!-- Breadcrumb and Sort -->
+            <div class="bg-orange-100 p-2 flex justify-between items-center">
+                <div class="text-gray-600">
+                    <a href="/user/home">Home</a> &gt; <a href="/user/products">Products</a>
+                </div>
+                <div>
+                    <select class="p-2 border border-gray-300 rounded">
+                        <option>
+                            Sort by: Recommended
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <!-- Products -->
+            <div class="flex flex-col px-2 w-full justify-between">
+                <div id="productsContainer" class="grid grid-cols-2 gap-4 md:grid-cols-4 mt-4"></div>
+                <div class="flex justify-between items-center p-4">
+                    <div id="rangeInfo" class="text-gray-500"></div>
+                    <div id="paginationContainer" class="flex items-center space-x-2"></div>
+                </div>
             </div>
         </div>
-        <div class="mb-4">
-            <h3 class="font-bold mb-2">
-                Colours
-            </h3>
-            <ul class="space-y-1">
-                <li>
-                    Orange
-                </li>
-                <li>
-                    Green
-                </li>
-                <li>
-                    Blue
-                </li>
-                <li>
-                    Red
-                </li>
-                <li>
-                    White
-                </li>
-                <li>
-                    Pink
-                </li>
-                <li>
-                    Brown
-                </li>
-            </ul>
-        </div>
-        <div>
-            <h3 class="font-bold mb-2">
-                Offers
-            </h3>
-            <ul class="space-y-1">
-                <li>
-                    10% and above
-                </li>
-                <li>
-                    20% and above
-                </li>
-                <li>
-                    30% and above
-                </li>
-                <li>
-                    40% and above
-                </li>
-                <li>
-                    50% and above
-                </li>
-                <li>
-                    60% and above
-                </li>
-                <li>
-                    70% and above
-                </li>
-                <li>
-                    80% and above
-                </li>
-            </ul>
-        </div>
-    </aside>
-    <!-- Products -->
-    <div class="flex flex-col w-5/6 justify-between">
-        <div id="productsContainer" class="grid grid-cols-2 gap-4 md:grid-cols-4 mt-4"></div>        
-        <div class="flex justify-between items-center p-4">
-            <div id="rangeInfo" class="text-gray-500"></div>
-            <div id="paginationContainer" class="flex items-center space-x-2"></div>
-        </div>
     </div>
-</div>
-<!-- Footer -->
-<%-include('../../partials/user/footer')%>
+    <!-- Footer -->
+    <%-include('../../partials/user/footer')%>
 
 <script>
     let currentPage = 1;
