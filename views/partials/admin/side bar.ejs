@@ -7,55 +7,37 @@
     <nav class="flex-1">
         <ul>
             <li class="mb-4">
-                <a class="flex items-center text-gray-500 hover:bg-gray-200 rounded-md" href="/admin/home">
-                    <i class="fas fa-tachometer-alt mr-3"></i>
-                    Dashboard
-                </a>
+                <a class="flex items-center rounded-md p-2 <%= activeTab === 'dashboard' ? 'bg-blue-500 text-white' : 'text-gray-500 hover:bg-gray-200' %>" href="/admin/home">
+                    <i class="fas fa-tachometer-alt mr-3"></i>Dashboard</a>
             </li>
             <li class="mb-4">
-                <a class="flex items-center text-gray-500 hover:bg-gray-200 rounded-md" href="/admin/products">
-                    <i class="fas fa-box mr-3"></i>
-                    Product
-                </a>
+                <a class="flex items-center rounded-md p-2 <%= activeTab === 'products' ? 'bg-blue-500 text-white' : 'text-gray-500 hover:bg-gray-200' %>" href="/admin/products">
+                    <i class="fas fa-box mr-3"></i>Products</a>
             </li>
             <li class="mb-4">
-                <a class="flex items-center text-gray-600 hover:bg-gray-200 rounded-md" href="/admin/categories">
-                    <i class="fas fa-list mr-3"></i>
-                    Categories
-                </a>
+                <a class="flex items-center rounded-md p-2 <%= activeTab === 'categories' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-200' %>" href="/admin/categories">
+                    <i class="fas fa-list mr-3"></i>Categories</a>
             </li>
             <li class="mb-4">
-                <a class="flex items-center text-gray-600 hover:bg-gray-200 rounded-md" href="/admin/orders">
-                    <i class="fas fa-tags mr-3"></i>
-                    Orders
-                </a>
+                <a class="flex items-center rounded-md p-2 <%= activeTab === 'orders' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-200' %>" href="/admin/orders">
+                    <i class="fas fa-tags mr-3"></i>Orders</a>
             </li>
             <li class="mb-4">
-                <a class="flex items-center text-gray-600 hover:bg-gray-200 rounded-md" href="/admin/users">
-                    <i class="fas fa-users mr-3"></i>
-                    Customers
-                </a>
+                <a class="flex items-center rounded-md p-2 <%= activeTab === 'customers' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-200' %>" href="/admin/users">
+                    <i class="fas fa-users mr-3"></i>Customers</a>
             </li>
             <li class="mb-4">
-                <a class="flex items-center text-gray-600 hover:bg-gray-200 rounded-md" href="#">
-                    <i class="fas fa-ticket-alt mr-3"></i>
-                    Coupons
-                </a>
+                <a class="flex items-center rounded-md p-2 <%= activeTab === 'coupons' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-200' %>" href="/admin/coupons">
+                    <i class="fas fa-ticket-alt mr-3"></i>Coupons</a>
             </li>
         </ul>
     </nav>
     <div class="mt-auto">
-        <a class="flex items-center text-gray-600 mb-4 hover:bg-gray-200 rounded-md" href="#">
-            <i class="fas fa-cog mr-3"></i>
-            Settings
-        </a>
-        <a class="flex items-center text-gray-600 mb-4 hover:bg-gray-200 rounded-md" href="#">
-            <i class="fas fa-headset mr-3"></i>
-            Support
-        </a>
-        <a class="flex items-center text-gray-600 mb-4 hover:bg-gray-200 rounded-md" href="/admin/logout">
-            <i class="fas fa-sign-out-alt mr-3"></i>
-            Logout
-        </a>
+        <a class="flex items-center rounded-md p-2 <%= activeTab === 'settings' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-200' %>" href="/admin/settings">
+            <i class="fas fa-cog mr-3"></i>Settings</a>
+        <a class="flex items-center rounded-md p-2 <%= activeTab === 'support' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-200' %>" href="/admin/support">
+            <i class="fas fa-headset mr-3"></i>Support</a>
+        <a class="flex items-center rounded-md p-2 text-gray-600 hover:bg-gray-200" href="/admin/logout">
+            <i class="fas fa-sign-out-alt mr-3"></i>Logout</a>
     </div>
 </div>

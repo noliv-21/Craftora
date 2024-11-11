@@ -64,3 +64,15 @@ exports.editAddress = async (req,res)=>{
         res.status(500).json({ error: 'An error occurred while editing the address.' });
     }
 }
+
+exports.getAddressPage = async (req,res)=>{
+    try {
+        const userId = req.session.user._id;
+        const addresses = await Addresses.find({userId})
+        res.render('user/order/address',{
+            addresses,activeTab:'addresses'
+        })
+    } catch (error) {
+        console.error(error)
+    }
+}

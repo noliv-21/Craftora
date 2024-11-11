@@ -249,7 +249,7 @@ exports.resend_otp = async (req, res) => {
 exports.users = async (req, res) => {
     try {
         let search = req.query.search || '';
-
+        const title = 'Customers'
         // Pagination
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
@@ -259,13 +259,12 @@ exports.users = async (req, res) => {
         const successMessage = req.session.successMessage
         req.session.errorMessage = null
         req.session.successMessage = null
-        const users = await Users.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit)
+        const users = await Users.find({}).sort({ createdAt: 1 }).skip(skip).limit(limit)
         const totalUsers = await Users.countDocuments();
         const totalPages = Math.ceil(totalUsers / limit)
-        const reversedUser = users.reverse();
 
         res.render('admin/user folder/users', {
-            title, users: reversedUser, errorMessage, successMessage, page, limit, totalPages, totalUsers
+            title, users, errorMessage, successMessage, page, limit, totalPages, totalUsers, activeTab: "customers"
         });
     } catch (err) {
         console.error(err);

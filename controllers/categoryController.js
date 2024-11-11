@@ -8,17 +8,16 @@ exports.categories = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
         const skip = (page - 1) * limit;
-        const categories = await Categories.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit)
+        const categories = await Categories.find({}).sort({ createdAt: 1 }).skip(skip).limit(limit)
         const totalCategories = await Categories.countDocuments();
         const totalPages = Math.ceil(totalCategories / limit)
-        const reversedCategory = categories.reverse();
 
         const errorMessage = req.session.errorMessage
         const successMessage = req.session.successMessage
         req.session.errorMessage = null
         req.session.successMessage = null
         res.render('admin/category folder/category_list', {
-            categories: reversedCategory, errorMessage, successMessage, page, totalPages, limit, totalCategories
+            categories, errorMessage, successMessage, page, totalPages, limit, totalCategories, activeTab: "categories"
         })
     } catch (error) {
         console.error(error)
@@ -31,7 +30,7 @@ exports.addCategory = (req, res) => {
     req.session.errorMessage = null
     req.session.successMessage = null
     res.render('admin/category folder/add_category', {
-        successMessage, errorMessage
+        successMessage, errorMessage, activeTab: "categories"
     })
 }
 
@@ -88,7 +87,7 @@ exports.editPage = async (req, res) => {
     req.session.errorMessage = null
     req.session.successMessage = null
     res.render('admin/category folder/edit_category', {
-        name, description, isListed, successMessage, errorMessage
+        name, description, isListed, successMessage, errorMessage, activeTab: "categories"
     })
 }
 

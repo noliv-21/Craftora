@@ -40,7 +40,7 @@ exports.login_verify = async (req, res) => {
 
 exports.home = (req, res) => {
     res.render('admin/dashboard', {
-        isSelected: "dashboard"
+        activeTab: "dashboard"
     });
 };
 
@@ -93,38 +93,5 @@ exports.deleting = async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Couldn't delete from server" });
-    }
-}
-
-exports.create_verify = async (req, res) => {
-    //      Create new user
-    console.log("Request body", req.body);
-    try {
-        const usernamechk = await users.findOne({ username: req.body.username });
-        // const existchk = users.some((user) => user.username === req.body.username);
-        if (!usernamechk) {
-
-            // Check if the required fields are present
-            if (!req.body.username || !req.body.password) {
-                return res.status(400).json({ success: false, message: 'Missing required fields' });
-            }
-
-            const newuser = new users({
-                username: req.body.username,
-                password: await bcrypt.hash(req.body.password, 10),  // Hashing password for security
-                email: req.body.email || undefined,
-                gender: req.body.gender || undefined
-            })
-            await newuser.save();
-            console.log("User created successfully");
-            res.redirect('/admin/home?msg=User%20Created%20Successfully');
-            // Send success response
-            // res.status(200).json({ success: true, message: 'User Created Successfully' });
-        } else {
-            res.redirect('/admin/home?msg=Username%20Exists');
-        }
-    } catch (err) {
-        console.error("Error during user creation:", err);
-        res.status(500).json({ success: false, message: 'Error saving user' });
     }
 }

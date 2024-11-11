@@ -4,18 +4,6 @@ const Addresses = require('../models/addressSchema')
 const Users = require('../models/userSchema')
 const Products = require('../models/productSchema')
 
-exports.getAddressPage = async (req,res)=>{
-    try {
-        const userId = req.session.user._id;
-        const addresses = await Addresses.find({userId})
-        res.render('user/order/address',{
-            addresses,activeTab:'addresses'
-        })
-    } catch (error) {
-        console.error(error)
-    }
-}
-
 exports.cfmPage = async (req, res) => {
     const userId = req.session.user._id
     const addressId = req.query.address
@@ -125,9 +113,7 @@ exports.getOrdersAdmin = async (req,res)=>{
             .sort({ createdAt: -1 })
 
         res.render('admin/order folder/orders', {
-            orders,
-            activeTab: 'orders',
-            orderStatuses
+            orders, activeTab: 'orders', orderStatuses
         });
     } catch (error) {
         console.error("Error fetching orders:", error);

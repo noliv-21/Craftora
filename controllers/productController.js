@@ -13,23 +13,43 @@ exports.products = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
         const skip = (page - 1) * limit;
-        const products = await Products.find({name: { $regex: search, $options: 'i' }}).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('category', 'name')
-        const totalProducts = await Products.countDocuments();
-        const totalPages = Math.ceil(totalProducts / limit)
-        const reversedProduct = products.reverse();
 
-        // const products = await Products.find({})
-        const errorMessage = req.session.errorMessage
-        const successMessage = req.session.successMessage
-        req.session.errorMessage = null
-        req.session.successMessage = null
-        res.render('admin/product folder/product_list', {
-            products: reversedProduct, errorMessage, successMessage, page, totalPages, limit, totalProducts
+        // Fetch products with search and pagination
+        const products = await Products.find({
+            name: { $regex: search, $options: 'i' }
         })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('category', 'name');
+
+        // Fetch total count of products based on search term
+        const totalProducts = await Products.countDocuments({
+            name: { $regex: search, $options: 'i' }
+        });
+
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        const errorMessage = req.session.errorMessage;
+        const successMessage = req.session.successMessage;
+        req.session.errorMessage = null;
+        req.session.successMessage = null;
+
+        res.render('admin/product folder/product_list', {
+            products,
+            errorMessage,
+            successMessage,
+            page,
+            totalPages,
+            limit,
+            totalProducts,
+            activeTab: "products"
+        });
     } catch (error) {
-        console.error(error)
+        console.error(error);
     }
-}
+};
+
 
 // exports.products = async (req, res) => {
 //     try {
@@ -87,14 +107,13 @@ exports.addProductPage = async (req, res) => {
         req.session.errorMessage = null
         req.session.successMessage = null
 
-
         //product data handling
         const categories = await Categories.find({}, { name: 1 })
         // const categories = (await Categories.find({}, { name: 1, _id: 0 })).map(category => category.name);
         const offerTypes = Products.schema.path('offerType').enumValues;
         const stockSelection = Products.schema.path('isAvailable').enumValues;
         res.render('admin/product folder/add_product', {
-            successMessage, errorMessage, offerTypes, stockSelection, categories
+            successMessage, errorMessage, offerTypes, stockSelection, categories, activeTab: "products"
         })
     } catch (error) {
         console.error(error)
@@ -185,7 +204,7 @@ exports.editPage = async (req, res) => {
     const offerTypes = Products.schema.path('offerType').enumValues;
     const isAvailable = Products.schema.path('isAvailable').enumValues;
     res.render('admin/product folder/edit_product', {
-        productDetails, successMessage, errorMessage, offerTypes, isAvailable, categories
+        productDetails, successMessage, errorMessage, offerTypes, isAvailable, categories, activeTab: "products"
     })
 }
 
@@ -242,24 +261,6 @@ exports.edittingProduct = async (req, res) => {
             }
         }
 
-        // if (removedImages) {
-        //     const imagesToRemove = Array.isArray(removedImages) ? removedImages : [removedImages];
-        //     imagesToRemove.forEach((img) => {
-        //         const index = product.image.indexOf(img);
-        //         if (index > -1) {
-        //             product.image.splice(index, 1); // Remove from images array
-        //             // Delete the file from the filesystem
-        //             fs.unlink(path.join('public', 'uploads', 'product-images', img), (err) => {
-        //                 if (err) {
-        //                     console.error(`Error deleting image ${img}:`, err);
-        //                 } else {
-        //                     console.log(`Deleted image: ${img}`);
-        //                 }
-        //             });
-        //         }
-        //     });
-        // }
-
         if (removedImages) {
             const imagesToRemove = Array.isArray(removedImages) ? removedImages : [removedImages];
             for (const img of imagesToRemove) {
@@ -310,7 +311,7 @@ exports.productDetails = async (req, res) => {
     req.session.errorMessage = null
     req.session.successMessage = null
     res.render('admin/product folder/product_details', {
-        productDetails, errorMessage, successMessage
+        productDetails, errorMessage, successMessage, activeTab: "products"
     })
 }
 
@@ -333,27 +334,6 @@ exports.productDetailsUser = async (req, res) => {
         console.error(error)
     }
 }
-
-// exports.showProducts = async (req,res)=>{
-//     try {
-//         let search = req.query.search || '';
-//         const session = req.session.user;
-//         const title = "All products";
-//         // Pagination
-//         const page = parseInt(req.query.page) || 1;
-//         const limit = 8;
-//         const skip = (page - 1) * limit;
-//         const products = await Products.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('category', 'name')
-//         const totalProducts = await Products.countDocuments();
-//         const totalPages = Math.ceil(totalProducts / limit)
-//         const reversedProduct = products.reverse();
-//         res.render('user/product folder/products',{
-//             title, session:session.username, limit, products, totalProducts, totalPages, page
-//         })
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
 
 // Product page
 exports.showProductsPage = (req, res) => {
