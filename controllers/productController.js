@@ -111,9 +111,8 @@ exports.addProductPage = async (req, res) => {
         const categories = await Categories.find({}, { name: 1 })
         // const categories = (await Categories.find({}, { name: 1, _id: 0 })).map(category => category.name);
         const offerTypes = Products.schema.path('offerType').enumValues;
-        const stockSelection = Products.schema.path('isAvailable').enumValues;
         res.render('admin/product folder/add_product', {
-            successMessage, errorMessage, offerTypes, stockSelection, categories, activeTab: "products"
+            successMessage, errorMessage, offerTypes, categories, activeTab: "products"
         })
     } catch (error) {
         console.error(error)
@@ -121,34 +120,45 @@ exports.addProductPage = async (req, res) => {
 }
 
 exports.addProduct = async (req, res) => {
-    const { name, description, price, mrp, offerType, offer, maxDiscount, category, stock, tags, status, isListed } = req.body;
+    const { name, description, price, mrp, offerType, percentage, maxDiscount, fixedAmount, category, stock, tags, status, isListed } = req.body;
     try {
         const tagsArray = tags ? tags.split(',').map(tag => tag.trim()) : [];
         const productChk = await Products.findOne({ name: new RegExp(`^${name}$`, 'i') })
         if (!productChk) {
-            const images = [];
-            if (req.files && req.files.length > 0) {
-                for (let i = 0; i < req.files.length; i++) {
-                    const originalImagePath = req.files[i].path;
-                    const resizedImagePath = path.join('public', 'uploads', 'product-images', req.files[i].filename);
-                    await sharp(originalImagePath).resize({ width: 440, height: 440 }).toFile(resizedImagePath);
-                    images.push(req.files[i].filename);
+            const image = [];
+            async function saveBase64Image(base64String, filename) {
+                const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
+                const buffer = Buffer.from(base64Data, 'base64');
+                await fs.writeFile(`public/uploads/product-images/${filename}`, buffer);
+            }
+            const { images } = req.body;
+    
+            try {
+                if (images && Array.isArray(images)) {
+                    for (const [index, base64Image] of images.entries()) {
+                        const filename = `product_${Date.now()}_${index}.png`;
+                        await saveBase64Image(base64Image, filename);
+                        image.push(filename);
+                    }
                 }
+            } catch (saveError) {
+                console.error('Error saving base64 image:', saveError);
+                req.session.errorMessage = "Error while saving base64 images";
+                return res.redirect('/admin/products');
             }
 
             const newProduct = new Products({
-                name, description, offerType, offer, isListed, status, maxDiscount, mrp, category,
+                name, description, offerType, percentage, isListed, status, maxDiscount, mrp, category, fixedAmount,
                 tags: tagsArray,
                 sellingPrice: price,
                 inventory: stock,
-                image: images,
-                createdAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                image: image
             })
             await newProduct.save()
             console.log("Product added successfully");
             req.session.successMessage = "Product added successfully"
-            res.status(200).json("successful").redirect('/admin/products')
-            // res.redirect('/admin/products')
+            // res.status(200).json("successful")
+            res.redirect('/admin/products')
         } else {
             console.log('Product with same name exists');
             req.session.errorMessage = 'A Product with same name exists'
@@ -194,10 +204,10 @@ exports.deleteProduct = async (req, res) => {
 }
 
 exports.editPage = async (req, res) => {
-    const catId = req.query.id;
+    const productId = req.query.id;
     const errorMessage = req.session.errorMessage
     const successMessage = req.session.successMessage
-    const productDetails = await Products.findById(catId)
+    const productDetails = await Products.findById(productId).populate('category')
     req.session.errorMessage = null
     req.session.successMessage = null
     const categories = await Categories.find({}, { name: 1 })
@@ -209,11 +219,9 @@ exports.editPage = async (req, res) => {
 }
 
 exports.edittingProduct = async (req, res) => {
-    const { originalName, name, description, price, mrp, offerType, offer, maxDiscount, category, stock, tags, isAvailable, isListed, removedImages } = req.body;
+    const { originalName, name, description, price, mrp, offerType, offer, maxDiscount, fixedAmount, category, stock, tags, isAvailable, isListed, removedImages } = req.body;
     const tagsArray = tags ? tags.split(',').map(tag => tag.trim()) : [];
-    // console.log(req.body.images);
     try {
-        // Fetch the product first
         const product = await Products.findOne({ name: originalName.trim() });
         if (!product) {
             req.session.errorMessage = "Product not found";
@@ -224,7 +232,7 @@ exports.edittingProduct = async (req, res) => {
             const buffer = Buffer.from(base64Data, 'base64');
             await fs.writeFile(`public/uploads/product-images/${filename}`, buffer);
         }
-        const { images } = req.body; // This should match the hidden input name
+        const { images } = req.body;
 
         try {
             if (images && Array.isArray(images)) {
@@ -238,27 +246,6 @@ exports.edittingProduct = async (req, res) => {
             console.error('Error saving base64 image:', saveError);
             req.session.errorMessage = "Error while saving base64 images";
             return res.redirect('/admin/products');
-        }
-        
-        
-        // Check for new file uploads
-        if (req.files && req.files.length > 0) {
-            for (let i = 0; i < req.files.length; i++) {
-                try {
-                    const originalImagePath = req.files[i].path;
-                    const resizedImagePath = path.join('public', 'uploads', 'product-images', req.files[i].filename);
-                    
-                    // Resize the image using sharp
-                    await sharp(originalImagePath).resize({ width: 440, height: 440 }).toFile(resizedImagePath);
-                    
-                    // Add the new image filename to the images array
-                    product.image.push(req.files[i].filename);
-                } catch (imgError) {
-                    console.error(`Error processing image ${req.files[i].filename}:`, imgError);
-                    req.session.errorMessage = "Error while processing one or more images";
-                    return res.redirect('/admin/products');
-                }
-            }
         }
 
         if (removedImages) {
@@ -287,7 +274,7 @@ exports.edittingProduct = async (req, res) => {
             }
         }
         await Products.findOneAndUpdate({ name: originalName }, {
-            name, description, offerType, offer, isListed, isAvailable, maxDiscount, mrp, category,
+            name, description, offerType, offer, isListed, isAvailable, maxDiscount, mrp, category, fixedAmount,
             tags: tagsArray,
             sellingPrice: price,
             inventory: stock,

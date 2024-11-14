@@ -21,9 +21,8 @@ app.set('views', __dirname + '/views'); // Your views folder
 app.set('layout', 'layouts/main'); // Your main layout file
 
 app.use(bodyParser.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static('public'));
 
 app.use(session({

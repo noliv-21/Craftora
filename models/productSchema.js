@@ -38,8 +38,12 @@ const productSchema = new mongoose.Schema({
     },
     maxDiscount: {
         type: Number,
-        required: false,
-        default: 30 // Maximum discount amount
+        required: false
+    },
+    fixedAmount:{
+        type:Number,
+        required:false,
+        default:0
     },
     image: {
         type: [String],
@@ -64,12 +68,8 @@ const productSchema = new mongoose.Schema({
         type:Number,
         required:false,
         default:0
-    },
-    createdAt:{
-        type:String,
-        required:true
     }
-})
+},{timestamps:true})
 
 const Product = mongoose.model("product", productSchema)
 module.exports = Product

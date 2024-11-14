@@ -86,21 +86,21 @@
                                         <td class="py-2">
                                             <%= product.category?.name %>
                                         </td>
-                                        <% if(product.isAvailable==="Available"){ %>
+                                        <% if(product.inventory>10){ %>
                                         <td class="py-2">
-                                            <div class="bg-green-100 text-green-600 px-2 py-1 rounded-md">
-                                                <%= product.inventory %> <%= product.isAvailable %>
+                                            <div class="inline-flex bg-green-100 text-green-600 px-2 py-1 rounded-md">
+                                                <%= product.inventory %> Available
                                             </div>
                                         </td>
-                                        <% } else if(product.isAvailable==="Out of Stock" || product.inventory<1){ %>
+                                        <% } else if(product.inventory<1){ %>
                                             <td class="py-2">
-                                                <div class="bg-red-100 text-red-600 px-2 py-1 rounded-md">
+                                                <div class="inline-flex bg-red-100 text-red-600 px-2 py-1 rounded-md">
                                                     Out of Stock
                                                 </div>
                                             </td>
                                         <% } else { %>
                                             <td class="py-2">
-                                                <div class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-md">
+                                                <div class="inline-flex bg-yellow-100 text-yellow-600 px-2 py-1 rounded-md">
                                                     Only <%= product.inventory %> Left
                                                 </div>
                                             </td>
@@ -117,7 +117,7 @@
                                             <td class="py-2">Not listed</td>
                                         <% } %>
                                         <td class="py-2">
-                                            <%= product.createdAt %>
+                                            <%= new Date(product.createdAt).toLocaleDateString() %>
                                         </td>
                                         <td class="py-2 flex space-x-2">
                                             <% if (product.isListed) { %>

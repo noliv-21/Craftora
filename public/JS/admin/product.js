@@ -18,7 +18,7 @@ setTimeout(() => {
 }, 3000);
 
 function confirmDelete(event, url) {
-    event.preventDefault(); // Prevent the default link action
+    event.preventDefault();
 
     Swal.fire({
         title: "Are you sure?",
