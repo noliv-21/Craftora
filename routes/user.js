@@ -11,6 +11,8 @@ user.use('/',express.static('public'));
 
 user.get('/login', userController.login);
 user.post('/login', userController.login_verify)
+user.get('/forgotPassword',userController.forgotPasswordPage)
+user.post('/sendOtp',userController.sendOtp)
 
 user.post('/signUp', userController.signup_verify)
 user.get('/otp', userController.otp)

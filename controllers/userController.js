@@ -62,6 +62,46 @@ exports.login_verify = async (req, res) => {
     }
 };
 
+exports.forgotPasswordPage = async (req,res)=>{
+    try {
+        res.render('user/forgotPassword')
+    } catch(err) {
+        console.error(err)
+    }
+}
+
+exports.sendOtp = async (req,res)=>{
+    try {
+        const {email} = req.body;
+        const userExists = await Users.findOne({email})
+        if(userExists){
+            // Generate OTP
+            const otp = generateOTP();
+            req.session.otp_cred = email;//Implement this later
+            req.session.userOtp = otp;
+            req.session.otpExpires = Date.now() + 10 * 60 * 1000; // 10-minute expiration
+            console.log(`Generated OTP: ${otp}`);
+
+            // Then send the OTP email asynchronously
+            sendVerificationEmail(email, otp)
+                .then(() => {
+                    console.log('OTP sent successfully');
+                    res.status(200).json("OTP send successfully")
+                })
+                .catch((error) => {
+                    console.error('Error sending OTP email:', error);
+                    res.status(500).json("Error sending OTP")
+                });
+        }else {
+            console.error("An account with this email doesn't exist")
+            res.status(404).json("An account with this email doesn't exist")
+        }
+    } catch (error) {
+        res.status(500).json("Server error")
+        console.error(error)
+    }
+}
+
 exports.home = async (req, res) => {
     try {
         const session = req.session.user
@@ -101,10 +141,8 @@ async function sendVerificationEmail(email, otp) {
             secure: false,
             requireTLS: true,
             auth: {
-                // user: "craftora.noliv@gmail.com",
-                // pass: "Craftora@123"
-                user: process.env.EMAIL_USER, // Use environment variable
-                pass: process.env.EMAIL_PASS  // Use environment variable
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
             },
             tls: {
                 rejectUnauthorized: false  // Accept self-signed certificates
@@ -202,7 +240,7 @@ exports.verify_otp = async (req, res) => {
         }
     } catch (err) {
         console.error("Error verifying OTP:", err);
-        res.status(500).send("Server error");
+        res.status(500).json("Server error");
     }
 };
 
@@ -232,12 +270,6 @@ exports.resend_otp = async (req, res) => {
             console.error('Error sending OTP email:', error);
             // Optionally, you could log this error or retry sending the email
         });
-
-    // // Send verification email
-    // const emailSent = /*await*/ sendVerificationEmail(email, otp);
-    // if (!emailSent) {
-    //     return res.json("email-error"); // Respond with error if email failed
-    // }
 
     // Increment the resend count
     req.session.resendCount += 1;
@@ -327,16 +359,26 @@ exports.saveUserDetails = async (req,res)=>{
 }
 
 exports.changePassword = async (req,res)=>{
-    console.log(req.body)
     const session = req.session.user;
-    try {
-        const user = await Users.findOne({ email:session.email });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+    if(session){
+        try {
+            const user = await Users.findOne({ email:session.email });
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            await Users.findOneAndUpdate({email:session.email},{password: await bcrypt.hash(req.body.password,10)})
+            res.status(200).json('Password edited succesfully')
+        } catch (error) {
+            console.log(error)
         }
-        await Users.findOneAndUpdate({email:session.email},{password: await bcrypt.hash(req.body.password,10)})
-        res.status(200).json('Password edited succesfully')
-    } catch (error) {
-        console.log(error)
+    }else{
+        const { email, newPass } = req.body;
+        try {
+            await Users.findOneAndUpdate({email},{password: await bcrypt.hash(newPass,10)})
+            res.status(200).json("Password changed successfully")
+        } catch (error) {
+            console.error(error)
+            res.status(500).json("Couldn't change the password")
+        }
     }
 }
