@@ -223,37 +223,60 @@ exports.signup_verify = async (req, res) => {
 };
 
 exports.verify_otp = async (req, res) => {
-    try {
-        // Check if OTP matches and hasn't expired
-        if (req.session.userOtp === req.body.otp && req.session.otpExpires > Date.now()) {
-            req.session.userOtp = null;
-            req.session.otpExpires = null;
-
-            // Verify user in database
-            await Users.findOneAndUpdate({ email: req.session.otp_cred }, { isVerified: true });
-            res.redirect('/user/login');
-        } else if (req.session.otpExpires < Date.now()) {
-            alert('OTP Expired')
-        } else {
-            alert('Invalid Otp')
-            res.status(400)
+    if(req.body.isForgot){
+        try {
+            if (req.session.userOtp === req.body.otp && req.session.otpExpires > Date.now()) {
+                req.session.userOtp = null;
+                req.session.otpExpires = null;
+                res.status(200).json("OTP verified")
+            } else if (req.session.otpExpires < Date.now()) {
+                res.status(400).json("Timer Expired")
+            } else {
+                alert('Invalid Otp')
+                res.status(400).json("Invalid OTP")
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json("Server error");
         }
-    } catch (err) {
-        console.error("Error verifying OTP:", err);
-        res.status(500).json("Server error");
+    }else {
+        try {
+            // Check if OTP matches and hasn't expired
+            if (req.session.userOtp === req.body.otp && req.session.otpExpires > Date.now()) {
+                req.session.userOtp = null;
+                req.session.otpExpires = null;
+    
+                // Verify user in database
+                await Users.findOneAndUpdate({ email: req.session.otp_cred }, { isVerified: true });
+                res.redirect('/user/login');
+            } else if (req.session.otpExpires < Date.now()) {
+                res.status(400).json("Timer Expired")
+            } else {
+                alert('Invalid Otp')
+                res.status(400).json("Invalid OTP")
+            }
+        } catch (err) {
+            console.error("Error verifying OTP:", err);
+            res.status(500).json("Server error");
+        }
     }
 };
 
 exports.resend_otp = async (req, res) => {
-    const email = req.session.otp_cred;
+    let email = req.session.otp_cred || req.body.email;
 
     // Initialize the count if not present
     if (!req.session.resendCount) {
         req.session.resendCount = 0;
     }
-    if (req.session.resendCount > 2) {
-        return res.status(429).json("Too many OTP resend attempts. Please try again later.")
+
+    // Check resend limit
+    if (req.session.resendCount >= 2) {
+        return res.status(405).json("Too many OTP resend attempts. Please try again later.");
     }
+
+    // Increment the resend count before sending OTP
+    req.session.resendCount += 1;
 
     // Generate OTP
     const otp = generateOTP();
@@ -261,22 +284,35 @@ exports.resend_otp = async (req, res) => {
     req.session.otpExpires = Date.now() + 10 * 60 * 1000; // 10-minute expiration
     console.log(`Generated OTP: ${otp}`);
 
-    // Then send the OTP email asynchronously
-    sendVerificationEmail(email, otp)
-        .then(() => {
+    try {
+        // Send the OTP email asynchronously
+        const emailSent = await sendVerificationEmail(email, otp);
+        if (emailSent) {
             console.log('OTP sent successfully');
-        })
-        .catch((error) => {
-            console.error('Error sending OTP email:', error);
-            // Optionally, you could log this error or retry sending the email
-        });
-
-    // Increment the resend count
-    req.session.resendCount += 1;
-
-    // Redirect to OTP page
-    res.redirect(`/user/otp`);
-}
+            return res.status(200).json({
+                message: "OTP sent successfully",
+                redirect: req.session.otp_cred ? '/user/otp' : null
+            });
+        } else {
+            throw new Error("Failed to send OTP");
+        }
+        // if (emailSent) {
+        //     console.log('OTP sent successfully');
+        //     if (req.session.otp_cred) {
+        //         return res.redirect(`/user/otp`);
+        //     } else {
+        //         return res.status(200).json("OTP sent successfully");
+        //     }
+        // } else {
+        //     // Respond with JSON directly if sending fails
+        //     console.error("Failed to send OTP");
+        //     return res.status(500).json("Failed to send OTP");
+        // }
+    } catch (error) {
+        console.error('Error sending OTP email:', error);
+        return res.status(500).json("Error sending Email");
+    }
+};
 
 exports.users = async (req, res) => {
     try {
