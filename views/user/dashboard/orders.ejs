@@ -1,3 +1,20 @@
+
+<style>
+    .toast_style{
+        width: fit-content;
+        max-width: 300px;
+        border-radius: 8px;
+        padding: 12px 20px;
+        border: 1px solid rgba(255, 0, 0, 0.3);
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 100;
+    }
+</style>
 <!-- Header -->
 <%- include('../../partials/user/header') %>
 
@@ -9,31 +26,106 @@
     <main class="p-6 w-4/5">
         <h2 class="text-2xl font-bold mb-4">Order History</h2>
         <div class="space-y-4">
-            <!-- Order Item 1 -->
-            <% orders.forEach((order,index)=>{ %>
-            <div class="flex items-center p-4 border rounded">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <% order.products.forEach((product,ind)=>{ %>
-                    <div class="my-3 mx-3 flex-col">
-                        <a href="/user/product/<%= product.productId._id %>"><img alt="Container Candles" class="w-16 h-16 rounded mr-4" height="100" width="100" 
-                        src="<%= product.productId.image && product.productId.image.length ? '/uploads/product-images/'+product.productId.image[0] : '/images/no_productImage.png' %>"/>
-                        <h3 class="text-xl font-bold"><%= product.productId.name %></h3></a>
+        <!-- Order Items -->
+        <% orders.forEach((order, index) => { %>
+            <div class="flex justify-between items-center p-4 border rounded mb-4">
+                <div class="flex items-center">
+                    <% if (order.products.length > 0) { %>
+                        <!-- Product Image and Name -->
+                        <a href="/user/product/<%= order.products[0].productId._id %>">
+                            <img alt="Product Image" class="w-16 h-16 rounded mr-4" height="100" width="100" 
+                                 src="<%= order.products[0].productId.image && order.products[0].productId.image.length 
+                                        ? '/uploads/product-images/' + order.products[0].productId.image[0] 
+                                        : '/images/no_productImage.png' %>"/>
+                        </a>
+                        <div>
+                            <p class="font-bold"><%= order.products[0].productId.name %></p>
+                            <% if (order.products.length > 1) { %>
+                                <p class="text-gray-500 text-sm">+ <%= order.products.length - 1 %> other product<%= order.products.length === 2 ? '' : "s" %></p>
+                            <% } %>
+                        </div>
+                    <% } %>
+                </div>
+                <!-- Order Info -->
+                <div class="flex-1 ml-4">
+                    <p class="text-sm">Order ID: <%= order._id %></p>
+                    <p class="text-sm">Ordered on: <%= new Date(order.createdAt).toLocaleDateString() %></p>
+                </div>
+                <!-- Total Amount -->
+                <div class="text-xl font-bold mr-4">Total: ₹<%= order.totalAmount %></div>
+                <div class="flex flex-col space-y-2">
+                    <!-- Order Status -->
+                    <div class="text-right">
+                        <p class="text-sm">
+                            <% if(order.status === "Delivered" || order.status === "Out for delivery"){ %>
+                                <span class="inline-flex bg-green-100 text-green-600 px-2 py-1 rounded-md">
+                                    <%= order.status %>
+                                </span>
+                            <% } else if(order.status === 'Returned'){ %>
+                                <span class="inline-flex bg-blue-100 text-blue-600 px-2 py-1 rounded-md">
+                                    <%= order.status %>
+                                </span>
+                            <% } else if(order.status === "Cancelled"){ %>
+                                <span class="inline-flex bg-red-100 text-red-600 px-2 py-1 rounded-md">
+                                    <%= order.status %>
+                                </span>
+                            <% } else if(order.status === "Order Placed"){ %>
+                                <span class="inline-flex bg-orange-100 text-orange-600 px-2 py-1 rounded-md">
+                                    <%= order.status %>
+                                </span>
+                            <% } else { %>
+                                <span class="inline-flex bg-yellow-100 text-yellow-600 px-2 py-1 rounded-md">
+                                    <%= order.status %>
+                                </span>
+                            <% } %>
+                             on <%= new Date(order.updatedAt).toLocaleDateString() %></p>
                     </div>
-                    <% }) %>
-                </div>
-                <div class="flex-1">
-                    <p>Order ID: <%= order._id %></p>
-                    <p>Order created on: <%= new Date(order.createdAt).toLocaleDateString() %></p>
-                </div>
-                <div class="text-xl font-bold">Total: ₹<%= order.totalAmount %></div>
-                <div class="flex items-center ml-4">
-                    <!-- <span class="text-red-500 mr-2">●</span> -->
-                    <span><%= order.status %> on <%= new Date(order.updatedAt).toLocaleDateString() %></span>
+                    <% if(order.status !== "Cancelled" && order.status !== "Returned" && order.status !== "Out for delivery" && order.status !== "Delivered"){ %>
+                        <button id="cancelBtn" class="btn btn-danger" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
+                    <% } %>
+                    <% if(order.status === "Delivered" && Date.now() <= (new Date(order.deliveredOn).getTime() + 7 * 24 * 60 * 60 * 1000)){ %>
+                        <button class="btn btn-primary" onclick="updateOrderStatus('<%= order._id %>', 'Returned')">Return Order</button>
+                    <% } %>
                 </div>
             </div>
-            <% }) %>
+            <% }) %>    
         </div>
     </main>
 </div>
 <!-- Footer -->
 <%- include('../../partials/user/footer') %>
+<script>
+    function updateOrderStatus(orderId, status) {
+        axios.patch(`/admin/updateOrderStatus/${orderId}`, { status: status })
+            .then(response => {
+                if (response.status === 200) {
+                    console.log("Order status updated successfully.");
+                }
+            })
+            .catch(error => {
+                console.error("Error updating order status:", error);
+                alert("Failed to update order status.");
+            });
+    }
+    async function cancelOrder(orderId){
+        try {
+            const btn = document.getElementById('cancelBtn')
+            const response = await axios.patch(`/user/order/cancel/${orderId}`)
+            if(response.status === 200){
+                Toastify({
+                    text: response.data.message,
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                    stopOnFocus: true,
+                    className: "toast_style"
+                }).showToast();
+                btn.classList.add('hidden');
+            }
+        } catch (error) {
+            alert("error")
+            console.error(error)
+        }
+    }
+</script>

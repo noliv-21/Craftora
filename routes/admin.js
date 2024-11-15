@@ -38,7 +38,7 @@ admin.post('/editProduct',productController.edittingProduct)
 admin.get('/viewProduct',productController.productDetails)
 
 admin.get('/orders',orderController.getOrdersAdmin)
-admin.post('/cancelOrder/:orderID',orderController.cancelOrder)
+admin.post('/cancelOrder/:orderId',orderController.cancelOrder)
 admin.patch('/updateOrderStatus/:orderId',orderController.updateStatus)
 
 module.exports = admin;

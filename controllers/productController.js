@@ -50,55 +50,6 @@ exports.products = async (req, res) => {
     }
 };
 
-
-// exports.products = async (req, res) => {
-//     try {
-//         const search = req.query.search || '';
-//         const page = parseInt(req.query.page) || 1;
-//         const limit = 5;
-//         const skip = (page - 1) * limit;
-
-//         // Fetch products with pagination and search
-//         const products = await Products.find({
-//             name: { $regex: search, $options: 'i' }
-//         })
-//         .sort({ createdAt: -1 })
-//         .skip(skip)
-//         .limit(limit)
-//         .populate('category', 'name');
-
-//         const totalProducts = await Products.countDocuments({
-//             name: { $regex: search, $options: 'i' }
-//         });
-//         const totalPages = Math.ceil(totalProducts / limit);
-//         const reversedProduct = products.reverse();
-
-//         // Send JSON response for AJAX requests
-//         if (req.headers['x-requested-with'] === 'XMLHttpRequest') {
-//             return res.json({ products: reversedProduct, page, totalPages, totalProducts });
-//         }
-
-//         // Regular rendering for non-AJAX requests
-//         const errorMessage = req.session.errorMessage;
-//         const successMessage = req.session.successMessage;
-//         req.session.errorMessage = null;
-//         req.session.successMessage = null;
-
-//         res.render('admin/product folder/product_list', {
-//             products: reversedProduct, 
-//             errorMessage, 
-//             successMessage, 
-//             page, 
-//             totalPages, 
-//             limit, 
-//             totalProducts
-//         });
-//     } catch (error) {
-//         console.error("Error fetching products:", error);
-//         res.status(500).json({ message: "Unable to retrieve products." });
-//     }
-// };
-
 exports.addProductPage = async (req, res) => {
     try {
         //error message handling
@@ -329,7 +280,7 @@ exports.showProductsPage = (req, res) => {
 
     res.render('user/product folder/products', {
         title,
-        session: session.username || null, // Use null if session or username is undefined
+        session: session ? session.username || session.fullname : null, // Use null if session or username is undefined
     });
 };
 
@@ -341,7 +292,7 @@ exports.fetchProducts = async (req, res) => {
         const limit = 8;
         const skip = (page - 1) * limit;
         
-        const products = await Products.find({ name: { $regex: search, $options: 'i' } })
+        const products = await Products.find({ name: { $regex: search, $options: 'i' }, isListed: true })
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)

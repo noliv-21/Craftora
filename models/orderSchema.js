@@ -50,10 +50,6 @@ const orderSchema = new mongoose.Schema({
         type:Number,
         default:0
     },
-    // createdAt:{
-    //     type:String,
-    //     required:true
-    // },
     coupons: [
         {
             couponId: {
@@ -77,7 +73,10 @@ const orderSchema = new mongoose.Schema({
                 default: Date.now
             }
         }
-    ]
+    ],
+    deliveredOn: { type: Date, default: null },
+    cancelledOn: { type: Date, default: null },
+    returnedOn: { type: Date, default: null },
 }, { timestamps: true })
 
 const orderModel = mongoose.model('order',orderSchema,'Orders')

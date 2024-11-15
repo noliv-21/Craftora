@@ -45,5 +45,6 @@ user.get('/order/dispatch',userController.userAuth,orderController.cfmPage)
 user.get('/order/payment',userController.userAuth,orderController.paymentPage)
 user.post('/order/creation',orderController.orderCreation)
 user.get('/orders',userController.userAuth,orderController.showOrdersUser)
+user.patch('/order/cancel/:orderId',orderController.cancelOrder)
 
 module.exports = user;

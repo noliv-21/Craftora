@@ -121,29 +121,78 @@ exports.getOrdersAdmin = async (req,res)=>{
     }
 }
 
-exports.cancelOrder = async (req,res)=>{
+exports.cancelOrder = async (req, res) => {
     try {
         const orderId = req.params.orderId;
-        await Orders.findByIdAndUpdate(orderId,{
-            status:"Cancelled"
-        })
-        res.status(200)
-    } catch (error) {
-        console.error(error)
-        res.status(400)
-    }
-}
 
-exports.updateStatus = async (req,res)=>{
+        // Fetch the order
+        const order = await Orders.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        // Check if the order is eligible for cancellation
+        if (["Cancelled", "Delivered", "Returned"].includes(order.status)) {
+            return res.status(400).json({ message: "Order cannot be cancelled." });
+        }
+
+        // Update order status and product inventory
+        await Orders.findByIdAndUpdate(orderId, {
+            status: "Cancelled",
+            cancelledOn: Date.now(),
+        });
+
+        const updateInventoryPromises = order.products.map((item) =>
+            Products.findByIdAndUpdate(
+                item.productId,
+                { $inc: { inventory: item.quantity } } // Increment inventory
+            )
+        );
+        await Promise.all(updateInventoryPromises);
+
+        res.status(200).json({ message: "Order cancelled successfully." });
+    } catch (error) {
+        console.error("Error cancelling order:", error);
+        res.status(500).json({ message: "Server error. Unable to cancel the order." });
+    }
+};
+
+exports.updateStatus = async (req, res) => {
     try {
         const orderId = req.params.orderId;
         const { status } = req.body;
-        
-        await Orders.findByIdAndUpdate(orderId, { status: status });
-        
+
+        // Fetch the order
+        const order = await Orders.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        // Check for valid status transition
+        if (["Cancelled", "Delivered", "Returned"].includes(order.status)) {
+            return res.status(400).json({ message: "Order status cannot be updated further." });
+        }
+
+        if (status === "Delivered") {
+            await Orders.findByIdAndUpdate(orderId, { status, deliveredOn: Date.now() });
+        } else if (status === "Cancelled") {
+            const updateInventoryPromises = order.products.map((item) =>
+                Products.findByIdAndUpdate(
+                    item.productId,
+                    { $inc: { inventory: item.quantity } } // Increment inventory
+                )
+            );
+            await Promise.all(updateInventoryPromises);
+            await Orders.findByIdAndUpdate(orderId, { status, cancelledOn: Date.now() });
+        } else if (status === "Returned") {
+            await Orders.findByIdAndUpdate(orderId, { status, returnedOn: Date.now() });
+        } else {
+            await Orders.findByIdAndUpdate(orderId, { status });
+        }
+
         res.status(200).json({ message: "Order status updated successfully." });
     } catch (error) {
         console.error("Error updating order status:", error);
-        res.status(400).json({ message: "Failed to update order status." });
+        res.status(500).json({ message: "Failed to update order status." });
     }
-}
+};

@@ -1,3 +1,19 @@
+<style>
+    .toast_style{
+        width: fit-content;
+        max-width: 300px;
+        border-radius: 8px;
+        padding: 12px 20px;
+        border: 1px solid rgba(255, 0, 0, 0.3);
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 100;
+    }
+</style>
 <div class="flex">
     <!-- Sidebar -->
     <%- include('../../partials/admin/side bar') %>
@@ -79,15 +95,46 @@
                         <td class="py-2"><%= order.totalAmount %></td>
                         <td class="py-2"><%= order.paymentMethod %></td>
                         <td class="py-2">
-                            <select name="status" class="bg-orange-100 text-orange-600 px-2 py-1 rounded-lg" onchange="updateOrderStatus('<%= order._id %>', this.value)">
-                                <% orderStatuses.forEach((status, index) => { %>
-                                    <% if (status !== "Returned") { %>
-                                        <option value="<%= status %>" <%= order.status === status ? 'selected' : '' %>><%= status %></option>
-                                    <% } %>
-                                <% }) %>
-                            </select>
-                        </td>                        
-                        <td class="py-2"><button onclick="updateOrderStatus('<%= order._id %>', 'Cancelled')"><i class="fas fa-ban text-red-600"></i></button></td>
+                            <% if (order.status === "Cancelled" || order.status === "Out for delivery" || order.status === "Returned") { %>
+                                <% if(order.status === "Cancelled"){ %>
+                                    <span class="inline-block bg-red-100 text-red-600 px-2 py-1 rounded-lg">
+                                        <%= order.status %>
+                                    </span>
+                                <% } else if(order.status === "Out for delivery"){ %>
+                                    <span class="inline-block bg-green-100 text-green-600 px-2 py-1 rounded-lg">
+                                        <%= order.status %>
+                                    </span>
+                                <% }else if(order.status === "Returned"){ %>
+                                    <span class="inline-block bg-blue-100 text-blue-600 px-2 py-1 rounded-lg">
+                                        <%= order.status %>
+                                    </span>
+                                <% } %>
+                            <% } else { %>
+                                <!-- Select input for changing status -->
+                                <select 
+                                    name="status" 
+                                    class="px-2 py-1 rounded-lg" 
+                                    onchange="updateOrderStatus('<%= order._id %>', this.value); updateStatusColor(this)"
+                                    data-status="<%= order.status %>">
+                                    <% orderStatuses.forEach((status) => { %>
+                                        <% if (status !== "Returned") { %>
+                                            <option value="<%= status %>" <%= order.status === status ? 'selected' : '' %>><%= status %></option>
+                                        <% } %>
+                                    <% }) %>
+                                </select>
+                            <% } %>
+                        </td>
+                        <td class="py-2">
+                            <% if (order.status === "Cancelled" || order.status === "Out for delivery" || order.status === "Returned") { %>
+                                <!-- Hide cancel button if cancellation isn't allowed -->
+                                <i class="fas fa-ban text-gray-400"></i>
+                            <% } else { %>
+                                <!-- Show cancel button if cancellation is allowed -->
+                                <button onclick="cancelOrder('<%= order._id %>')">
+                                    <i class="fas fa-ban text-red-600"></i>
+                                </button>
+                            <% } %>
+                        </td>
                     </tr>
                     <% }) %>
                 </tbody>
@@ -109,4 +156,57 @@
                 alert("Failed to update order status.");
             });
     }
+    async function cancelOrder(orderId){
+        try {
+            const response = await axios.post(`/admin/cancelOrder/${orderId}`)
+            if(response.status === 200){
+                alert('cancelled')
+                Toastify({
+                    text: response.data.message,
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                    stopOnFocus: true,
+                    className: "toast_style"
+                }).showToast();
+            }
+        } catch (error) {
+            alert("error")
+            console.error(error)
+        }
+    }
+</script>
+<script>
+    function getStatusColorStyle(status) {
+        switch (status) {
+            case 'Delivered':
+            case 'Out for delivery':
+                return { backgroundColor: '#d1fae5', color: '#047857' };
+            case 'Returned':
+                return { backgroundColor: '#dbeafe', color: '#1e3a8a' };
+            case 'Cancelled':
+                return { backgroundColor: '#fee2e2', color: '#b91c1c' };
+            case 'Order Placed':
+                return { backgroundColor: '#ffedd5', color: '#ea580c' };
+            default:
+                return { backgroundColor: '#fef9c3', color: '#ca8a04' };
+        }
+    }
+
+    function updateStatusColor(select) {
+        const status = select.value;
+        const { backgroundColor, color } = getStatusColorStyle(status);
+        select.style.backgroundColor = backgroundColor;
+        select.style.color = color;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('select[name="status"]').forEach(select => {
+            const status = select.getAttribute('data-status');
+            const { backgroundColor, color } = getStatusColorStyle(status);
+            select.style.backgroundColor = backgroundColor;
+            select.style.color = color;
+        });
+    });
 </script>

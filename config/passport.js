@@ -19,9 +19,8 @@ async (AccessToken,refreshToken,profile,done)=>{
                 fullname:profile.displayName,
                 email:profile.emails[0].value,
                 googleId:profile.id,
-                isVerified:true,
-                createdAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-            })
+                isVerified:true
+            }, { timestamps:true })
             await user.save()
             return done(null,{user,isNewUser:true})
         }
