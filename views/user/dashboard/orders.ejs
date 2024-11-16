@@ -1,4 +1,3 @@
-
 <style>
     .toast_style{
         width: fit-content;
@@ -48,7 +47,7 @@
                 </div>
                 <!-- Order Info -->
                 <div class="flex-1 ml-4">
-                    <p class="text-sm">Order ID: <%= order._id %></p>
+                    <p class="text-sm">Order ID: <%= order.orderId ? order.orderId : order._id %></p>
                     <p class="text-sm">Ordered on: <%= new Date(order.createdAt).toLocaleDateString() %></p>
                 </div>
                 <!-- Total Amount -->
@@ -88,7 +87,25 @@
                     <% } %>
                 </div>
             </div>
-            <% }) %>    
+            <% }) %>
+            <div class="flex justify-between items-center mt-4">
+                <div class="text-gray-500">
+                    Showing <%= (page - 1) * limit + 1 %>-<%= Math.min(page * limit, totalOrders) %> of <%= totalOrders %>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <% if (page > 1) { %>
+                        <a href="?page=<%= page - 1 %>" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">&lt;</a>
+                    <% } %>
+            
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <a href="?page=<%= i %>" class="px-3 py-1 rounded-md <%= i === page ? 'bg-orange-400 text-white' : 'bg-gray-200 text-gray-700' %>"><%= i %></a>
+                    <% } %>
+            
+                    <% if (page < totalPages) { %>
+                        <a href="?page=<%= page + 1 %>" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">&gt;</a>
+                    <% } %>
+                </div>
+            </div>
         </div>
     </main>
 </div>
@@ -114,17 +131,27 @@
             if(response.status === 200){
                 Toastify({
                     text: response.data.message,
-                    duration: 3000,
+                    duration: 2000,
                     gravity: "top",
                     position: "right",
-                    backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                    backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
                     stopOnFocus: true,
                     className: "toast_style"
                 }).showToast();
                 btn.classList.add('hidden');
             }
         } catch (error) {
-            alert("error")
+            // alert("error")
+            const errorMessage = error.response?.data?.message || "An unexpected error occurred";
+            Toastify({
+                text: errorMessage,
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                stopOnFocus: true,
+                className: "toast_style"
+            }).showToast();
             console.error(error)
         }
     }

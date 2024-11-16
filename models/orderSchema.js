@@ -1,9 +1,15 @@
 const mongoose = require('mongoose')
+const crypto = require('crypto')
 
 const orderSchema = new mongoose.Schema({
+    orderId:{
+        type:String,
+        unique:true
+    },
     userId:{
         type:mongoose.Schema.Types.ObjectId,
-        required:true
+        required:true,
+        ref:'user'
     },
     addressId:{
         type:mongoose.Schema.Types.ObjectId,
@@ -78,6 +84,16 @@ const orderSchema = new mongoose.Schema({
     cancelledOn: { type: Date, default: null },
     returnedOn: { type: Date, default: null },
 }, { timestamps: true })
+
+orderSchema.pre('save', async function (next) {
+    if (!this.orderId) {
+        // Generate unique orderId
+        const randomString = crypto.randomBytes(3).toString('hex').toUpperCase();
+        const timestamp = Date.now().toString().slice(-6);
+        this.orderId = `ORD-${randomString}-${timestamp}`;
+    }
+    next();
+});
 
 const orderModel = mongoose.model('order',orderSchema,'Orders')
 

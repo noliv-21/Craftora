@@ -1,4 +1,20 @@
 <link rel="stylesheet" href="/css/user/product_details.css">
+<style>
+    .toast_style{
+        width: fit-content;
+        max-width: 300px;
+        border-radius: 8px;
+        padding: 12px 20px;
+        border: 1px solid rgba(255, 0, 0, 0.3);
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        position: absolute;
+        top: 100px;
+        right: 40px;
+        z-index: 100;
+    }
+</style>
 <!-- Header -->
 <%-include('../../partials/user/header')%>
 <!-- Main Content -->
@@ -230,8 +246,28 @@
         try {
             const response = await axios.post('/user/addToCart', { productId });
             console.log(response.data)
+            if(response.status === 200){
+                Toastify({
+                    text: response.data,
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "linear-gradient(135deg, rgba(253, 186, 116, 0.9), rgba(255, 255, 255, 0.9))",
+                    stopOnFocus: true,
+                    className: "toast_style"
+                }).showToast();
+            }
         } catch (error) {
             console.error(error)
+            Toastify({
+                text: error.response?.data || "An error occurred",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                stopOnFocus: true,
+                className: "toast_style"
+            }).showToast();
         }
     }
 </script>

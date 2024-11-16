@@ -33,7 +33,7 @@ user.post('/changePassword',userController.changePassword)
 user.get('/addresses',userController.userAuth,addressController.showUserAddresses)
 user.post('/addAddress',addressController.addAddress)
 user.delete('/deleteAddress',addressController.deleteAddress)
-user.patch('/user/editAddress/:addressId',addressController.editAddress)
+user.patch('/editAddress/:addressId',addressController.editAddress)
 
 user.get('/cart',userController.userAuth,cartController.getCart)
 user.post('/addToCart',cartController.addToCart)

@@ -88,10 +88,22 @@ exports.showOrdersUser = async (req,res)=>{
     try {
         const session = req.session.user
         const userId = session._id
-        const orders = await Orders.find({userId}).populate("products.productId").sort({ createdAt: -1 })
-        console.log(orders.products);
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+        const skip = (page - 1) * limit;
+
+        const orders = await Orders.find({userId}).populate("products.productId").sort({ createdAt: -1 }).skip(skip).limit(limit)
+        const totalOrders = await Orders.countDocuments({ userId });
+        const totalPages = Math.ceil(totalOrders / limit);
         res.render('user/dashboard/orders',{
-            orders,session,activeTab:'orders'
+            orders,
+            session,
+            activeTab: 'orders',
+            page,
+            totalPages,
+            limit,
+            totalOrders
         })
     } catch (error) {
         console.error(error)
@@ -102,6 +114,9 @@ exports.showOrdersUser = async (req,res)=>{
 exports.getOrdersAdmin = async (req,res)=>{
     try {
         const orderStatuses = Orders.schema.path('status').enumValues;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 6;
+        const skip = (page - 1) * limit;
 
         const orders = await Orders.find({})
             .populate('userId', 'username email')
@@ -110,10 +125,16 @@ exports.getOrdersAdmin = async (req,res)=>{
                 model: 'product',
                 select: 'name image sellingPrice'
             })
-            .sort({ createdAt: -1 })
+            .sort({ createdAt: -1 }).skip(skip).limit(limit)
+        const totalOrders = await Orders.countDocuments();
+        const totalPages = Math.ceil(totalOrders / limit);
 
         res.render('admin/order folder/orders', {
-            orders, activeTab: 'orders', orderStatuses
+            orders, activeTab: 'orders', orderStatuses,
+            page,
+            totalPages,
+            limit,
+            totalOrders
         });
     } catch (error) {
         console.error("Error fetching orders:", error);

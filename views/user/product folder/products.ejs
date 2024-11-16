@@ -116,10 +116,15 @@
                     <a href="/user/home">Home</a> &gt; <a href="/user/products">Products</a>
                 </div>
                 <div>
-                    <select class="p-2 border border-gray-300 rounded">
-                        <option>
-                            Sort by: Recommended
-                        </option>
+                    <select id="sortSelection" class="p-2 border border-gray-300 rounded">
+                        <option value="popularity">Popularity</option>
+                        <option value="price-low-high">Price: Low to High</option>
+                        <option value="price-high-low">Price: High to Low</option>
+                        <option value="ratings">Ratings</option>
+                        <option value="featured">Featured</option>
+                        <option value="new">New Arrivals</option>
+                        <option value="a-z">aA - zZ</option>
+                        <option value="z-a">zZ - aA</option>
                     </select>
                 </div>
             </div>
@@ -137,25 +142,35 @@
     <%-include('../../partials/user/footer')%>
 
 <script>
+    // Event listener for sorting
+    document.getElementById('sortSelection').addEventListener('change', async (e) => {
+        const searchQuery = document.getElementById('searchInput').value;
+        const selectedSort = e.target.value;
+        currentPage = 1;
+        await fetchProducts(searchQuery, currentPage, selectedSort);
+    });
+
     let currentPage = 1;
     let totalPages = 1;
 
     async function searchProducts() {
         const searchQuery = document.getElementById('searchInput').value;
-        currentPage = 1; // Reset to the first page on new search
-        await fetchProducts(searchQuery, currentPage);
+        const selectedSort = document.getElementById('sortSelection').value;
+        currentPage = 1;
+        await fetchProducts(searchQuery, currentPage, selectedSort);
     }
 
-    async function fetchProducts(searchQuery = '', page = 1) {
+    async function fetchProducts(searchQuery = '', page = 1, sortBy = 'new') {
         try {
             const response = await axios.get(`/user/api/products`, {
-                params: { search: searchQuery, page: page },
+                params: { search: searchQuery, page: page, sortBy: sortBy },
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
 
             if (response.data.products) {
                 displayProducts(response.data.products);
                 updatePagination(response.data.totalPages, page, response.data.totalProducts, response.data.limit);
+                setSortSelection(response.data.sortOption);
             }
         } catch (error) {
             console.error("Error fetching products:", error);
@@ -212,7 +227,8 @@
             prevButton.innerText = '<';
             prevButton.addEventListener('click', () => {
                 currentPage -= 1;
-                fetchProducts(document.getElementById('searchInput').value, currentPage);
+                // fetchProducts(document.getElementById('searchInput').value, currentPage);
+                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
             });
             paginationContainer.appendChild(prevButton);
         }
@@ -231,7 +247,8 @@
             pageButton.innerText = i;
             pageButton.addEventListener('click', () => {
                 currentPage = i;
-                fetchProducts(document.getElementById('searchInput').value, i);
+                // fetchProducts(document.getElementById('searchInput').value, i);
+                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
             });
             paginationContainer.appendChild(pageButton);
         }
@@ -244,10 +261,16 @@
             nextButton.innerText = '>';
             nextButton.addEventListener('click', () => {
                 currentPage += 1;
-                fetchProducts(document.getElementById('searchInput').value, currentPage);
+                // fetchProducts(document.getElementById('searchInput').value, currentPage);
+                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
             });
             paginationContainer.appendChild(nextButton);
         }
+    }
+
+    function setSortSelection(selectedSort) {
+        const sortDropdown = document.getElementById('sortSelection');
+        sortDropdown.value = selectedSort;
     }
 
     // Initial load

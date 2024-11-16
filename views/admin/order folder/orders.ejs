@@ -76,7 +76,7 @@
                     <% orders.forEach((order,index)=>{ %>
                     <tr class="border-b">
                         <td class="py-2">
-                            <a class="text-blue-500" href="#"><%= order._id %></a>
+                            <a class="text-blue-500" href="#"><%= order.orderId ? order.orderId : order._id %></a>
                         </td>
                         <td class="py-2">
                             <% if (order.products.length > 0) { %>
@@ -95,7 +95,7 @@
                         <td class="py-2"><%= order.totalAmount %></td>
                         <td class="py-2"><%= order.paymentMethod %></td>
                         <td class="py-2">
-                            <% if (order.status === "Cancelled" || order.status === "Out for delivery" || order.status === "Returned") { %>
+                            <% if (order.status === "Cancelled" || order.status === "Out for delivery" || order.status === "Returned" || order.status === "Delivered") { %>
                                 <% if(order.status === "Cancelled"){ %>
                                     <span class="inline-block bg-red-100 text-red-600 px-2 py-1 rounded-lg">
                                         <%= order.status %>
@@ -106,6 +106,10 @@
                                     </span>
                                 <% }else if(order.status === "Returned"){ %>
                                     <span class="inline-block bg-blue-100 text-blue-600 px-2 py-1 rounded-lg">
+                                        <%= order.status %>
+                                    </span>
+                                <% } else { %>
+                                    <span class="inline-block bg-green-100 text-green-600 px-2 py-1 rounded-lg">
                                         <%= order.status %>
                                     </span>
                                 <% } %>
@@ -125,7 +129,7 @@
                             <% } %>
                         </td>
                         <td class="py-2">
-                            <% if (order.status === "Cancelled" || order.status === "Out for delivery" || order.status === "Returned") { %>
+                            <% if (order.status === "Cancelled" || order.status === "Out for delivery" || order.status === "Returned" || order.status === "Delivered") { %>
                                 <!-- Hide cancel button if cancellation isn't allowed -->
                                 <i class="fas fa-ban text-gray-400"></i>
                             <% } else { %>
@@ -139,6 +143,24 @@
                     <% }) %>
                 </tbody>
             </table>
+        </div>
+        <div class="flex justify-between items-center mt-4">
+            <div class="text-gray-500">
+                Showing <%= (page - 1) * limit + 1 %>-<%= Math.min(page * limit, totalOrders) %> of <%= totalOrders %>
+            </div>
+            <div class="flex items-center space-x-2">
+                <% if (page > 1) { %>
+                    <a href="?page=<%= page - 1 %>" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">&lt;</a>
+                <% } %>
+        
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <a href="?page=<%= i %>" class="px-3 py-1 rounded-md <%= i === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' %>"><%= i %></a>
+                <% } %>
+        
+                <% if (page < totalPages) { %>
+                    <a href="?page=<%= page + 1 %>" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">&gt;</a>
+                <% } %>
+            </div>
         </div>
     </div>
 </div>

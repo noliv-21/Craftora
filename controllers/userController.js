@@ -383,6 +383,7 @@ exports.saveUserDetails = async (req,res)=>{
                 gender:userDet.gender,
                 phone:userDet.phone
             })
+            
             res.redirect(`/user/profile`)
         }else{
             req.session.user.errorMess = 'Username already exists'

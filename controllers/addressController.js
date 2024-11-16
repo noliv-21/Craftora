@@ -30,6 +30,7 @@ exports.addAddress = async (req,res)=>{
         res.status(201).json("Address successfully created")
     } catch (error) {
         console.error(error)
+        res.status(500).json("Error saving address")
     }
 }
 
@@ -43,10 +44,10 @@ exports.deleteAddress = async (req,res)=>{
         if (!deletedAddress) {
             return res.status(404).json({ error: 'Address not found.' });
         }
-        res.status(200).json({ message: 'Address deleted successfully.' });
+        res.status(200).json('Address deleted successfully.' );
     } catch (error) {
         console.error("Error deleting address:", error);
-        res.status(500).json({ error: 'An error occurred while deleting the address.' });
+        res.status(500).json('An error occurred while deleting the address.' );
     }
 }
 
@@ -54,14 +55,15 @@ exports.editAddress = async (req,res)=>{
     try {
         const address = req.body;
         const id = req.params.addressId
-        await Addresses.findByIdAndUpdate({id},{
+        await Addresses.findByIdAndUpdate(id,{
             name:address.name, streetAddress:address.streetAddress, city:address.city,
-            state:address.state, country:address.country, pincode:address.pincode, phone:address.pincode,
+            state:address.state, country:address.country, pincode:address.pincode, phone:address.phone,
         })
+        console.log("Address edited successfully");
         res.status(200).json('Address edited successfully')
     } catch (error) {
         console.error(error)
-        res.status(500).json({ error: 'An error occurred while editing the address.' });
+        res.status(500).json('An error occurred while editing the address.' );
     }
 }
 

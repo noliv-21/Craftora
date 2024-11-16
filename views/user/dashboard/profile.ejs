@@ -204,12 +204,32 @@
                 // Make the POST request to update password
                 const response = await axios.post('/user/changePassword', { password: newPassword });
                 console.log(response.data)
+                if(response.data === 200){
+                    Toastify({
+                        text: response.data,
+                        duration: 2000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
+                        stopOnFocus: true,
+                        className: "toast_style"
+                    }).showToast();
+                }
                 // Display success message
                 messageElement.textContent = 'Password updated successfully!';
                 messageElement.classList.remove('hidden');
                 messageElement.style.color = 'green';
                 setTimeout(() => closeModal(), 1000);
             } catch (error) {
+                Toastify({
+                        text: error.data,
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                        stopOnFocus: true,
+                        className: "toast_style"
+                    }).showToast();
                 console.error(error.response?.data || error.message); // Log the error message
                 messageElement.textContent = 'Error updating password. Please try again.';
                 messageElement.classList.remove('hidden');

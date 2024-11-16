@@ -1,5 +1,6 @@
 const Products = require('../models/productSchema')
 const Categories = require('../models/categorySchema')
+const Orders = require('../models/orderSchema')
 const sharp = require('sharp')
 const path = require('path')
 const fs = require('fs').promises;
@@ -287,18 +288,180 @@ exports.showProductsPage = (req, res) => {
 // Dynamic product update
 exports.fetchProducts = async (req, res) => {
     try {
+        const sortOption = req.query.sortBy || 'new';
+        let sortCriteria;
+        switch (sortOption) {
+            case 'popularity':
+                break;
+            case 'price-low-high':
+                sortCriteria = { sellingPrice: 1 };
+                break;
+            case 'price-high-low':
+                sortCriteria = { sellingPrice: -1 };
+                break;
+            case 'ratings':
+                sortCriteria = { rating: -1 }
+                break;
+            case 'featured':
+                sortCriteria = { isFeatured: 1 }
+                break;
+            case 'new':
+                sortCriteria = { createdAt: -1 };
+                break;
+            case 'a-z':
+                sortCriteria = { name: 1 };
+                break;
+            case 'z-a':
+                sortCriteria = { name: -1 };
+                break;
+            default:
+                sortCriteria = { createdAt: -1 };
+        }      
+
         let search = req.query.search || '';
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
         const skip = (page - 1) * limit;
         
-        const products = await Products.find({ name: { $regex: search, $options: 'i' }, isListed: true })
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .populate('category', 'name');
+        let products;
+        let totalProducts;
+
+        if (sortOption === 'popularity') {
+
+            // products = await Products.aggregate([
+            //     // Step 1: Lookup totalOrdered from Orders
+            //     {
+            //         $lookup: {
+            //             from: 'orders',
+            //             let: { productId: '$_id' },
+            //             pipeline: [
+            //                 { $unwind: '$products' }, // Unwind products array in Orders
+            //                 {
+            //                     $match: {
+            //                         $expr: { $eq: ['$products.productId', '$$productId'] } // Match productId
+            //                     }
+            //                 },
+            //                 {
+            //                     $group: {
+            //                         _id: '$products.productId',
+            //                         totalQuantity: { $sum: '$products.quantity' } // Sum up the quantities
+            //                     }
+            //                 }
+            //             ],
+            //             as: 'orderData'
+            //         }
+            //     },
+            //     // Step 2: Add totalOrdered field (default to 0 if no orders)
+            //     {
+            //         $addFields: {
+            //             totalOrdered: {
+            //                 $ifNull: [{ $arrayElemAt: ['$orderData.totalQuantity', 0] }, 0]
+            //             }
+            //         }
+            //     },
+            //     // Step 3: Remove the orderData array (no longer needed)
+            //     {
+            //         $project: {
+            //             orderData: 0
+            //         }
+            //     },
+            //     // Step 4: Lookup category details
+            //     {
+            //         $lookup: {
+            //             from: 'categories',
+            //             localField: 'category',
+            //             foreignField: '_id',
+            //             as: 'categoryDetails'
+            //         }
+            //     },
+            //     // Step 5: Unwind category details (handle missing categories gracefully)
+            //     {
+            //         $unwind: {
+            //             path: '$categoryDetails',
+            //             preserveNullAndEmptyArrays: true
+            //         }
+            //     },
+            //     // Step 6: Sort products by totalOrdered (descending), then by name (ascending for tie-breaking)
+            //     {
+            //         $sort: {
+            //             totalOrdered: -1,
+            //             name: 1
+            //         }
+            //     },
+            //     // Step 7: Apply pagination (skip and limit)
+            //     { $skip: skip },
+            //     { $limit: limit },
+            //     // Step 8: Project the final fields
+            //     {
+            //         $project: {
+            //             _id: 1,
+            //             name: 1,
+            //             mrp: 1,
+            //             sellingPrice: 1,
+            //             image: 1,
+            //             totalOrdered: 1,
+            //             category: '$categoryDetails.name'
+            //         }
+            //     }
+            // ]);            
+            // console.log(products)
+            // totalProducts = await Products.countDocuments({ isListed: true });                       
+
+            // const mostOrderedProducts = await Orders.aggregate([
+            products = await Orders.aggregate([
+                { $unwind: '$products' },
+                { 
+                    $group: { 
+                        _id: '$products.productId', 
+                        totalOrdered: { $sum: '$products.quantity' } 
+                    } 
+                },
+                { $sort: { totalOrdered: -1 } },
+                { $skip: skip },
+                { $limit: limit },
+                {
+                    $lookup: {
+                        from: 'products', // The collection name
+                        localField: '_id',
+                        foreignField: '_id',
+                        as: 'productDetails'
+                    }
+                },
+                { $unwind: '$productDetails' }, // Flatten the product details array
+                { $match: { 'productDetails.isListed': true } }, // Apply filter to ensure only listed products
+                {
+                    $lookup: {
+                        from: 'categories', // The collection name for categories
+                        localField: 'productDetails.category', // Field in the products collection
+                        foreignField: '_id', // Field in the categories collection
+                        as: 'categoryDetails'
+                    }
+                },
+                { $unwind: { path: '$categoryDetails', preserveNullAndEmptyArrays: true } }, // Handle missing categories
+                {
+                    $project: {
+                        _id: 1,
+                        totalOrdered: 1,
+                        name: '$productDetails.name',
+                        category: '$categoryDetails.name',
+                        sellingPrice: '$productDetails.sellingPrice',
+                        mrp: '$productDetails.mrp',
+                        image: '$productDetails.image'
+                    }
+                }
+            ]);
+            totalProducts = products.length;         
+        } else {
+            products = await Products.find({ name: { $regex: search, $options: 'i' }, isListed: true })
+                .sort(sortCriteria)
+                .skip(skip)
+                .limit(limit)
+                .populate('category', 'name');
+            totalProducts = await Products.countDocuments({ name: { $regex: search, $options: 'i' }, isListed: true });
+            // totalProducts = products.length;
+        }
         
-        const totalProducts = await Products.countDocuments({ name: { $regex: search, $options: 'i' } });
+        // const totalProducts = await Products.countDocuments({ name: { $regex: search, $options: 'i' } });
         const totalPages = Math.ceil(totalProducts / limit);
 
         res.json({
@@ -306,7 +469,8 @@ exports.fetchProducts = async (req, res) => {
             totalProducts: totalProducts,
             totalPages: totalPages,
             page: page,
-            limit: limit // Sending limit for client-side calculation of displayed range
+            limit: limit,
+            sortOption
         });
     } catch (error) {
         console.log("Error in fetchProducts:", error);

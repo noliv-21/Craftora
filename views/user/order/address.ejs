@@ -36,6 +36,20 @@
     .modal.show .modal-content {
         transform: translateY(0);
     }
+
+    .toast_style{
+        width: fit-content;
+        max-width: 300px;
+        border-radius: 8px;
+        padding: 12px 20px;
+        border: 1px solid rgba(255, 0, 0, 0.3);
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
 </style>
 
 <!-- Header -->
@@ -296,7 +310,6 @@
 
             const form = document.getElementById('addressForm');
             const message = document.getElementById('message');
-            // Collect form data
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
 
@@ -311,11 +324,20 @@
 
                 const result = await response.json();
 
-                if (response.ok) {
+                if (response.status === 200 || response.status === 201) {
                     message.classList.remove('hidden');
                     message.classList.add('text-green-500');
                     message.textContent = isEditMode ? 'Address updated successfully!' : 'Address added successfully!';
                     message.style.display = 'block';
+                    Toastify({
+                        text: response.data,
+                        duration: 2000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
+                        stopOnFocus: true,
+                        className: "toast_style"
+                    }).showToast();
                     setTimeout(() => {
                         message.classList.add('hidden')
                         message.textContent = ''
@@ -326,11 +348,20 @@
                         }, 500);
                     }, 1500)
                 } else {
-                    alert(result.error || "Failed to save address.");
+                    // alert(result.error || "Failed to save address.");
+                    Toastify({
+                        text: response.data,
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                        stopOnFocus: true,
+                        className: "toast_style"
+                    }).showToast();
                 }
             } catch (error) {
                 console.error("Error:", error);
-                alert("An error occurred while adding the address.");
+                alert(error.data.error);
             }
         } else {
             alert("Please correct the highlighted errors.");

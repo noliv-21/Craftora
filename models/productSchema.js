@@ -68,6 +68,14 @@ const productSchema = new mongoose.Schema({
         type:Number,
         required:false,
         default:0
+    },
+    isFeatured:{
+        type:Boolean,
+        default:false
+    },
+    popularity:{
+        type: Number,
+        default: 0
     }
 },{timestamps:true})
 
