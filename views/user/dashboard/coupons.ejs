@@ -1,0 +1,171 @@
+<%- include('../../partials/user/header') %>
+<div class="font-roboto bg-gradient-to-r from-gray-100 to-gray-300 flex">
+    <!-- Sidebar -->
+    <%- include('../../partials/user/dashboard_sideBar') %>
+    <!-- Main Content -->
+    <main class="p-8">
+        <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold mb-6">Apply Coupon Code</h2>
+            
+            <% if (locals.errorMessage) { %>
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" id="errorMessage">
+                    <%= errorMessage %>
+                </div>
+            <% } %>
+            
+            <% if (locals.successMessage) { %>
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" id="successMessage">
+                    <%= successMessage %>
+                </div>
+            <% } %>
+
+            <form id="applyCouponForm" class="flex items-center space-x-4 mb-6">
+                <input type="text" id="couponCode" name="couponCode" placeholder="Enter coupon code" required style="text-transform: uppercase;"
+                    class="flex-grow px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300 transform hover:scale-105">
+                <button type="submit" 
+                    class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition duration-300 transform hover:scale-105">
+                    Apply
+                </button>
+            </form>
+
+            <p class="text-gray-600 mb-6">By applying coupon code you agree to our terms and conditions</p>
+
+            <!-- Available Coupons -->
+            <div class="mb-8">
+                <h3 class="text-xl font-bold mb-4">Available Coupons</h3>
+                <div id="availableCoupons" class="space-y-4">
+                    <% if (availableCoupons && availableCoupons.length > 0) { %>
+                        <% availableCoupons.forEach(coupon => { %>
+                            <div class="bg-gradient-to-r from-orange-100 to-orange-200 p-4 rounded-lg shadow flex justify-between items-center hover:shadow-lg transition duration-300 transform hover:scale-105">
+                                <div>
+                                    <p class="text-lg font-bold"><%= coupon.name %></p>
+                                    <p class="text-gray-600">
+                                        <% if (coupon.discountType === 'PERCENTAGE') { %>
+                                            <%= coupon.discountValue %>% off
+                                        <% } else { %>
+                                            ₹<%= coupon.discountValue %> off
+                                        <% } %>
+                                        on orders above ₹<%= coupon.minAmount %>
+                                    </p>
+                                    <p class="text-sm text-gray-500"><%= coupon.description %></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-gray-600">Code: <span class="font-mono"><%= coupon.couponCode %></span></p>
+                                    <p class="text-gray-600">Expires: <%= new Date(coupon.expiryDate).toLocaleDateString() %></p>
+                                    <button onclick="copyCouponCode('<%= coupon.couponCode %>')" 
+                                        class="mt-2 text-orange-500 hover:text-orange-600">
+                                        Copy Code
+                                    </button>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="text-gray-500">No coupons available at the moment.</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Coupon History -->
+            <div>
+                <h3 class="text-xl font-bold mb-4">Coupon History</h3>
+                <div id="couponHistory" class="space-y-4">
+                    <% if (couponHistory && couponHistory.length > 0) { %>
+                        <% couponHistory.forEach(history => { %>
+                            <div class="bg-gray-100 p-4 rounded-lg shadow">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-bold"><%= history.coupon.name %></p>
+                                        <p class="text-gray-600">
+                                            <% if (history.coupon.discountType === 'PERCENTAGE') { %>
+                                                <%= history.coupon.discountValue %>% off
+                                            <% } else { %>
+                                                ₹<%= history.coupon.discountValue %> off
+                                            <% } %>
+                                        </p>
+                                        <p class="text-sm text-gray-500">Order ID: <%= history.orderId %></p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-gray-600">Used on <%= new Date(history.usedAt).toLocaleDateString() %></p>
+                                        <p class="text-green-600">Saved ₹<%= history.savedAmount %></p>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="text-gray-500">No coupons used yet.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+// Copy coupon code to clipboard
+function copyCouponCode(code) {
+    if (!code) return;
+    
+    navigator.clipboard.writeText(code).then(() => {
+        showMessage('Coupon code copied!', 'success');
+    }).catch(() => {
+        showMessage('Failed to copy code', 'error');
+    });
+}
+
+// Show message function
+function showMessage(message, type) {
+    if (!message) return;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `fixed top-4 right-4 px-6 py-3 rounded-lg ${
+        type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+    }`;
+    messageDiv.textContent = message;
+    document.body.appendChild(messageDiv);
+    setTimeout(() => messageDiv.remove(), 3000);
+}
+
+// Handle coupon application
+document.getElementById('applyCouponForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const couponInput = document.getElementById('couponCode');
+    if (!couponInput) return;
+    
+    const couponCode = couponInput.value;
+    if (!couponCode) {
+        showMessage('Please enter a coupon code', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/user/coupons/apply', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ couponCode })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showMessage(data.message || 'Coupon applied successfully!', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showMessage(data.error || 'Failed to apply coupon', 'error');
+        }
+    } catch (error) {
+        showMessage('An error occurred while applying the coupon', 'error');
+    }
+});
+
+// Auto-hide messages after 3 seconds
+document.addEventListener('DOMContentLoaded', () => {
+    const messages = document.querySelectorAll('#errorMessage, #successMessage');
+    messages.forEach(msg => {
+        if (msg) setTimeout(() => msg.remove(), 3000);
+    });
+});
+</script>
+
+<%- include('../../partials/user/footer') %>

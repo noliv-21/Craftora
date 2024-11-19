@@ -6,6 +6,7 @@ const addressController = require('../controllers/addressController')
 const cartController = require('../controllers/cartController');
 const orderController = require('../controllers/orderController')
 const wishlistController = require('../controllers/wishlistController')
+const couponController = require('../controllers/couponController')
 const passport = require('passport');
 
 user.use('/',express.static('public'));
@@ -52,5 +53,12 @@ user.get('/wishlist',userController.userAuth,wishlistController.getWishlistPage)
 user.delete('/wishlist/remove',wishlistController.removeProduct)
 user.post('/wishlist/add',wishlistController.addProduct)
 user.get('/wishlist/check',userController.userAuth,wishlistController.checkWishlist)
+
+// Coupon Routes
+user.get('/dashboard/coupons', userController.userAuth, couponController.getUserCoupons);
+user.post('/coupons/apply', userController.userAuth, couponController.applyCoupon);
+user.get('/coupons/history', userController.userAuth, couponController.couponHistory);
+user.post('/coupons/save', userController.userAuth, couponController.saveCouponUser);
+user.get('/product/:productId/coupons', userController.userAuth, couponController.getProductDetailsCoupons);
 
 module.exports = user;

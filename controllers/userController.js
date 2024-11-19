@@ -358,11 +358,8 @@ exports.dashboard = async (req,res)=>{
     try {
         const session= req.session.user;
         const errorMessage = req.session.user.errorMess;
-        console.log(errorMessage);
         const successMessage = req.session.user.successMess;
         const user = await Users.findOne({email:session.email})
-        console.log("user:",user);
-        console.log("session",session);
         res.render('user/dashboard/profile',{
             session:session.email,user,errorMessage,successMessage,activeTab:'profile'
         })
