@@ -1,6 +1,7 @@
 const Products = require('../models/productSchema')
 const Categories = require('../models/categorySchema')
 const Orders = require('../models/orderSchema')
+const Wishlists = require('../models/wishlistSchema')
 const sharp = require('sharp')
 const path = require('path')
 const fs = require('fs').promises;

@@ -168,7 +168,11 @@
             });
 
             if (response.data.products) {
-                displayProducts(response.data.products);
+                // Get wishlist items to check product status
+                const wishlistResponse = await axios.get('/user/wishlist/check');
+                const wishlistItems = wishlistResponse.data || [];
+                
+                displayProducts(response.data.products, wishlistItems);
                 updatePagination(response.data.totalPages, page, response.data.totalProducts, response.data.limit);
                 setSortSelection(response.data.sortOption);
             }
@@ -177,7 +181,7 @@
         }
     }
 
-    function displayProducts(products) {
+    function displayProducts(products, wishlistItems) {
         const productsContainer = document.getElementById('productsContainer');
         productsContainer.innerHTML = ''; // Clear previous results
 
@@ -187,24 +191,36 @@
         }
 
         products.forEach(product => {
+            const isInWishlist = wishlistItems.some(item => item.productId === product._id);
+            const heartClass = isInWishlist ? 'text-red-500' : 'text-gray-400';
+            
             const productHtml = `
-                <a href="/user/product/${product._id}">
-                    <div class="bg-white p-4 rounded shadow">
-                        <img 
-                            alt="Product Image" 
-                            class="w-full h-48 object-cover rounded mb-2" 
-                            src="${product.image && product.image.length ? '/uploads/product-images/' + product.image[0] : '/images/no_productImage.png'}"
-                        />
-                        <div class="text-center">
-                            <h3 class="font-bold">${product.name}</h3>
-                            <div class="text-green-500">
-                                <b>₹</b> ${product.sellingPrice}
-                                <span class="line-through text-gray-500">₹ ${product.mrp}</span>
-                                ${product.offer ? `<span class="text-red-500">(${product.offer}% off)</span>` : ''}
+                <div class="relative">
+                    <a href="/user/product/${product._id}">
+                        <div class="bg-white p-4 rounded shadow">
+                            <img 
+                                alt="Product Image" 
+                                class="w-full h-48 object-cover rounded mb-2" 
+                                src="${product.image && product.image.length ? '/uploads/product-images/' + product.image[0] : '/images/no_productImage.png'}"
+                            />
+                            <div class="text-center">
+                                <h3 class="font-bold">${product.name}</h3>
+                                <div class="text-green-500">
+                                    <b>₹</b> ${product.sellingPrice}
+                                    <span class="line-through text-gray-500">₹ ${product.mrp}</span>
+                                    ${product.offer ? `<span class="text-red-500">(${product.offer}% off)</span>` : ''}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </a>
+                    </a>
+                    <!-- Heart Icon as Overlay -->
+                    <button 
+                        class="absolute top-2 right-2 hover:text-red-500 transition duration-300" 
+                        onclick="toggleWishlist('${product._id}', this)"
+                    >
+                        <i class="fas fa-heart ${heartClass}"></i>
+                    </button>
+                </div>
             `;
             productsContainer.insertAdjacentHTML('beforeend', productHtml);
         });
@@ -271,6 +287,33 @@
     function setSortSelection(selectedSort) {
         const sortDropdown = document.getElementById('sortSelection');
         sortDropdown.value = selectedSort;
+    }
+
+    async function toggleWishlist( productId, button) {
+        try {
+            const icon = button.querySelector('i');
+
+            // Toggle heart state (empty or filled)
+            if (icon.classList.contains('text-gray-400')) {
+                // Add to wishlist
+                const response = await axios.post('/user/wishlist/add', { productId });
+                if (response.status === 200) {
+                    icon.classList.remove('text-gray-400');
+                    icon.classList.add('text-red-500');
+                    console.log('Product added to wishlist');
+                }
+            } else {
+                // Remove from wishlist
+                const response = await axios.delete(`/user/wishlist/remove?productId=${productId}`);
+                if (response.status === 200) {
+                    icon.classList.remove('text-red-500');
+                    icon.classList.add('text-gray-400');
+                    console.log('Product removed from wishlist');
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling wishlist:', error);
+        }
     }
 
     // Initial load

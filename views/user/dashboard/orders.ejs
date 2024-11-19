@@ -126,9 +126,23 @@
     }
     async function cancelOrder(orderId){
         try {
-            const btn = document.getElementById('cancelBtn')
             const response = await axios.patch(`/user/order/cancel/${orderId}`)
             if(response.status === 200){
+                // Find the order's status span and cancel button
+                const orderDiv = document.querySelector(`button[onclick="cancelOrder('${orderId}')"]`).closest('.flex.justify-between');
+                const statusDiv = orderDiv.querySelector('.text-right p span');
+                const cancelBtn = orderDiv.querySelector('#cancelBtn');
+
+                // Update the status display
+                statusDiv.className = 'inline-flex bg-red-100 text-red-600 px-2 py-1 rounded-md';
+                statusDiv.textContent = 'Cancelled';
+
+                // Hide the cancel button
+                if(cancelBtn) {
+                    cancelBtn.classList.add('hidden');
+                }
+
+                // Show success message
                 Toastify({
                     text: response.data.message,
                     duration: 2000,
@@ -138,10 +152,8 @@
                     stopOnFocus: true,
                     className: "toast_style"
                 }).showToast();
-                btn.classList.add('hidden');
             }
         } catch (error) {
-            // alert("error")
             const errorMessage = error.response?.data?.message || "An unexpected error occurred";
             Toastify({
                 text: errorMessage,

@@ -245,26 +245,32 @@
     async function addToCart(productId){
         try {
             const response = await axios.post('/user/addToCart', { productId });
-            console.log(response.data)
-            if(response.status === 200){
+            if (response.status === 200) {
+                // Update cart count
+                const cartCount = document.getElementById('cartCount');
+                if (cartCount) {
+                    cartCount.textContent = (parseInt(cartCount.textContent) + 1).toString();
+                }
+
                 Toastify({
                     text: response.data,
                     duration: 2000,
                     gravity: "top",
                     position: "right",
-                    backgroundColor: "linear-gradient(135deg, rgba(253, 186, 116, 0.9), rgba(255, 255, 255, 0.9))",
+                    backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
                     stopOnFocus: true,
                     className: "toast_style"
                 }).showToast();
             }
         } catch (error) {
-            console.error(error)
+            console.error('Error adding to cart:', error);
             Toastify({
-                text: error.response?.data || "An error occurred",
+                text: error.response?.data || "Error adding to cart",
                 duration: 3000,
+                close: true,
                 gravity: "top",
                 position: "right",
-                backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                backgroundColor: "#F44336",
                 stopOnFocus: true,
                 className: "toast_style"
             }).showToast();

@@ -5,6 +5,7 @@ const productController = require('../controllers/productController')
 const addressController = require('../controllers/addressController')
 const cartController = require('../controllers/cartController');
 const orderController = require('../controllers/orderController')
+const wishlistController = require('../controllers/wishlistController')
 const passport = require('passport');
 
 user.use('/',express.static('public'));
@@ -46,5 +47,10 @@ user.get('/order/payment',userController.userAuth,orderController.paymentPage)
 user.post('/order/creation',orderController.orderCreation)
 user.get('/orders',userController.userAuth,orderController.showOrdersUser)
 user.patch('/order/cancel/:orderId',orderController.cancelOrder)
+
+user.get('/wishlist',userController.userAuth,wishlistController.getWishlistPage)
+user.delete('/wishlist/remove',wishlistController.removeProduct)
+user.post('/wishlist/add',wishlistController.addProduct)
+user.get('/wishlist/check',userController.userAuth,wishlistController.checkWishlist)
 
 module.exports = user;

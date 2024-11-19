@@ -1,0 +1,149 @@
+<style>
+    .toast_style{
+        width: fit-content;
+        max-width: 300px;
+        border-radius: 8px;
+        padding: 12px 20px;
+        border: 1px solid rgba(255, 0, 0, 0.3);
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        position: absolute;
+        top: 100px;
+        right: 40px;
+        z-index: 100;
+    }
+</style>
+<!-- Header -->
+<%- include('../../partials/user/header') %>
+<main class="py-8 px-20 container">
+    <div class="text-sm text-gray-500">
+        <a href="/user/home">Home</a> &gt; Wishlist
+    </div>
+    <h1 class="text-2xl font-bold mb-4">My Wishlist (<%= wishlist ? wishlist.length : 0 %>) ❤️</h1>
+    <% if(wishlist.length>0 && wishlist){ %>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <% wishlist.forEach((item,index)=>{ %>
+        <div id="item<%= index %>"
+            class="bg-gradient-to-r from-orange-200 to-yellow-200 p-4 rounded-lg flex items-center space-x-4 hover:shadow-lg transition duration-300">
+            <img alt="Pumpkin Candles" class="w-24 h-24 rounded-lg hover:scale-105 transition duration-300"
+                height="100" width="100"
+                src="<%= item.productId.image && item.productId.image.length ? '/uploads/product-images/' + item.productId.image[0] : '/images/no_productImage.png' %>"/>
+            <div class="flex-1">
+                <h3><%= item.productId.name %></h3>
+                <div class="flex items-center space-x-2 mt-2">
+                    <span class="bg-green-500 text-white px-2 py-1 rounded-full text-sm"><%= item.productId.rating %> <i class="fas fa-star"></i>
+                    </span>
+                </div>
+                <div class="text-3xl font-bold text-green-600 mt-4">
+                    <b>₹</b> <%= item.productId.sellingPrice %>
+                    <span class="line-through text-gray-500 text-[20px]">₹ <%= item.productId.mrp %></span>
+                </div>
+            </div>
+            <div class="flex space-x-2">
+                <button type="button" onclick="moveToCart('<%= item.productId._id %>','<%= index %>')"
+                    class="bg-white border border-gray-300 px-4 py-2 rounded-full hover:bg-gray-100 hover:scale-105 transition duration-300">
+                    Move to cart
+                </button>
+                <button type="button" onclick="remove('<%= item.productId._id %>','<%= index %>')"
+                    class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 hover:scale-105 transition duration-300">
+                    Remove
+                </button>
+            </div>
+        </div>
+        <% }) %>
+    </div>
+    <% } else { %>
+        <div class="w-full flex justify-center">
+            <img class="h-[300px] w-[300px]" src="/images/user/wishlist_image.png" alt="">
+        </div>
+    <% } %>
+</main>
+<script>
+    async function moveToCart(productId, index){
+        try {
+            const response = await axios.post('/user/addToCart',{productId})
+            if(response.status === 200){
+                const response2 = await axios.delete(`/user/wishlist/remove?productId=${productId}`)
+                if(response2.status === 200){
+                    console.log("Added to cart")
+                    Toastify({
+                        text: "Moved to cart successfully!",
+                        duration: 2000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "linear-gradient(135deg, rgba(253, 186, 116, 0.9), rgba(255, 255, 255, 0.9))",
+                        stopOnFocus: true,
+                        className: "toast_style"
+                    }).showToast();
+                    
+                    // Hide the item
+                    const item = document.getElementById("item"+index);
+                    if(item) {
+                        item.classList.add('hidden');
+                        
+                        // Update wishlist count in the heading
+                        const wishlistCountElement = document.querySelector('h1');
+                        if(wishlistCountElement) {
+                            const currentCount = parseInt(wishlistCountElement.textContent.match(/\d+/)[0]);
+                            wishlistCountElement.textContent = `My Wishlist (${currentCount - 1}) ❤️`;
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Error in adding to cart:",error)
+            Toastify({
+                text: error.response?.data || "An error occurred",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                stopOnFocus: true,
+                className: "toast_style"
+            }).showToast();
+        }
+    }
+    
+    async function remove(productId, index){
+        try {
+            const response = await axios.delete(`/user/wishlist/remove?productId=${productId}`)
+            if(response.status === 200){
+                console.log('product removed from wishlist')
+                Toastify({
+                    text: "Removed from wishlist!",
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "linear-gradient(135deg, rgba(253, 186, 116, 0.9), rgba(255, 255, 255, 0.9))",
+                    stopOnFocus: true,
+                    className: "toast_style"
+                }).showToast();
+                
+                // Hide the item
+                const item = document.getElementById("item"+index);
+                if(item) {
+                    item.classList.add('hidden');
+                    
+                    // Update wishlist count in the heading
+                    const wishlistCountElement = document.querySelector('h1');
+                    if(wishlistCountElement) {
+                        const currentCount = parseInt(wishlistCountElement.textContent.match(/\d+/)[0]);
+                        wishlistCountElement.textContent = `My Wishlist (${currentCount - 1}) ❤️`;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error(error)
+            Toastify({
+                text: error.response?.data || "An error occurred",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                stopOnFocus: true,
+                className: "toast_style"
+            }).showToast();
+        }
+    }
+</script>

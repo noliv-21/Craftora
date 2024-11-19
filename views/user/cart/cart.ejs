@@ -1,3 +1,20 @@
+<style>
+    .toast_style{
+        width: fit-content;
+        max-width: 300px;
+        border-radius: 8px;
+        padding: 12px 20px;
+        border: 1px solid rgba(255, 0, 0, 0.3);
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 100;
+        /* position:sticky; */
+    }
+</style>
 <div class="min-h-screen flex flex-col">
 <!-- Header -->
 <%- include('../../partials/user/header') %>
@@ -5,7 +22,7 @@
     <!-- Main Content -->
     <main class="p-8 flex-grow justify-center">
         <div class="w-full mx-auto max-w-4xl">
-            <h1 class="text-2xl mb-4 text-center"><%= countOfProducts %> ITEM IN YOUR CART</h1>
+            <h1 id="cartHeader" class="text-2xl mb-4 text-center"><%= countOfProducts %> ITEM IN YOUR CART</h1>
             <% products.forEach((product,index)=>{ %>
             <div id="product-<%= product.productId._id %>" class="border rounded-lg p-4 flex bg-orange-200 shadow-md">
                 <img alt="Product image" class="w-48 h-48 rounded-lg"
@@ -34,11 +51,9 @@
                 </div>
             </div>
             <% }) %>
-            <% if(countOfProducts>0){ %>
-            <div class="mt-8 flex justify-center">
+            <div id="checkoutButton" class="mt-8 flex justify-center" style="display: '<%= countOfProducts > 0 ? 'flex' : 'none' %>'">
                 <a class="bg-orange-300 text-black px-8 py-4 rounded-lg text-xl" href="/user/order/addressPage">Check out</a>
             </div>
-            <% } %>
         </div>
     </main>
 
@@ -53,46 +68,98 @@
         const quantityElement = document.getElementById(`quantity-${productId}`);
         const totalPriceElement = document.getElementById(`total-price-${productId}`);
         let currentQuantity = parseInt(quantityElement.textContent);
+        const maxQuantity = Math.min(5, stock); // Limit to either 5 or stock, whichever is lower
 
-        if (currentQuantity + change < 1) return; // Prevent quantity from dropping below 1
-        if (currentQuantity + change > stock) return;
+        // Check limits before making the API call
+        const newQuantity = currentQuantity + change;
+        if (newQuantity < 1 || newQuantity > maxQuantity) {
+            Toastify({
+                text: newQuantity < 1 ? "Quantity cannot be less than 1" : "Cannot add more than " + maxQuantity + " items",
+                duration: 2000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                stopOnFocus: true,
+                className: "toast_style"
+            }).showToast();
+            return;
+        }
+
         try {
             const response = await fetch(`/user/cart/update-quantity`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId, change })
+                body: JSON.stringify({ productId, change }) // Remove newQuantity as it's not expected by the backend
             });
             const data = await response.json();
 
-            if (data.success) {
-                const newQuantity = currentQuantity + change;
+            if (response.ok) {
+                // Update quantity and price only if backend update was successful
                 quantityElement.textContent = newQuantity;
                 totalPriceElement.textContent = price * newQuantity;
+                
+                // Update cart header count
+                const cartHeader = document.getElementById('cartHeader');
+                if (cartHeader) {
+                    const currentCount = parseInt(cartHeader.textContent.split(' ')[0]);
+                    cartHeader.textContent = `${currentCount} ITEM${currentCount !== 1 ? 'S' : ''} IN YOUR CART`;
+                }
             } else {
-                console.error('Error updating quantity:', data.message);
+                Toastify({
+                    text: data.message || "Error updating quantity",
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                    stopOnFocus: true,
+                    className: "toast_style"
+                }).showToast();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Toastify({
+                text: "Failed to update quantity",
+                duration: 2000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                stopOnFocus: true,
+                className: "toast_style"
+            }).showToast();
+        }
+    }
+
+    async function removeProduct(id) {
+        try {
+            const response = await axios.delete('/user/cart/removeProduct', {
+                data: { id }
+            });
+            if (response.data.success) {
+                console.log('Product removed from cart');
+                const productElement = document.getElementById(`product-${id}`);
+                if (productElement) {
+                    // Get current count before removing the product
+                    const cartHeaderElement = document.getElementById('cartHeader');
+                    let currentCount = parseInt(cartHeaderElement.textContent);
+                    
+                    // Remove the product element
+                    productElement.remove();
+                    
+                    // Update the cart count in header
+                    currentCount--;
+                    cartHeaderElement.textContent = `${currentCount} ITEM IN YOUR CART`;
+                    
+                    // Show/hide checkout button based on count
+                    const checkoutButton = document.getElementById('checkoutButton');
+                    if (checkoutButton) {
+                        checkoutButton.style.display = currentCount > 0 ? 'flex' : 'none';
+                    }
+                }
+            } else {
+                console.error('Failed to remove product:', response.data.message);
             }
         } catch (error) {
             console.error('Error:', error);
         }
     }
-
-    async function removeProduct(id) {
-    try {
-        const response = await axios.delete('/user/cart/removeProduct', {
-            data: { id } // Pass `id` (productId) as data in the request body
-        });
-        if (response.data.success) {
-            console.log('Product removed from cart');
-            const productElement = document.getElementById(`product-${id}`);
-            if (productElement) {
-                productElement.remove();
-            }
-        } else {
-            console.error('Failed to remove product:', response.data.message);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-    }
-}
-
 </script>
