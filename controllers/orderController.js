@@ -4,56 +4,58 @@ const Addresses = require('../models/addressSchema')
 const Users = require('../models/userSchema')
 const Products = require('../models/productSchema')
 
-exports.cfmPage = async (req, res) => {
-    const userId = req.session.user._id
-    const addressId = req.query.address
-    req.session.user.orderAddress = addressId;
+exports.checkout = async (req, res) => {
+    const session = req.session.user;
+    const userId = session._id;
     try {
-        const cart = await Carts.findOne({userId}).populate('products.productId');
+        const cart = await Carts.findOne({ userId }).populate('products.productId');
+        const addresses = await Addresses.find({ userId });
+        const paymentMethods = Orders.schema.path('paymentMethod').enumValues;
+        
         let total = 0;
         const products = cart ? cart.products : [];
         products.forEach(item => {
             const price = item.productId.sellingPrice || 0;
             total += price * item.quantity;
         });
-        req.session.user.orderTotal = total;
-        // const total = cart ? cart.totalAmount : 0;
-        const productCount = products.length;
-        const deliveryAddress = await Addresses.findById(addressId)
-        res.render('user/order/confirmationPage', {
-            deliveryAddress,products,total,productCount
+
+        res.render('user/order/checkout', {
+            addresses,
+            paymentMethods,
+            session,
+            total,
+            products
         });
     } catch (error) {
-        res.status(500).json({ error: "Failed to initiate order confirmation" });
+        console.error("Error loading checkout page:", error);
+        res.status(500).json({ error: "Failed to load checkout page" });
     }
 };
 
-exports.paymentPage = async (req,res)=>{
-    const total = req.query.total;
-    console.log("total Amount",total)
-    try {
-        const paymentMethods = Orders.schema.path('paymentMethod').enumValues;
-        res.render('user/order/payment',{
-            total, paymentMethods
-        })
-    } catch (error) {
-        console.error(error)
-    }
-}
-
 exports.orderCreation = async (req,res)=>{
     const userId = req.session.user._id;
-    const { total, paymentType } = req.body;
-    const addressId = req.session.user.orderAddress;
-    req.session.user.orderAddress = null;
+    const { total, paymentType, addressId } = req.body;
+    
     try {
+        // Validate address
+        if (!addressId) {
+            return res.status(400).json({ message: "Please select a delivery address" });
+        }
+
         const cart = await Carts.findOne({ userId }).populate('products.productId');
         if (!cart) {
             return res.status(400).json({ message: "Cart is empty" });
         }
 
+        // Validate address belongs to user
+        const address = await Addresses.findOne({ _id: addressId, userId });
+        if (!address) {
+            return res.status(400).json({ message: "Invalid delivery address" });
+        }
+
         const newOrder = new Orders({
-            userId, addressId,
+            userId, 
+            addressId,
             products: cart.products.map(item => ({
                 productId: item.productId._id,
                 quantity: item.quantity,
@@ -75,9 +77,8 @@ exports.orderCreation = async (req,res)=>{
         }
 
         await Carts.deleteOne({ userId });
-        // await Carts.findOneAndUpdate({ userId }, { $set: { products: [] }, totalAmount: 0 });
         
-        res.status(200).json({ message: "Order placed successfully" });
+        res.status(200).json({ success: true, message: "Order placed successfully" });
     } catch (error) {
         console.error("Error creating order:", error);
         res.status(500).json({ message: "Failed to place order" });
@@ -163,18 +164,17 @@ exports.cancelOrder = async (req, res) => {
             cancelledOn: Date.now(),
         });
 
-        const updateInventoryPromises = order.products.map((item) =>
-            Products.findByIdAndUpdate(
-                item.productId,
-                { $inc: { inventory: item.quantity } } // Increment inventory
-            )
-        );
-        await Promise.all(updateInventoryPromises);
+        // Restore product inventory
+        for (const item of order.products) {
+            await Products.findByIdAndUpdate(item.productId, {
+                $inc: { inventory: item.quantity }
+            });
+        }
 
-        res.status(200).json({ message: "Order cancelled successfully." });
+        res.status(200).json({ message: "Order cancelled successfully" });
     } catch (error) {
         console.error("Error cancelling order:", error);
-        res.status(500).json({ message: "Server error. Unable to cancel the order." });
+        res.status(500).json({ message: "Failed to cancel order" });
     }
 };
 
