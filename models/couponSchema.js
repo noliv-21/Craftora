@@ -41,10 +41,10 @@ const couponSchema = new mongoose.Schema({
         min: [0, 'Minimum amount cannot be negative'],
         default: 0
     },
-    maxAmount: {
+    maxDiscount: {
         type: Number,
         required: [true, 'Maximum discount amount is required'],
-        min: [0, 'Maximum amount cannot be negative'],
+        min: [0, 'Maximum discount cannot be negative'],
         default: 0
     },
     expiryDate: {
@@ -100,7 +100,7 @@ couponSchema.virtual('isExpired').get(function() {
 
 // Virtual for checking if coupon is still available (not reached limit)
 couponSchema.virtual('isAvailable').get(function() {
-    return this.usedCount < this.limit && this.isActive && !this.isExpired;
+    return this.usedCount < this.totalLimit && this.isActive && !this.isExpired;
 });
 
 const couponModel = mongoose.model("coupon", couponSchema, "Coupons");

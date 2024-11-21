@@ -307,7 +307,7 @@ const addCoupon = async (req, res) => {
             discountType,
             discountValue,
             minAmount,
-            maxAmount,
+            maxDiscount,
             totalLimit,
             perUserLimit,
             expiryDate
@@ -335,7 +335,7 @@ const addCoupon = async (req, res) => {
         const numericFields = {
             discountValue: parseFloat(discountValue),
             minAmount: parseFloat(minAmount),
-            maxAmount: parseFloat(maxAmount),
+            maxDiscount: parseFloat(maxDiscount),
             totalLimit: parseInt(totalLimit),
             perUserLimit: parseInt(perUserLimit)
         };
@@ -366,7 +366,7 @@ const addCoupon = async (req, res) => {
             discountType,
             discountValue: numericFields.discountValue,
             minAmount: numericFields.minAmount,
-            maxAmount: numericFields.maxAmount,
+            maxDiscount: numericFields.maxDiscount,
             totalLimit: numericFields.totalLimit,
             perUserLimit: numericFields.perUserLimit,
             expiryDate: parsedExpiryDate,
@@ -397,7 +397,7 @@ const updateCoupon = async (req, res) => {
         if (req.body.discountType) updateData.discountType = req.body.discountType;
         if (req.body.discountValue) updateData.discountValue = Number(req.body.discountValue);
         if (req.body.minAmount) updateData.minAmount = Number(req.body.minAmount);
-        if (req.body.maxAmount) updateData.maxAmount = Number(req.body.maxAmount);
+        if (req.body.maxDiscount) updateData.maxDiscount = Number(req.body.maxDiscount);
         if (req.body.totalLimit) updateData.totalLimit = Number(req.body.totalLimit);
         if (req.body.perUserLimit) updateData.perUserLimit = Number(req.body.perUserLimit);
         if (req.body.expiryDate) updateData.expiryDate = new Date(req.body.expiryDate);

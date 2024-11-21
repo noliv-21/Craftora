@@ -253,14 +253,15 @@
                                                     <input type="text" id="couponCode" required
                                                         pattern="^[A-Z0-9]{6,12}$"
                                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                                        oninput="this.value = this.value.toUpperCase()">
+                                                        oninput="this.value = this.value.toUpperCase()"
+                                                        onkeyup="validateInput(this, 6, 12, 'Coupon code')">
                                                     <button type="button" onclick="generateCouponCode()"
                                                         class="mt-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
                                                         Generate
                                                     </button>
                                                 </div>
+                                                <p class="mt-1 text-sm text-red-500 hidden" id="couponCodeError"></p>
                                                 <div id="codeAvailabilityStatus" class="mt-1 text-sm"></div>
-                                                <p id="codeValidationMessage" class="mt-1 text-sm"></p>
                                             </div>
 
                                             <div>
@@ -276,19 +277,19 @@
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Discount Type <span
                                                         class="text-red-500">*</span></label>
-                                                <select id="discountType" required onchange="handleDiscountTypeChange(this)"
-                                                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                                <select id="discountType" required
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                                     <option value="percentage">Percentage</option>
                                                     <option value="fixed">Fixed Amount</option>
                                                 </select>
+                                                <p class="mt-1 text-sm text-red-500 hidden" id="discountTypeError"></p>
                                             </div>
 
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Discount Value <span
                                                         class="text-red-500">*</span></label>
                                                 <input type="number" id="discountValue" required min="0" step="1"
-                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                                    onchange="validateDiscountValue(this)">
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                                 <p class="mt-1 text-sm text-red-500 hidden" id="discountValueError"></p>
                                             </div>
 
@@ -664,33 +665,32 @@
 
                     // Validate max discount for percentage type
                     function validateMaxDiscount(input) {
+                        if (!input) return false;
+                        const value = parseFloat(input.value);
                         const errorElement = document.getElementById('maxDiscountError');
-                        const discountType = document.getElementById('discountType').value;
                         const discountValue = parseFloat(document.getElementById('discountValue').value);
+                        const discountType = document.getElementById('discountType').value.toUpperCase();
                         
-                        if (discountType === 'percentage') {
-                            const maxDiscount = parseFloat(input.value);
-                            
-                            if (isNaN(maxDiscount) || maxDiscount <= 0) {
-                                errorElement.textContent = 'Maximum discount limit must be greater than 0';
+                        if (!errorElement) return false;
+                        
+                        if (isNaN(value) || value <= 0) {
+                            errorElement.textContent = 'Maximum discount must be greater than 0';
+                            errorElement.classList.remove('hidden');
+                            return false;
+                        }
+
+                        // For percentage discounts, make sure maxDiscount makes sense with the discount percentage
+                        if (discountType === 'PERCENTAGE' && !isNaN(discountValue)) {
+                            const minAmount = parseFloat(document.getElementById('minAmount').value);
+                            if (!isNaN(minAmount) && value > (minAmount * discountValue / 100)) {
+                                errorElement.textContent = 'Maximum discount cannot be greater than the calculated discount amount';
                                 errorElement.classList.remove('hidden');
                                 return false;
                             }
-                            
-                            // Additional validation if needed
-                            // For example, max discount should be reasonable compared to discount percentage
-                            if (discountValue && !isNaN(discountValue)) {
-                                if (maxDiscount < (discountValue / 100)) {
-                                    errorElement.textContent = 'Maximum discount limit should be greater than the minimum possible discount';
-                                    errorElement.classList.remove('hidden');
-                                    return false;
-                                }
-                            }
-                            
-                            errorElement.classList.add('hidden');
-                            return true;
                         }
-                        return true; // Always return true for fixed discount type
+                        
+                        errorElement.classList.add('hidden');
+                        return true;
                     }
 
                     // Event listeners
@@ -718,121 +718,215 @@
 
                     // Form handling functions
                     async function validateForm() {
-                        let isValid = true;
-                        const requiredFields = {
-                            'couponName': 'Name',
-                            'couponCode': 'Code',
-                            'discountValue': 'Discount Value',
-                            'minAmount': 'Minimum Amount',
-                            'maxAmount': 'Maximum Amount',
-                            'maxUsers': 'Maximum Users'
-                        };
+                        const requiredFields = [
+                            { id: 'couponName', min: 3, max: 50, label: 'Coupon name' },
+                            { id: 'couponCode', min: 6, max: 12, label: 'Coupon code' },
+                            { id: 'description', min: 10, max: 200, label: 'Description' },
+                            { id: 'discountType', min: 0, max: 0, label: 'Discount type' },
+                            { id: 'discountValue', min: 0, max: 0, label: 'Discount value' },
+                            { id: 'minAmount', min: 0, max: 0, label: 'Minimum amount' },
+                            { id: 'maxDiscount', min: 0, max: 0, label: 'Maximum discount' },
+                            { id: 'totalLimit', min: 0, max: 0, label: 'Total limit' },
+                            { id: 'perUserLimit', min: 0, max: 0, label: 'Per user limit' },
+                            { id: 'expiryDate', min: 0, max: 0, label: 'Expiry date' }
+                        ];
 
-                        // Check required fields
-                        for (const [id, label] of Object.entries(requiredFields)) {
-                            const element = document.getElementById(id);
-                            if (!element.value.trim()) {
-                                showError(id, `${label} is required`);
-                                isValid = false;
+                        let isValid = true;
+
+                        for (const field of requiredFields) {
+                            const input = document.getElementById(field.id);
+                            if (!input) {
+                                console.error(`Field ${field.id} not found`);
+                                continue;
+                            }
+
+                            if (field.min > 0 || field.max > 0) {
+                                if (!validateInput(input, field.min, field.max, field.label)) {
+                                    isValid = false;
+                                }
                             } else {
-                                hideError(id);
+                                if (!input.value.trim()) {
+                                    const errorElement = document.getElementById(`${field.id}Error`);
+                                    if (errorElement) {
+                                        errorElement.textContent = `${field.label} is required`;
+                                        errorElement.classList.remove('hidden');
+                                    }
+                                    isValid = false;
+                                }
                             }
                         }
 
-                        // Validate amounts if form is still valid
-                        if (isValid) {
-                            const minAmount = parseFloat(document.getElementById('minAmount').value);
-                            const maxAmount = parseFloat(document.getElementById('maxAmount').value);
-                            const discountValue = parseFloat(document.getElementById('discountValue').value);
-
-                            if (maxAmount <= minAmount) {
-                                showError('maxAmount', 'Maximum amount must be greater than minimum amount');
-                                isValid = false;
-                            }
-
-                            if (discountValue <= 0) {
-                                showError('discountValue', 'Discount value must be greater than 0');
-                                isValid = false;
-                            }
-
-                            if (discountValue >= maxAmount) {
-                                showError('discountValue', 'Discount value must be less than maximum amount');
-                                isValid = false;
-                            }
-                        }
-
-                        return isValid;
-                    }
-
-                    function validateAmount(element, type) {
-                        let isValid = true;
-                        let errorMessage = '';
-
-                        const value = parseFloat(element.value);
-                        const minAmount = parseFloat(document.getElementById('minAmount').value);
-                        const maxAmount = parseFloat(document.getElementById('maxAmount').value);
+                        // Additional validation for numeric fields
+                        const discountType = document.getElementById('discountType').value;
                         const discountValue = parseFloat(document.getElementById('discountValue').value);
 
-                        switch (type) {
-                            case 'minAmount':
-                                if (value < 0) {
-                                    errorMessage = 'Minimum amount cannot be negative';
-                                    isValid = false;
-                                } else if (maxAmount && value >= maxAmount) {
-                                    errorMessage = 'Minimum amount must be less than maximum amount';
-                                    isValid = false;
-                                }
-                                break;
-
-                            case 'maxAmount':
-                                if (value <= 0) {
-                                    errorMessage = 'Maximum amount must be greater than 0';
-                                    isValid = false;
-                                } else if (value <= minAmount) {
-                                    errorMessage = 'Maximum amount must be greater than minimum amount';
-                                    isValid = false;
-                                }
-                                break;
-
-                            case 'discountValue':
-                                if (value <= 0) {
-                                    errorMessage = 'Discount value must be greater than 0';
-                                    isValid = false;
-                                } else if (maxAmount && value >= maxAmount) {
-                                    errorMessage = 'Discount value must be less than maximum amount';
-                                    isValid = false;
-                                }
-                                break;
+                        if (discountType === 'percentage' && (discountValue <= 0 || discountValue > 100)) {
+                            const errorElement = document.getElementById('discountValueError');
+                            if (errorElement) {
+                                errorElement.textContent = 'Percentage discount must be between 1 and 100';
+                                errorElement.classList.remove('hidden');
+                            }
+                            isValid = false;
                         }
 
-                        if (!isValid) {
-                            showError(element.id, errorMessage);
-                        } else {
-                            hideError(element.id);
+                        // Validate expiry date
+                        const expiryDate = new Date(document.getElementById('expiryDate').value);
+                        if (expiryDate <= new Date()) {
+                            const errorElement = document.getElementById('expiryDateError');
+                            if (errorElement) {
+                                errorElement.textContent = 'Expiry date must be in the future';
+                                errorElement.classList.remove('hidden');
+                            }
+                            isValid = false;
                         }
 
                         return isValid;
                     }
 
-                    function showError(elementId, message) {
-                        const element = document.getElementById(elementId);
-                        const errorElement = document.getElementById(`${elementId}Error`);
-
-                        if (element && errorElement) {
-                            element.classList.add('border-red-500');
-                            errorElement.textContent = message;
-                            errorElement.classList.remove('hidden');
+                    function validateInput(input, minLength, maxLength, fieldName) {
+                        if (!input) return false;
+                        const value = input.value.trim();
+                        const errorElement = document.getElementById(`${input.id}Error`);
+                        
+                        if (!errorElement) {
+                            console.error(`Error element not found for ${fieldName}`);
+                            return false;
                         }
+                        
+                        if (value.length < minLength || value.length > maxLength) {
+                            errorElement.textContent = `${fieldName} must be between ${minLength} and ${maxLength} characters`;
+                            errorElement.classList.remove('hidden');
+                            return false;
+                        }
+                        
+                        errorElement.classList.add('hidden');
+                        return true;
                     }
 
-                    function hideError(elementId) {
-                        const element = document.getElementById(elementId);
-                        const errorElement = document.getElementById(`${elementId}Error`);
+                    function validateDiscountValue(input) {
+                        if (!input) return false;
+                        const value = parseFloat(input.value);
+                        const errorElement = document.getElementById('discountValueError');
+                        const discountType = document.getElementById('discountType').value.toUpperCase();
+                        
+                        if (!errorElement) return false;
+                        
+                        if (isNaN(value) || value <= 0) {
+                            errorElement.textContent = 'Discount value must be greater than 0';
+                            errorElement.classList.remove('hidden');
+                            return false;
+                        }
 
-                        if (element && errorElement) {
-                            element.classList.remove('border-red-500');
-                            errorElement.textContent = '';
-                            errorElement.classList.add('hidden');
+                        if (discountType === 'PERCENTAGE' && value > 100) {
+                            errorElement.textContent = 'Percentage discount cannot exceed 100%';
+                            errorElement.classList.remove('hidden');
+                            return false;
+                        }
+                        
+                        errorElement.classList.add('hidden');
+                        return true;
+                    }
+
+                    function validateAmount(input) {
+                        if (!input) return false;
+                        const value = parseFloat(input.value);
+                        const errorElement = document.getElementById(`${input.id}Error`);
+                        
+                        if (!errorElement) return false;
+                        
+                        if (isNaN(value) || value <= 0) {
+                            errorElement.textContent = 'Amount must be greater than 0';
+                            errorElement.classList.remove('hidden');
+                            return false;
+                        }
+                        
+                        errorElement.classList.add('hidden');
+                        return true;
+                    }
+
+                    function validateLimit(input) {
+                        if (!input) return false;
+                        const value = parseInt(input.value);
+                        const errorElement = document.getElementById(`${input.id}Error`);
+                        
+                        if (!errorElement) return false;
+                        
+                        if (isNaN(value) || value <= 0) {
+                            errorElement.textContent = 'Limit must be greater than 0';
+                            errorElement.classList.remove('hidden');
+                            return false;
+                        }
+                        
+                        errorElement.classList.add('hidden');
+                        return true;
+                    }
+
+                    function validateExpiryDate(input) {
+                        if (!input) return false;
+                        const selectedDate = new Date(input.value);
+                        const today = new Date();
+                        const errorElement = document.getElementById('expiryDateError');
+                        
+                        if (!errorElement) return false;
+                        
+                        today.setHours(0, 0, 0, 0);
+                        
+                        if (selectedDate < today) {
+                            errorElement.textContent = 'Expiry date must be in the future';
+                            errorElement.classList.remove('hidden');
+                            return false;
+                        }
+                        
+                        errorElement.classList.add('hidden');
+                        return true;
+                    }
+
+                    async function submitForm(event) {
+                        event.preventDefault();
+                        
+                        try {
+                            if (!validateForm()) {
+                                showToast('Please fix the validation errors', 'error');
+                                return;
+                            }
+
+                            // Get form data
+                            const formData = {
+                                name: document.getElementById('couponName').value.trim(),
+                                couponCode: document.getElementById('couponCode').value.trim().toUpperCase(),
+                                description: document.getElementById('description').value.trim(),
+                                discountType: document.getElementById('discountType').value.toUpperCase(),
+                                discountValue: parseFloat(document.getElementById('discountValue').value),
+                                minAmount: parseFloat(document.getElementById('minAmount').value),
+                                maxDiscount: parseFloat(document.getElementById('maxDiscount').value),
+                                totalLimit: parseInt(document.getElementById('totalLimit').value),
+                                perUserLimit: parseInt(document.getElementById('perUserLimit').value),
+                                expiryDate: document.getElementById('expiryDate').value
+                            };
+
+                            // Add image if available
+                            const croppedImageData = document.getElementById('croppedImageData').value;
+                            if (croppedImageData) {
+                                formData.image = croppedImageData;
+                            }
+
+                            // Send request
+                            const response = await axios.post('/admin/coupons', formData, {
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            });
+
+                            if (response.data.success) {
+                                showToast('Coupon added successfully', 'success');
+                                setTimeout(() => window.location.reload(), 1000);
+                            } else {
+                                showToast(response.data.error || 'Failed to add coupon', 'error');
+                            }
+                        } catch (error) {
+                            console.error('Error submitting form:', error);
+                            const errorMessage = error.response?.data?.error || 'Failed to add coupon';
+                            showToast(errorMessage, 'error');
                         }
                     }
 
@@ -856,127 +950,35 @@
                     }
 
                     function resetForm() {
-                        document.getElementById('couponForm').reset();
-                        hideError('couponCode');
-                        hideError('description');
-                        hideError('discountValue');
-                        hideError('maxAmount');
-                        hideError('minPurchase');
-                        hideError('maxUsers');
-                        updateAvailabilityStatus('');
-                        resetImage();
-                    }
+                        const form = document.getElementById('couponForm');
+                        if (form) form.reset();
 
-                    // Form submission
-                    async function submitForm(event) {
-                        event.preventDefault();
+                        // Clear all error messages
+                        const errorElements = document.querySelectorAll('[id$="Error"]');
+                        errorElements.forEach(element => {
+                            element.textContent = '';
+                            element.classList.add('hidden');
+                        });
 
-                        try {
-                            if (!validateForm()) {
-                                return false;
-                            }
-
-                            const formData = prepareFormData();
-                            const couponId = document.getElementById('couponId').value;
-                            const url = couponId ? `/admin/coupons/${couponId}` : '/admin/coupons';
-                            const method = couponId ? 'PUT' : 'POST';
-
-                            const response = await axios({
-                                method: method,
-                                url: url,
-                                data: formData,
-                                headers: {
-                                    'Content-Type': 'multipart/form-data'
-                                }
-                            });
-
-                            if (response.status === 200 || response.status === 201) {
-                                showToast(couponId ? 'Coupon updated successfully' : 'Coupon created successfully', 'success');
-                                closeModal();
-                                window.location.reload();
-                            }
-                        } catch (error) {
-                            console.error('Error submitting form:', error);
-                            showToast(error.response?.data?.message || 'Failed to save coupon', 'error');
+                        // Reset coupon code status
+                        const statusElement = document.getElementById('codeAvailabilityStatus');
+                        if (statusElement) {
+                            statusElement.textContent = '';
+                            statusElement.className = 'mt-1 text-sm';
                         }
 
-                        return false;
-                    }
+                        // Reset image related elements
+                        const cropperContainer = document.getElementById('cropperContainer');
+                        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+                        const croppedImageData = document.getElementById('croppedImageData');
 
-                    function prepareFormData() {
-                        const formData = new FormData();
+                        if (cropperContainer) cropperContainer.classList.add('hidden');
+                        if (imagePreviewContainer) imagePreviewContainer.classList.add('hidden');
+                        if (croppedImageData) croppedImageData.value = '';
 
-                        // Get basic fields
-                        formData.append('name', document.getElementById('couponName').value.trim());
-                        formData.append('couponCode', document.getElementById('couponCode').value.trim());
-                        formData.append('description', document.getElementById('description').value.trim());
-                        formData.append('discountValue', document.getElementById('discountValue').value);
-                        formData.append('minAmount', document.getElementById('minAmount').value);
-                        formData.append('maxAmount', document.getElementById('maxAmount').value);
-                        formData.append('maxUsers', document.getElementById('maxUsers').value);
-
-                        // Get cropped image data if available
-                        const croppedImageData = document.getElementById('croppedImageData').value;
-                        if (croppedImageData) {
-                            formData.append('image', croppedImageData);
-                        }
-
-                        return formData;
-                    }
-
-                    // Status toggle
-                    async function toggleCouponStatus(couponId, currentStatus) {
-                        try {
-                            const response = await axios.patch(`/admin/coupons/${couponId}/toggle`);
-
-                            if (response.status === 200) {
-                                const newStatus = response.data.isActive;
-                                updateStatusButton(couponId, newStatus);
-                                showToast(`Coupon ${newStatus ? 'activated' : 'deactivated'} successfully`, 'success');
-                            }
-                        } catch (error) {
-                            console.error('Error toggling coupon status:', error);
-                            showToast('Failed to update coupon status', 'error');
-                        }
-                    }
-
-                    function updateStatusButton(couponId, isActive) {
-                        const button = document.querySelector(`[data-coupon-id="${couponId}"] .status-button`);
-                        if (button) {
-                            button.textContent = isActive ? 'Active' : 'Inactive';
-                            button.classList.remove(isActive ? 'bg-red-100' : 'bg-green-100');
-                            button.classList.add(isActive ? 'bg-green-100' : 'bg-red-100');
-                        }
-                    }
-
-                    // Coupon code functions
-                    function updateAvailabilityStatus(code, isAvailable) {
-                        const statusDiv = document.getElementById('codeAvailabilityStatus');
-                        if (!statusDiv) return;
-
-                        if (!code) {
-                            statusDiv.textContent = '';
-                            statusDiv.className = 'mt-1 text-sm';
-                            return;
-                        }
-
-                        if (isAvailable) {
-                            statusDiv.textContent = '✓ This code is available';
-                            statusDiv.className = 'mt-1 text-sm text-green-600';
-                        } else {
-                            statusDiv.textContent = '✗ This code is already taken';
-                            statusDiv.className = 'mt-1 text-sm text-red-600';
-                        }
-                    }
-
-                    async function checkCouponExists(code) {
-                        try {
-                            const response = await axios.get(`/admin/coupons/check-code/${code}`);
-                            return response.data.exists;
-                        } catch (error) {
-                            console.error('Error checking coupon code:', error);
-                            throw error;
-                        }
+                        // Reset the discount type handling
+                        const discountType = document.getElementById('discountType');
+                        if (discountType) handleDiscountTypeChange(discountType);
                     }
 
                     // Edit coupon function
@@ -995,9 +997,9 @@
                                 discountType: row.getAttribute('data-discount-type'),
                                 discountValue: row.getAttribute('data-discount-value'),
                                 minAmount: row.getAttribute('data-min-amount'),
-                                maxAmount: row.getAttribute('data-max-amount'),
+                                maxDiscount: row.getAttribute('data-max-discount'),
                                 totalLimit: row.getAttribute('data-total-limit'),
-                                perUserLimit: row.getAttribute('data-per-user-limit'),
+                                userLimit: row.getAttribute('data-user-limit'),
                                 expiryDate: row.getAttribute('data-expiry'),
                                 image: row.getAttribute('data-image')
                             };
@@ -1017,10 +1019,16 @@
                             document.getElementById('couponName').value = coupon.name;
                             document.getElementById('couponCode').value = coupon.couponCode;
                             document.getElementById('description').value = coupon.description;
+                            document.getElementById('discountType').value = coupon.discountType.toLowerCase();
                             document.getElementById('discountValue').value = coupon.discountValue;
                             document.getElementById('minAmount').value = coupon.minAmount;
-                            document.getElementById('maxAmount').value = coupon.maxAmount;
-                            document.getElementById('maxUsers').value = coupon.maxUsers;
+                            document.getElementById('maxDiscount').value = coupon.maxDiscount;
+                            document.getElementById('totalLimit').value = coupon.totalLimit;
+                            document.getElementById('perUserLimit').value = coupon.userLimit;
+                            document.getElementById('expiryDate').value = new Date(coupon.expiryDate).toISOString().split('T')[0];
+
+                            // Handle discount type visibility
+                            handleDiscountTypeChange(document.getElementById('discountType'));
 
                             // Reset image related elements
                             document.getElementById('cropperContainer').classList.add('hidden');
@@ -1036,33 +1044,6 @@
                             showToast('Error loading coupon details', 'error');
                         }
                     }
-
-                    function showExistingImage(imagePath) {
-                        if (imagePath) {
-                            const previewContainer = document.getElementById('imagePreviewContainer');
-                            const imagePreview = document.getElementById('imagePreview');
-
-                            // Ensure the path starts with /uploads/coupons/
-                            const fullPath = imagePath.startsWith('/') ? imagePath : '/uploads/coupons/' + imagePath;
-                            imagePreview.src = fullPath;
-
-                            // Show the preview container and hide the cropper
-                            previewContainer.classList.remove('hidden');
-                            document.getElementById('cropperContainer').classList.add('hidden');
-                        }
-                    }
-
-                    // Event listeners
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const imageInput = document.getElementById('imageInput');
-                        if (imageInput) {
-                            imageInput.addEventListener('change', function () {
-                                validateAndHandleImage(this);
-                            });
-                        }
-
-                        // Initialize other event listeners as needed
-                    });
                 </script>
         </div>
 </div>
