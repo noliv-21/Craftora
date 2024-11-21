@@ -1,21 +1,62 @@
 const Carts = require('../models/cartSchema')
 const Products = require('../models/productSchema')
 
-exports.getCart = async (req,res)=>{
+exports.getCart = async (req, res) => {
     try {
         const session = req.session.user;
-        const userId = session._id
-        const cart = await Carts.findOne({userId}).populate('products.productId');
-        const products = cart ? cart.products : [];
-        const total = cart ? cart.totalAmount : 0;
-        countOfProducts = products.length
-        res.render('user/cart/cart',{
-            total,products,session, countOfProducts
-        })
+        const userId = session._id;
+
+        const cart = await Carts.findOne({ userId }).populate({
+            path: 'products.productId',
+            // select: 'name mrp offer fixedAmount category',
+            populate: { path: 'category', select: 'offer' }
+        });
+
+        const products = cart ? cart.products.map(item => {
+            const product = item.productId;
+
+            // Calculate discounts
+            const percentageDiscountFromProduct = product.offer ? Math.floor(product.mrp * (product.offer / 100)) : 0;
+            const fixedDiscountFromProduct = product.fixedAmount || 0;
+            const categoryDiscount = product.category.offer
+                ? Math.floor(product.mrp * (product.category.offer / 100))
+                : 0;
+
+            // Determine the best price
+            let discountedPrice = product.mrp;
+            let bestDiscountType = '';
+
+            if (percentageDiscountFromProduct > fixedDiscountFromProduct && percentageDiscountFromProduct > categoryDiscount) {
+                discountedPrice = product.mrp - percentageDiscountFromProduct;
+                bestDiscountType = `${product.offer}% off`;
+            } else if (fixedDiscountFromProduct > categoryDiscount) {
+                discountedPrice = product.mrp - fixedDiscountFromProduct;
+                bestDiscountType = `₹${fixedDiscountFromProduct} off`;
+            } else if (categoryDiscount > 0) {
+                discountedPrice = product.mrp - categoryDiscount;
+                bestDiscountType = `Category Offer: ${product.category.offer}% off`;
+            }
+
+            return {
+                ...item.toObject(),
+                discountedPrice,
+                bestDiscountType
+            };
+        }) : [];
+
+        const total = products.reduce((sum, item) => sum + (item.discountedPrice * item.quantity), 0);
+        const countOfProducts = products.length;
+
+        res.render('user/cart/cart', {
+            total,
+            products,
+            session,
+            countOfProducts
+        });
     } catch (error) {
-        console.error(error)
+        console.error(error);
     }
-}
+};
 
 exports.addToCart = async (req,res)=>{
     try {

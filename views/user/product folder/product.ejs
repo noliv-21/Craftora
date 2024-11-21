@@ -48,8 +48,15 @@
                 <div class="bg-green-500 text-white px-2 py-1 rounded">Rating <%= product.rating %> <i class="fas fa-star"></i></div>
             </div>
             <div class="text-3xl font-bold text-green-600 mt-4">
-                <b>₹</b> <%= product.sellingPrice %>
-                <span class="line-through text-gray-500 text-[20px]">₹ <%= product.mrp %></span>
+                <b>₹</b> <%= product.discountedPrice %>
+                <% if (product.bestDiscount > 0) { %>
+                    <span class="line-through text-gray-500 text-[20px]">₹ <%= product.mrp %></span>
+                    <span class="text-sm text-red-500 font-normal">
+                        (<%= product.bestDiscount === Math.floor(product.mrp * (product.offer / 100)) 
+                            ? product.offer + '%' 
+                            : '₹' + product.bestDiscount %> off)
+                    </span>
+                <% } %>
             </div>
             <span class="inline-flex gap-1 flex-col">
                 <div class="text-sm text-gray-500 mt-2">Special Price</div>
@@ -60,7 +67,6 @@
                 <% } else if(product.inventory<=0) { %>
                         <div class="bg-red-100 inline text-red-600 px-2 py-1 my-1 rounded-md">
                             Out of Stock
-                            <!-- <%= product.isAvailable %> -->
                         </div>
                 <% } else { %>
                         <div class="bg-yellow-100 inline text-yellow-600 px-2 py-1 my-1 rounded-md">

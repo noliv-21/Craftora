@@ -260,20 +260,38 @@ exports.productDetailsUser = async (req, res) => {
         const productId = req.params.productId;
         const deliveryDate = new Date(new Date().setDate(new Date().getDate() + 5))
             .toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-        const productDetails = await Products.findById(productId).populate('category', 'name');
+
+        const productDetails = await Products.findById(productId).populate('category', 'name offer');
+        
+        // Calculate the best offer
+        const percentageDiscount = productDetails.offer ? Math.floor(productDetails.mrp * (productDetails.offer / 100)) : 0;
+        const fixedDiscount = productDetails.fixedAmount || 0;
+        const categoryOfferDiscount = productDetails.category.offer 
+            ? Math.floor(productDetails.mrp * (productDetails.category.offer / 100)) 
+            : 0;
+
+        const bestDiscount = Math.max(percentageDiscount, fixedDiscount, categoryOfferDiscount);
+        const discountedPrice = productDetails.mrp - bestDiscount;
+
+        // Add calculated data to product object
+        productDetails.discountedPrice = discountedPrice;
+        productDetails.bestDiscount = bestDiscount;
+
         const relatedProducts = await Products.find({
-            category:productDetails.category._id,
+            category: productDetails.category._id,
             _id: { $ne: productId }
-        }).sort({createdAt:-1}).limit(10)
-        const title = productDetails.name
+        }).sort({ createdAt: -1 }).limit(10);
+
+        const title = productDetails.name;
         const session = req.session.user || null;
+
         res.render('user/product folder/product', {
             title, session, product: productDetails, deliveryDate, relatedProducts
-        })
+        });
     } catch (error) {
-        console.error(error)
+        console.error(error);
     }
-}
+};
 
 // Product page
 exports.showProductsPage = (req, res) => {
@@ -471,7 +489,8 @@ exports.fetchProducts = async (req, res) => {
             totalPages: totalPages,
             page: page,
             limit: limit,
-            sortOption
+            sortOption,
+            isLoggedIn: !!req.session.user
         });
     } catch (error) {
         console.log("Error in fetchProducts:", error);

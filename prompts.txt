@@ -1,5 +1,0 @@
-Bro, I am not using the file upload in the product adding. Instead I am getting it as a formData like req.body.images. And converting this by saveBase64Image function. And also I am adding the filename to the data that is going to save to the database. So implement this functionality in the coupon section for only one image. 
-
-You can also refer the add_product.ejs to know how I am handling the data there including the image.
-I think I am sending the data of the fields through the form itself. So if you can do the same method in the coupons.ejs and in it's controller, then that's better.
-So after knowing it correctly and making sure it will work then do the changes. 
