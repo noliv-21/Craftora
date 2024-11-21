@@ -40,10 +40,9 @@ admin.get('/orders',orderController.getOrdersAdmin)
 admin.post('/cancelOrder/:orderId',orderController.cancelOrder)
 admin.patch('/updateOrderStatus/:orderId',orderController.updateStatus)
 
+// Coupon routes
 admin.get('/coupons',couponController.couponsPage_admin)
 admin.get('/coupons/check-code/:code', couponController.checkCouponCode)
-
-// Coupon routes
 admin.post('/coupons', couponController.addCoupon);
 admin.patch('/coupons/:id', couponController.updateCoupon);
 admin.patch('/coupons/:id/toggle', couponController.toggleCouponStatus)

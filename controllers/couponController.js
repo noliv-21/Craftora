@@ -1,48 +1,6 @@
 const Coupons = require('../models/couponSchema');
 const Users = require('../models/userSchema');
 const Orders = require('../models/orderSchema');
-const fs = require('fs');
-const path = require('path');
-
-// Helper function to convert base64 to image and save
-const saveBase64AsImage = async (base64String, fileName) => {
-    try {
-        // Remove the data:image/jpeg;base64 prefix if present
-        const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
-        
-        // Create buffer from base64
-        const imageBuffer = Buffer.from(base64Data, 'base64');
-        
-        // Create uploads directory if it doesn't exist
-        const uploadDir = path.join(__dirname, '../public/uploads/coupons');
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        
-        // Save the file
-        const filePath = path.join(uploadDir, fileName);
-        fs.writeFileSync(filePath, imageBuffer);
-        
-        return true;
-    } catch (error) {
-        console.error('Error saving image:', error);
-        return false;
-    }
-};
-
-// Helper function to delete image file
-const deleteImageFile = async (filename) => {
-    if (!filename) return;
-    
-    try {
-        const imagePath = path.join(__dirname, '../public/uploads/coupons', filename);
-        if (fs.existsSync(imagePath)) {
-            fs.unlinkSync(imagePath);
-        }
-    } catch (error) {
-        console.error('Error deleting image file:', error);
-    }
-};
 
 // Get user's available coupons and history
 const getUserCoupons = async (req, res) => {
@@ -252,7 +210,7 @@ const getProductDetailsCoupons = async (req, res) => {
                 discount: coupon.discountType === 'PERCENTAGE' 
                     ? `${coupon.discountAmount}% OFF` 
                     : `₹${coupon.discountAmount} OFF`,
-                minAmount: coupon.minimumAmount,
+                minAmount: coupon.minAmount,
                 description: coupon.description || 'Limited time offer!',
                 type: coupon.couponType
             }))
@@ -313,16 +271,6 @@ const addCoupon = async (req, res) => {
             expiryDate
         } = req.body;
 
-        let imageName = '';
-        if (req.files && req.files.image) {
-            const croppedImageData = req.files.image;
-            imageName = croppedImageData.name;
-            const saved = await saveBase64AsImage(croppedImageData, imageName);
-            if (!saved) {
-                return res.status(500).json({ success: false, error: 'Failed to save image' });
-            }
-        }
-
         // Validate required fields
         if (!name || !couponCode || !description || !discountType || !expiryDate) {
             return res.status(400).json({
@@ -369,8 +317,7 @@ const addCoupon = async (req, res) => {
             maxDiscount: numericFields.maxDiscount,
             totalLimit: numericFields.totalLimit,
             perUserLimit: numericFields.perUserLimit,
-            expiryDate: parsedExpiryDate,
-            image: imageName
+            expiryDate: parsedExpiryDate
         });
 
         await newCoupon.save();
@@ -401,24 +348,6 @@ const updateCoupon = async (req, res) => {
         if (req.body.totalLimit) updateData.totalLimit = Number(req.body.totalLimit);
         if (req.body.perUserLimit) updateData.perUserLimit = Number(req.body.perUserLimit);
         if (req.body.expiryDate) updateData.expiryDate = new Date(req.body.expiryDate);
-
-        // Handle image update
-        if (req.body.croppedImageData) {
-            // Get the existing coupon to find the old image
-            const existingCoupon = await Coupons.findById(couponId);
-            if (existingCoupon && existingCoupon.image) {
-                // Delete the old image file
-                await deleteImageFile(existingCoupon.image);
-            }
-
-            // Save the new image
-            const imageName = `coupon_${Date.now()}.png`;
-            const saved = await saveBase64AsImage(req.body.croppedImageData, imageName);
-            if (!saved) {
-                return res.status(500).json({ success: false, error: 'Failed to save image' });
-            }
-            updateData.image = imageName;
-        }
 
         const updatedCoupon = await Coupons.findByIdAndUpdate(
             couponId, 

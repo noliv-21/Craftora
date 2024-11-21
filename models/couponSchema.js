@@ -57,10 +57,6 @@ const couponSchema = new mongoose.Schema({
             message: 'Expiry date must be in the future'
         }
     },
-    image: {
-        type: String,
-        default: 'default-coupon.png'
-    },
     isActive: {
         type: Boolean,
         default: true

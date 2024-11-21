@@ -60,9 +60,6 @@
                                     <tr>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                                            Image</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                             Name</th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
@@ -70,6 +67,9 @@
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                             Discount</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                            Usage Limits</th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                             Status</th>
@@ -89,17 +89,10 @@
                                             data-discount-type="<%= coupon.discountType %>"
                                             data-discount-value="<%= coupon.discountValue %>"
                                             data-min-amount="<%= coupon.minAmount %>"
-                                            data-max-amount="<%= coupon.maxAmount %>"
+                                            data-max-discount="<%= coupon.maxDiscount %>"
                                             data-total-limit="<%= coupon.totalLimit %>"
                                             data-per-user-limit="<%= coupon.perUserLimit %>"
-                                            data-expiry="<%= coupon.expiryDate %>" data-image="<%= coupon.image %>">
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="flex-shrink-0 h-10 w-10">
-                                                    <img class="h-10 w-10 rounded-full object-cover"
-                                                        src="<%= coupon.image ? `/uploads/coupons/${coupon.image}` : '/images/default-coupon.png' %>"
-                                                        alt="<%= coupon.name %>">
-                                                </div>
-                                            </td>
+                                            data-expiry="<%= coupon.expiryDate.toISOString() %>">
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm font-medium text-gray-900">
                                                     <%= coupon.name %>
@@ -117,8 +110,18 @@
                                                         : `₹${coupon.discountValue}` %>
                                                 </div>
                                                 <div class="text-xs text-gray-500">
-                                                    Min: ₹<%= coupon.minAmount %> | Max: <%= coupon.maxAmount ?
-                                                            `₹${coupon.maxAmount}` : 'N/A' %>
+                                                    Min Order: ₹<%= coupon.minAmount %>
+                                                    <% if (coupon.discountType === 'PERCENTAGE' && coupon.maxDiscount) { %>
+                                                        <br>Max Discount: ₹<%= coupon.maxDiscount %>
+                                                    <% } %>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">
+                                                    Total: <%= coupon.totalLimit ? coupon.totalLimit : 'Unlimited' %>
+                                                </div>
+                                                <div class="text-xs text-gray-500">
+                                                    Per User: <%= coupon.perUserLimit ? coupon.perUserLimit : 'Unlimited' %>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
@@ -127,8 +130,8 @@
                                                     <%= coupon.isActive ? 'Active' : 'Inactive' %>
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                <%= new Date(coupon.expiryDate).toLocaleDateString() %>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <%= new Date(coupon.expiryDate).toLocaleDateString('en-IN') %>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                                 <button onclick="editCoupon('<%= coupon._id %>')"
@@ -136,9 +139,8 @@
                                                 <button id="toggle-<%= coupon._id %>"
                                                     onclick="toggleCouponStatus('<%= coupon._id %>', '<%= coupon.isActive %>')"
                                                     class="text-<%= coupon.isActive ? 'red' : 'green' %>-600 hover:text-<%= coupon.isActive ? 'red' : 'green' %>-800"
-                                                    title="<%= coupon.isActive ? 'Deactivate' : 'Activate' %>">
-                                                    <i
-                                                        class="fas fa-toggle-<%= coupon.isActive ? 'on' : 'off' %> text-xl"></i>
+                                                    title="<%= coupon.isActive ? 'Click to deactivate this coupon' : 'Click to activate this coupon' %>">
+                                                    <i class="fas fa-toggle-<%= coupon.isActive ? 'on' : 'off' %> text-xl"></i>
                                                 </button>
                                             </td>
                                         </tr>
@@ -228,12 +230,8 @@
 
                             <!-- Modal body -->
                             <div class="p-6">
-                                <form id="couponForm" class="space-y-4" onsubmit="return submitForm(event)"
-                                    enctype="multipart/form-data">
+                                <form id="couponForm" class="space-y-4" onsubmit="return submitForm(event)">
                                     <input type="hidden" id="couponId">
-                                    <input type="hidden" id="croppedImageData">
-
-                                    <!-- Two column layout -->
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <!-- Left column -->
                                         <div class="space-y-4">
@@ -249,26 +247,35 @@
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Code <span
                                                         class="text-red-500">*</span></label>
-                                                <div class="flex space-x-2">
+                                                <div class="mt-1 relative">
                                                     <input type="text" id="couponCode" required
                                                         pattern="^[A-Z0-9]{6,12}$"
-                                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                                         oninput="this.value = this.value.toUpperCase()"
                                                         onkeyup="validateInput(this, 6, 12, 'Coupon code')">
                                                     <button type="button" onclick="generateCouponCode()"
-                                                        class="mt-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
+                                                        class="absolute inset-y-0 right-0 px-3 flex items-center bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700">
                                                         Generate
                                                     </button>
                                                 </div>
+                                                <div id="codeAvailability" class="mt-1 text-sm hidden">
+                                                    <div id="checkingCode" class="text-gray-500 hidden">
+                                                        <i class="fas fa-spinner fa-spin"></i> Checking availability...
+                                                    </div>
+                                                    <div id="codeAvailable" class="text-green-600 hidden">
+                                                        <i class="fas fa-check-circle"></i> Coupon code is available
+                                                    </div>
+                                                    <div id="codeUnavailable" class="text-red-600 hidden">
+                                                        <i class="fas fa-times-circle"></i> Coupon code is already taken
+                                                    </div>
+                                                </div>
                                                 <p class="mt-1 text-sm text-red-500 hidden" id="couponCodeError"></p>
-                                                <div id="codeAvailabilityStatus" class="mt-1 text-sm"></div>
                                             </div>
 
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Description <span
                                                         class="text-red-500">*</span></label>
-                                                <textarea id="description" rows="2" required minlength="10"
-                                                    maxlength="200"
+                                                <textarea id="description" required rows="3" minlength="10" maxlength="200"
                                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                                     onkeyup="validateInput(this, 10, 200, 'Description')"></textarea>
                                                 <p class="mt-1 text-sm text-red-500 hidden" id="descriptionError"></p>
@@ -289,7 +296,8 @@
                                                 <label class="block text-sm font-medium text-gray-700">Discount Value <span
                                                         class="text-red-500">*</span></label>
                                                 <input type="number" id="discountValue" required min="0" step="1"
-                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                    onchange="validateDiscountValue(this)">
                                                 <p class="mt-1 text-sm text-red-500 hidden" id="discountValueError"></p>
                                             </div>
 
@@ -336,109 +344,24 @@
                                                 <label class="block text-sm font-medium text-gray-700">Expiry Date &
                                                     Time <span class="text-red-500">*</span></label>
                                                 <input type="datetime-local" id="expiryDate" required
-                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                                    onchange="validateExpiryDate(this)">
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                                 <p class="mt-1 text-sm text-red-500 hidden" id="expiryDateError"></p>
                                             </div>
-
-                                            <!-- Image upload section -->
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Coupon Image
-                                                    <span class="text-red-500">*</span></label>
-                                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md relative"
-                                                    id="dropZone" ondrop="handleDrop(event)"
-                                                    ondragover="handleDragOver(event)"
-                                                    ondragleave="handleDragLeave(event)">
-                                                    <div class="space-y-1 text-center">
-                                                        <svg class="mx-auto h-12 w-12 text-gray-400"
-                                                            stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                                            <path
-                                                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                                                                stroke-width="2" stroke-linecap="round"
-                                                                stroke-linejoin="round" />
-                                                        </svg>
-                                                        <div class="flex text-sm text-gray-600">
-                                                            <label for="imageInput"
-                                                                class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
-                                                                <span>Upload a file</span>
-                                                                <input id="imageInput" name="image" type="file"
-                                                                    class="sr-only" accept="image/*"
-                                                                    onchange="validateAndHandleImage(this)">
-                                                            </label>
-                                                            <p class="pl-1">or drag and drop</p>
-                                                        </div>
-                                                        <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
-                                                    </div>
-                                                </div>
-                                                <p id="imageError" class="mt-1 text-sm text-red-600 hidden"></p>
-                                            </div>
-
-                                            <!-- Cropper container -->
-                                            <div id="cropperContainer" class="hidden">
-                                                <div class="relative" style="max-height: 400px;">
-                                                    <img id="cropperImage" class="max-w-full" src="">
-                                                </div>
-                                                <div class="mt-3 flex justify-end space-x-3">
-                                                    <button type="button" onclick="cancelCrop()"
-                                                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                                                        Cancel
-                                                    </button>
-                                                    <button type="button" onclick="saveCroppedImage()"
-                                                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-                                                        Save Crop
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <!-- Preview container -->
-                                            <div id="imagePreviewContainer" class="mt-4 hidden">
-                                                <div class="relative inline-block">
-                                                    <img id="imagePreview" class="max-w-xs rounded-lg shadow-md"
-                                                        style="max-height: 200px;">
-                                                    <button type="button" onclick="resetImage()"
-                                                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                            viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
 
-                                    <!-- Cropper container -->
-                                    <div id="cropperContainer" class="hidden mt-4"
-                                        style="max-height: 500px; overflow: hidden;">
-                                        <div class="relative" style="max-height: 400px;">
-                                            <img id="cropperImage" src="" alt="Image to crop"
-                                                style="max-width: 100%; max-height: 400px;">
-                                        </div>
-                                        <div class="mt-4 flex justify-end space-x-2">
-                                            <button type="button" onclick="cancelCrop()"
-                                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-                                                Cancel
-                                            </button>
-                                            <button type="button" onclick="cropImage()"
-                                                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                                                Save Image
-                                            </button>
-                                        </div>
+                                    <!-- Modal footer -->
+                                    <div class="flex items-center justify-end p-4 border-t">
+                                        <button type="button" onclick="closeModal()"
+                                            class="mr-3 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" form="couponForm"
+                                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                                            Save Coupon
+                                        </button>
                                     </div>
                                 </form>
-                            </div>
-
-                            <!-- Modal footer -->
-                            <div class="flex items-center justify-end p-4 border-t">
-                                <button type="button" onclick="closeModal()"
-                                    class="mr-3 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-                                    Cancel
-                                </button>
-                                <button type="submit" form="couponForm"
-                                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                                    Save Coupon
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -458,188 +381,89 @@
                         setTimeout(() => toast.remove(), 3000);
                     }
 
-                    // Image handling functions
-                    function validateAndHandleImage(input) {
-                        const file = input.files[0];
-                        if (!file) return;
-
-                        // Validate file type
-                        const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
-                        if (!validTypes.includes(file.type)) {
-                            showToast('Please upload a valid image file (JPEG, PNG, or GIF)', 'error');
-                            input.value = '';
-                            return;
-                        }
-
-                        // Validate file size (5MB)
-                        const maxSize = 5 * 1024 * 1024;
-                        if (file.size > maxSize) {
-                            showToast('Image size should not exceed 5MB', 'error');
-                            input.value = '';
-                            return;
-                        }
-
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            const image = new Image();
-                            image.src = e.target.result;
-
-                            image.onload = function () {
-                                try {
-                                    // Hide preview and show cropper
-                                    const previewContainer = document.getElementById('imagePreviewContainer');
-                                    const cropperContainer = document.getElementById('cropperContainer');
-                                    const cropperImage = document.getElementById('cropperImage');
-
-                                    previewContainer.classList.add('hidden');
-                                    cropperContainer.classList.remove('hidden');
-                                    cropperImage.src = e.target.result;
-
-                                    // Initialize cropper
-                                    if (cropper) {
-                                        cropper.destroy();
-                                    }
-                                    cropper = new Cropper(cropperImage, {
-                                        aspectRatio: 1,
-                                        viewMode: 2,
-                                        dragMode: 'move',
-                                        autoCropArea: 1,
-                                        restore: false,
-                                        modal: true,
-                                        guides: true,
-                                        highlight: true,
-                                        cropBoxMovable: true,
-                                        cropBoxResizable: true,
-                                        toggleDragModeOnDblclick: false
-                                    });
-                                } catch (error) {
-                                    console.error('Error initializing cropper:', error);
-                                    showToast('Error initializing image cropper', 'error');
-                                }
-                            };
-                        };
-                        reader.readAsDataURL(file);
-                    }
-
-                    function saveCroppedImage() {
-                        if (!cropper) {
-                            showToast('No image to crop', 'error');
-                            return;
-                        }
-
-                        try {
-                            const canvas = cropper.getCroppedCanvas({
-                                width: 400,
-                                height: 400,
-                                imageSmoothingEnabled: true,
-                                imageSmoothingQuality: 'high'
-                            });
-
-                            if (!canvas) {
-                                showToast('Failed to crop image', 'error');
-                                return;
-                            }
-
-                            // Convert to base64 and store in hidden input
-                            const croppedImageData = canvas.toDataURL('image/jpeg', 0.8);
-                            document.getElementById('croppedImageData').value = croppedImageData;
-
-                            // Update preview
-                            const previewImage = document.getElementById('imagePreview');
-                            const previewContainer = document.getElementById('imagePreviewContainer');
-                            const cropperContainer = document.getElementById('cropperContainer');
-
-                            previewImage.src = croppedImageData;
-                            previewContainer.classList.remove('hidden');
-                            cropperContainer.classList.add('hidden');
-
-                            // Destroy cropper
-                            cropper.destroy();
-                            cropper = null;
-
-                            showToast('Image cropped successfully', 'success');
-                        } catch (error) {
-                            console.error('Error saving cropped image:', error);
-                            showToast('Failed to save cropped image', 'error');
-                        }
-                    }
-
-                    function cancelCrop() {
-                        const cropperContainer = document.getElementById('cropperContainer');
-                        const previewContainer = document.getElementById('imagePreviewContainer');
-
-                        if (cropper) {
-                            cropper.destroy();
-                            cropper = null;
-                        }
-
-                        cropperContainer.classList.add('hidden');
-
-                        // If we have a previous image, show it
-                        const previewImage = document.getElementById('imagePreview');
-                        if (previewImage.src) {
-                            previewContainer.classList.remove('hidden');
-                        }
-                    }
-
-                    function resetImage() {
-                        const imageInput = document.getElementById('imageInput');
-                        const previewContainer = document.getElementById('imagePreviewContainer');
-                        const cropperContainer = document.getElementById('cropperContainer');
-                        const previewImage = document.getElementById('imagePreview');
-
-                        if (imageInput) imageInput.value = '';
-                        if (previewContainer) previewContainer.classList.add('hidden');
-                        if (previewImage) previewImage.src = '';
-                        if (cropperContainer) cropperContainer.classList.add('hidden');
-
-                        if (cropper) {
-                            cropper.destroy();
-                            cropper = null;
-                        }
-                    }
-
                     // Form handling functions
                     async function generateCouponCode() {
-                        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                        const codeLength = 8;
+                        const length = 8;
+                        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
                         let code = '';
-
-                        for (let i = 0; i < codeLength; i++) {
-                            const randomIndex = Math.floor(Math.random() * characters.length);
-                            code += characters[randomIndex];
+                        for (let i = 0; i < length; i++) {
+                            code += chars.charAt(Math.floor(Math.random() * chars.length));
                         }
-
-                        try {
-                            const codeInput = document.getElementById('couponCode');
-                            codeInput.value = code;
-                            await checkCouponCode(code);
-                        } catch (error) {
-                            console.error('Error generating coupon code:', error);
-                            showToast('Failed to generate coupon code', 'error');
-                        }
+                        document.getElementById('couponCode').value = code;
+                        await checkCouponAvailability(code);
                     }
 
-                    async function checkCouponCode(code) {
+                    // Debounce function
+                    function debounce(func, wait) {
+                        let timeout;
+                        return function executedFunction(...args) {
+                            const later = () => {
+                                clearTimeout(timeout);
+                                func(...args);
+                            };
+                            clearTimeout(timeout);
+                            timeout = setTimeout(later, wait);
+                        };
+                    }
+
+                    async function checkCouponAvailability(code) {
+                        const availabilityDiv = document.getElementById('codeAvailability');
+                        const checkingDiv = document.getElementById('checkingCode');
+                        const availableDiv = document.getElementById('codeAvailable');
+                        const unavailableDiv = document.getElementById('codeUnavailable');
+
+                        // Hide all status messages first
+                        availableDiv.classList.add('hidden');
+                        unavailableDiv.classList.add('hidden');
+
+                        // Show checking message
+                        availabilityDiv.classList.remove('hidden');
+                        checkingDiv.classList.remove('hidden');
+
                         try {
                             const response = await axios.get(`/admin/coupons/check-code/${code}`);
-                            const statusElement = document.getElementById('codeAvailabilityStatus');
                             
-                            if (response.data.exists) {
-                                statusElement.textContent = 'This code is already in use';
-                                statusElement.className = 'mt-1 text-sm text-red-600';
-                                return false;
+                            // Hide checking message
+                            checkingDiv.classList.add('hidden');
+
+                            if (!response.data.exists) {
+                                availableDiv.classList.remove('hidden');
+                                unavailableDiv.classList.add('hidden');
                             } else {
-                                statusElement.textContent = 'Code is available';
-                                statusElement.className = 'mt-1 text-sm text-green-600';
-                                return true;
+                                availableDiv.classList.add('hidden');
+                                unavailableDiv.classList.remove('hidden');
                             }
                         } catch (error) {
                             console.error('Error checking coupon code:', error);
-                            showToast('Failed to check coupon code availability', 'error');
-                            return false;
+                            checkingDiv.classList.add('hidden');
+                            showToast('Error checking coupon availability', 'error');
                         }
                     }
+
+                    // Debounced version of checkCouponAvailability
+                    const debouncedCheckAvailability = debounce(checkCouponAvailability, 500);
+
+                    // Add event listener for coupon code input
+                    document.getElementById('couponCode').addEventListener('input', function(e) {
+                        const code = e.target.value.trim();
+                        if (code.length > 0) {
+                            // Show checking message immediately
+                            const availabilityDiv = document.getElementById('codeAvailability');
+                            const checkingDiv = document.getElementById('checkingCode');
+                            const availableDiv = document.getElementById('codeAvailable');
+                            const unavailableDiv = document.getElementById('codeUnavailable');
+
+                            availabilityDiv.classList.remove('hidden');
+                            checkingDiv.classList.remove('hidden');
+                            availableDiv.classList.add('hidden');
+                            unavailableDiv.classList.add('hidden');
+
+                            // Call debounced function
+                            debouncedCheckAvailability(code);
+                        } else {
+                            document.getElementById('codeAvailability').classList.add('hidden');
+                        }
+                    });
 
                     // Handle discount type change
                     function handleDiscountTypeChange(select) {
@@ -701,9 +525,9 @@
                         if (couponCodeInput) {
                             couponCodeInput.addEventListener('input', async function() {
                                 if (this.value.length >= 6) {
-                                    await checkCouponCode(this.value);
+                                    await checkCouponAvailability(this.value);
                                 } else {
-                                    document.getElementById('codeAvailabilityStatus').textContent = '';
+                                    document.getElementById('codeAvailability').classList.add('hidden');
                                 }
                             });
                         }
@@ -904,28 +728,34 @@
                                 expiryDate: document.getElementById('expiryDate').value
                             };
 
-                            // Add image if available
-                            const croppedImageData = document.getElementById('croppedImageData').value;
-                            if (croppedImageData) {
-                                formData.image = croppedImageData;
+                            const couponId = document.getElementById('couponId').value;
+                            let response;
+
+                            if (couponId) {
+                                // Update existing coupon
+                                response = await axios.patch(`/admin/coupons/${couponId}`, formData, {
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    }
+                                });
+                            } else {
+                                // Create new coupon
+                                response = await axios.post('/admin/coupons', formData, {
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    }
+                                });
                             }
 
-                            // Send request
-                            const response = await axios.post('/admin/coupons', formData, {
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            });
-
                             if (response.data.success) {
-                                showToast('Coupon added successfully', 'success');
+                                showToast(couponId ? 'Coupon updated successfully' : 'Coupon added successfully', 'success');
                                 setTimeout(() => window.location.reload(), 1000);
                             } else {
-                                showToast(response.data.error || 'Failed to add coupon', 'error');
+                                showToast(response.data.error || `Failed to ${couponId ? 'update' : 'add'} coupon`, 'error');
                             }
                         } catch (error) {
                             console.error('Error submitting form:', error);
-                            const errorMessage = error.response?.data?.error || 'Failed to add coupon';
+                            const errorMessage = error.response?.data?.error || `Failed to ${couponId ? 'update' : 'add'} coupon`;
                             showToast(errorMessage, 'error');
                         }
                     }
@@ -933,7 +763,6 @@
                     // Modal functions
                     function openModal(modalType = 'add') {
                         resetForm();
-                        resetImage();
 
                         if (modalType === 'add') {
                             document.getElementById('modalTitle').textContent = 'Add New Coupon';
@@ -946,7 +775,6 @@
                     function closeModal() {
                         document.getElementById('couponModal').classList.add('hidden');
                         resetForm();
-                        resetImage();
                     }
 
                     function resetForm() {
@@ -961,34 +789,22 @@
                         });
 
                         // Reset coupon code status
-                        const statusElement = document.getElementById('codeAvailabilityStatus');
+                        const statusElement = document.getElementById('codeAvailability');
                         if (statusElement) {
-                            statusElement.textContent = '';
-                            statusElement.className = 'mt-1 text-sm';
+                            statusElement.classList.add('hidden');
                         }
-
-                        // Reset image related elements
-                        const cropperContainer = document.getElementById('cropperContainer');
-                        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-                        const croppedImageData = document.getElementById('croppedImageData');
-
-                        if (cropperContainer) cropperContainer.classList.add('hidden');
-                        if (imagePreviewContainer) imagePreviewContainer.classList.add('hidden');
-                        if (croppedImageData) croppedImageData.value = '';
-
-                        // Reset the discount type handling
-                        const discountType = document.getElementById('discountType');
-                        if (discountType) handleDiscountTypeChange(discountType);
                     }
 
                     // Edit coupon function
                     function editCoupon(couponId) {
                         try {
+                            console.log('Editing coupon with ID:', couponId);
                             const row = document.querySelector(`tr[data-coupon-id="${couponId}"]`);
                             if (!row) {
                                 throw new Error('Coupon row not found');
                             }
 
+                            // Get all data attributes
                             const coupon = {
                                 _id: couponId,
                                 name: row.getAttribute('data-name'),
@@ -999,13 +815,19 @@
                                 minAmount: row.getAttribute('data-min-amount'),
                                 maxDiscount: row.getAttribute('data-max-discount'),
                                 totalLimit: row.getAttribute('data-total-limit'),
-                                userLimit: row.getAttribute('data-user-limit'),
+                                perUserLimit: row.getAttribute('data-per-user-limit'),
                                 expiryDate: row.getAttribute('data-expiry'),
                                 image: row.getAttribute('data-image')
                             };
 
-                            populateModalForEdit(coupon);
+                            console.log('Retrieved coupon data:', coupon);
+                            
+                            // Open modal and populate form
                             openModal('edit');
+                            setTimeout(() => {
+                                populateModalForEdit(coupon);
+                            }, 100);
+
                         } catch (error) {
                             console.error('Error loading coupon details:', error);
                             showToast('Failed to load coupon details', 'error');
@@ -1015,33 +837,66 @@
                     function populateModalForEdit(coupon) {
                         try {
                             document.getElementById('modalTitle').textContent = 'Edit Coupon';
-                            document.getElementById('couponId').value = coupon._id;
-                            document.getElementById('couponName').value = coupon.name;
-                            document.getElementById('couponCode').value = coupon.couponCode;
-                            document.getElementById('description').value = coupon.description;
-                            document.getElementById('discountType').value = coupon.discountType.toLowerCase();
-                            document.getElementById('discountValue').value = coupon.discountValue;
-                            document.getElementById('minAmount').value = coupon.minAmount;
-                            document.getElementById('maxDiscount').value = coupon.maxDiscount;
-                            document.getElementById('totalLimit').value = coupon.totalLimit;
-                            document.getElementById('perUserLimit').value = coupon.userLimit;
-                            document.getElementById('expiryDate').value = new Date(coupon.expiryDate).toISOString().split('T')[0];
+                            document.getElementById('couponId').value = coupon._id || '';
+                            document.getElementById('couponName').value = coupon.name || '';
+                            document.getElementById('couponCode').value = coupon.couponCode || '';
+                            document.getElementById('description').value = coupon.description || '';
+                            document.getElementById('discountType').value = coupon.discountType.toLowerCase() || 'percentage';
+                            document.getElementById('discountValue').value = coupon.discountValue || '';
+                            document.getElementById('minAmount').value = coupon.minAmount || '';
+                            document.getElementById('maxDiscount').value = coupon.maxDiscount || '';
+                            document.getElementById('totalLimit').value = coupon.totalLimit || '';
+                            document.getElementById('perUserLimit').value = coupon.perUserLimit || '';
 
-                            // Handle discount type visibility
-                            handleDiscountTypeChange(document.getElementById('discountType'));
-
-                            // Reset image related elements
-                            document.getElementById('cropperContainer').classList.add('hidden');
-                            document.getElementById('croppedImageData').value = '';
-                            document.getElementById('imagePreviewContainer').classList.add('hidden');
-
-                            // Show existing image preview if available
-                            if (coupon.image) {
-                                showExistingImage(coupon.image);
+                            // Format the expiry date for datetime-local input
+                            if (coupon.expiryDate) {
+                                const date = new Date(coupon.expiryDate);
+                                // Format: YYYY-MM-DDThh:mm
+                                const formattedDate = date.getFullYear() + '-' + 
+                                    String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                                    String(date.getDate()).padStart(2, '0') + 'T' + 
+                                    String(date.getHours()).padStart(2, '0') + ':' + 
+                                    String(date.getMinutes()).padStart(2, '0');
+                                document.getElementById('expiryDate').value = formattedDate;
                             }
                         } catch (error) {
-                            console.error('Error populating modal:', error);
-                            showToast('Error loading coupon details', 'error');
+                            console.error('Error populating form:', error);
+                            showToast('Failed to populate form', 'error');
+                        }
+                    }
+
+                    async function toggleCouponStatus(couponId, currentStatus) {
+                        try {
+                            const response = await axios.patch(`/admin/coupons/${couponId}/toggle`);
+                            
+                            if (response.data.success) {
+                                // Update the status text and classes
+                                const statusSpan = document.getElementById(`status-${couponId}`);
+                                const toggleButton = document.getElementById(`toggle-${couponId}`);
+                                const toggleIcon = toggleButton.querySelector('i');
+                                const newStatus = !JSON.parse(currentStatus);
+
+                                // Update status badge
+                                statusSpan.textContent = newStatus ? 'Active' : 'Inactive';
+                                statusSpan.className = `px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                    newStatus ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                }`;
+
+                                // Update toggle button
+                                toggleButton.className = `text-${newStatus ? 'red' : 'green'}-600 hover:text-${newStatus ? 'red' : 'green'}-800`;
+                                toggleButton.title = newStatus ? 'Click to deactivate this coupon' : 'Click to activate this coupon';
+                                toggleIcon.className = `fas fa-toggle-${newStatus ? 'on' : 'off'} text-xl`;
+
+                                // Update the onclick handler with new status
+                                toggleButton.setAttribute('onclick', `toggleCouponStatus('${couponId}', '${newStatus}')`);
+
+                                showToast(response.data.message || 'Coupon status updated successfully', 'success');
+                            } else {
+                                showToast(response.data.error || 'Failed to update coupon status', 'error');
+                            }
+                        } catch (error) {
+                            console.error('Error toggling coupon status:', error);
+                            showToast(error.response?.data?.error || 'Failed to update coupon status', 'error');
                         }
                     }
                 </script>
