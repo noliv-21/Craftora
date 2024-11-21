@@ -1,6 +1,48 @@
 const Coupons = require('../models/couponSchema');
 const Users = require('../models/userSchema');
 const Orders = require('../models/orderSchema');
+const fs = require('fs');
+const path = require('path');
+
+// Helper function to convert base64 to image and save
+const saveBase64AsImage = async (base64String, fileName) => {
+    try {
+        // Remove the data:image/jpeg;base64 prefix if present
+        const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
+        
+        // Create buffer from base64
+        const imageBuffer = Buffer.from(base64Data, 'base64');
+        
+        // Create uploads directory if it doesn't exist
+        const uploadDir = path.join(__dirname, '../public/uploads/coupons');
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        
+        // Save the file
+        const filePath = path.join(uploadDir, fileName);
+        fs.writeFileSync(filePath, imageBuffer);
+        
+        return true;
+    } catch (error) {
+        console.error('Error saving image:', error);
+        return false;
+    }
+};
+
+// Helper function to delete image file
+const deleteImageFile = async (filename) => {
+    if (!filename) return;
+    
+    try {
+        const imagePath = path.join(__dirname, '../public/uploads/coupons', filename);
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+        }
+    } catch (error) {
+        console.error('Error deleting image file:', error);
+    }
+};
 
 // Get user's available coupons and history
 const getUserCoupons = async (req, res) => {
@@ -221,10 +263,219 @@ const getProductDetailsCoupons = async (req, res) => {
     }
 };
 
+const couponsPage_admin = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+        const skip = (page - 1) * limit;
+
+        const coupons = await Coupons.find().skip(skip).limit(limit);
+        const totalOrders = await Coupons.countDocuments();
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        res.render('admin/coupon folder/coupons', {
+            session: req.session.user,
+            activeTab: 'coupons',
+            coupons, limit, page, totalPages, totalOrders
+        });
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: 'Failed to render coupons page' });
+    }
+};
+
+// Add this function to check coupon code availability
+const checkCouponCode = async (req, res) => {
+    try {
+        const code = req.params.code;
+        // Use Coupons model instead of Coupon
+        const existingCoupon = await Coupons.findOne({ couponCode: code });
+        res.json({ exists: !!existingCoupon });
+    } catch (error) {
+        console.error('Error checking coupon code:', error);
+        res.status(500).json({ error: 'Failed to check coupon code' });
+    }
+};
+
+// Add new coupon
+const addCoupon = async (req, res) => {
+    try {
+        const {
+            name,
+            couponCode,
+            description,
+            discountType,
+            discountValue,
+            minAmount,
+            maxAmount,
+            totalLimit,
+            perUserLimit,
+            expiryDate
+        } = req.body;
+
+        let imageName = '';
+        if (req.files && req.files.image) {
+            const croppedImageData = req.files.image;
+            imageName = croppedImageData.name;
+            const saved = await saveBase64AsImage(croppedImageData, imageName);
+            if (!saved) {
+                return res.status(500).json({ success: false, error: 'Failed to save image' });
+            }
+        }
+
+        // Validate required fields
+        if (!name || !couponCode || !description || !discountType || !expiryDate) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields'
+            });
+        }
+
+        // Validate numeric fields
+        const numericFields = {
+            discountValue: parseFloat(discountValue),
+            minAmount: parseFloat(minAmount),
+            maxAmount: parseFloat(maxAmount),
+            totalLimit: parseInt(totalLimit),
+            perUserLimit: parseInt(perUserLimit)
+        };
+
+        // Check if any numeric field is NaN
+        for (const [field, value] of Object.entries(numericFields)) {
+            if (isNaN(value)) {
+                return res.status(400).json({
+                    success: false,
+                    error: `Invalid ${field} value`
+                });
+            }
+        }
+
+        // Validate expiry date
+        const parsedExpiryDate = new Date(expiryDate);
+        if (isNaN(parsedExpiryDate.getTime()) || parsedExpiryDate <= new Date()) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid expiry date. Must be a future date'
+            });
+        }
+
+        const newCoupon = new Coupons({
+            name: name.trim(),
+            couponCode: couponCode.trim().toUpperCase(),
+            description: description.trim(),
+            discountType,
+            discountValue: numericFields.discountValue,
+            minAmount: numericFields.minAmount,
+            maxAmount: numericFields.maxAmount,
+            totalLimit: numericFields.totalLimit,
+            perUserLimit: numericFields.perUserLimit,
+            expiryDate: parsedExpiryDate,
+            image: imageName
+        });
+
+        await newCoupon.save();
+        res.status(200).json({ success: true, message: 'Coupon added successfully' });
+    } catch (error) {
+        console.error('Error adding coupon:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to save coupon'
+        });
+    }
+};
+
+// Update existing coupon
+const updateCoupon = async (req, res) => {
+    try {
+        const couponId = req.params.id;
+        const updateData = {};
+
+        // Extract and validate each field from req.body
+        if (req.body.name) updateData.name = req.body.name;
+        if (req.body.couponCode) updateData.couponCode = req.body.couponCode ? req.body.couponCode.toUpperCase() : '';
+        if (req.body.description) updateData.description = req.body.description;
+        if (req.body.discountType) updateData.discountType = req.body.discountType;
+        if (req.body.discountValue) updateData.discountValue = Number(req.body.discountValue);
+        if (req.body.minAmount) updateData.minAmount = Number(req.body.minAmount);
+        if (req.body.maxAmount) updateData.maxAmount = Number(req.body.maxAmount);
+        if (req.body.totalLimit) updateData.totalLimit = Number(req.body.totalLimit);
+        if (req.body.perUserLimit) updateData.perUserLimit = Number(req.body.perUserLimit);
+        if (req.body.expiryDate) updateData.expiryDate = new Date(req.body.expiryDate);
+
+        // Handle image update
+        if (req.body.croppedImageData) {
+            // Get the existing coupon to find the old image
+            const existingCoupon = await Coupons.findById(couponId);
+            if (existingCoupon && existingCoupon.image) {
+                // Delete the old image file
+                await deleteImageFile(existingCoupon.image);
+            }
+
+            // Save the new image
+            const imageName = `coupon_${Date.now()}.png`;
+            const saved = await saveBase64AsImage(req.body.croppedImageData, imageName);
+            if (!saved) {
+                return res.status(500).json({ success: false, error: 'Failed to save image' });
+            }
+            updateData.image = imageName;
+        }
+
+        const updatedCoupon = await Coupons.findByIdAndUpdate(
+            couponId, 
+            updateData,
+            { new: true }
+        );
+
+        if (!updatedCoupon) {
+            return res.status(404).json({ success: false, error: 'Coupon not found' });
+        }
+
+        res.json({ 
+            success: true, 
+            message: 'Coupon updated successfully',
+            coupon: updatedCoupon 
+        });
+    } catch (error) {
+        console.error('Error updating coupon:', error);
+        res.status(500).json({ success: false, error: 'Failed to update coupon' });
+    }
+};
+
+// Toggle coupon active status
+const toggleCouponStatus = async (req, res) => {
+    try {
+        const couponId = req.params.id;
+        const coupon = await Coupons.findById(couponId);
+        
+        if (!coupon) {
+            return res.status(404).json({ success: false, error: 'Coupon not found' });
+        }
+
+        // Toggle the isActive status
+        coupon.isActive = !coupon.isActive;
+        await coupon.save();
+
+        res.json({ 
+            success: true, 
+            message: `Coupon ${coupon.isActive ? 'activated' : 'deactivated'} successfully`,
+            isActive: coupon.isActive 
+        });
+    } catch (error) {
+        console.error('Error toggling coupon status:', error);
+        res.status(500).json({ success: false, error: 'Failed to toggle coupon status' });
+    }
+};
+
 module.exports = {
     getUserCoupons,
     applyCoupon,
     couponHistory,
     saveCouponUser,
-    getProductDetailsCoupons
+    getProductCoupons,
+    getProductDetailsCoupons,
+    couponsPage_admin,
+    checkCouponCode,
+    addCoupon,
+    updateCoupon,
+    toggleCouponStatus
 };

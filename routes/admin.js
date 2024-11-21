@@ -1,12 +1,12 @@
 const express = require('express');
 const admin = express.Router();
-const multer=require('multer')
-const upload = require('../helpers/multer');
+
 const productController = require('../controllers/productController');
 const adminController = require('../controllers/adminController');
 const categoryController = require('../controllers/categoryController');
 const userController = require('../controllers/userController');
 const orderController = require('../controllers/orderController')
+const couponController = require('../controllers/couponController')
 
 admin.use('/',express.static('public'));
 
@@ -18,7 +18,6 @@ admin.get('/logout', adminController.logout)
 
 admin.get('/users',userController.users)
 admin.post('/blockUser',userController.block_unblock)
-// admin.get('/search-users',adminController.searchUsers)
 
 admin.get('/categories',categoryController.categories)
 admin.get('/categories/add',categoryController.addCategory)
@@ -40,5 +39,13 @@ admin.get('/viewProduct',productController.productDetails)
 admin.get('/orders',orderController.getOrdersAdmin)
 admin.post('/cancelOrder/:orderId',orderController.cancelOrder)
 admin.patch('/updateOrderStatus/:orderId',orderController.updateStatus)
+
+admin.get('/coupons',couponController.couponsPage_admin)
+admin.get('/coupons/check-code/:code', couponController.checkCouponCode)
+
+// Coupon routes
+admin.post('/coupons', couponController.addCoupon);
+admin.patch('/coupons/:id', couponController.updateCoupon);
+admin.patch('/coupons/:id/toggle', couponController.toggleCouponStatus)
 
 module.exports = admin;

@@ -1,10 +1,11 @@
 <%- include('../../partials/user/header') %>
-<div class="font-roboto bg-gradient-to-r from-gray-100 to-gray-300 flex">
+<div class="font-roboto bg-gradient-to-r from-gray-100 to-gray-300 flex min-h-screen">
     <!-- Sidebar -->
     <%- include('../../partials/user/dashboard_sideBar') %>
+    
     <!-- Main Content -->
-    <main class="p-8">
-        <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
+        <div class="w-full bg-white p-4 sm:p-6 rounded-lg shadow-lg">
             <h2 class="text-2xl font-bold mb-6">Apply Coupon Code</h2>
             
             <% if (locals.errorMessage) { %>
@@ -19,11 +20,11 @@
                 </div>
             <% } %>
 
-            <form id="applyCouponForm" class="flex items-center space-x-4 mb-6">
+            <form id="applyCouponForm" class="flex flex-col sm:flex-row items-center gap-4 mb-6">
                 <input type="text" id="couponCode" name="couponCode" placeholder="Enter coupon code" required style="text-transform: uppercase;"
-                    class="flex-grow px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300 transform hover:scale-105">
+                    class="w-full sm:flex-grow px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300">
                 <button type="submit" 
-                    class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition duration-300 transform hover:scale-105">
+                    class="w-full sm:w-auto bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition duration-300">
                     Apply
                 </button>
             </form>
@@ -33,29 +34,31 @@
             <!-- Available Coupons -->
             <div class="mb-8">
                 <h3 class="text-xl font-bold mb-4">Available Coupons</h3>
-                <div id="availableCoupons" class="space-y-4">
+                <div id="availableCoupons" class="grid gap-4 grid-cols-1 lg:grid-cols-2">
                     <% if (availableCoupons && availableCoupons.length > 0) { %>
                         <% availableCoupons.forEach(coupon => { %>
-                            <div class="bg-gradient-to-r from-orange-100 to-orange-200 p-4 rounded-lg shadow flex justify-between items-center hover:shadow-lg transition duration-300 transform hover:scale-105">
-                                <div>
-                                    <p class="text-lg font-bold"><%= coupon.name %></p>
-                                    <p class="text-gray-600">
-                                        <% if (coupon.discountType === 'PERCENTAGE') { %>
-                                            <%= coupon.discountValue %>% off
-                                        <% } else { %>
-                                            ₹<%= coupon.discountValue %> off
-                                        <% } %>
-                                        on orders above ₹<%= coupon.minAmount %>
-                                    </p>
-                                    <p class="text-sm text-gray-500"><%= coupon.description %></p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-gray-600">Code: <span class="font-mono"><%= coupon.couponCode %></span></p>
-                                    <p class="text-gray-600">Expires: <%= new Date(coupon.expiryDate).toLocaleDateString() %></p>
-                                    <button onclick="copyCouponCode('<%= coupon.couponCode %>')" 
-                                        class="mt-2 text-orange-500 hover:text-orange-600">
-                                        Copy Code
-                                    </button>
+                            <div class="bg-gradient-to-r from-orange-100 to-orange-200 p-4 rounded-lg shadow hover:shadow-lg transition duration-300">
+                                <div class="flex flex-col sm:flex-row justify-between gap-4">
+                                    <div class="flex-1">
+                                        <p class="text-lg font-bold"><%= coupon.name %></p>
+                                        <p class="text-gray-600">
+                                            <% if (coupon.discountType === 'PERCENTAGE') { %>
+                                                <%= coupon.discountValue %>% off
+                                            <% } else { %>
+                                                ₹<%= coupon.discountValue %> off
+                                            <% } %>
+                                            on orders above ₹<%= coupon.minAmount %>
+                                        </p>
+                                        <p class="text-sm text-gray-500 mt-2"><%= coupon.description %></p>
+                                    </div>
+                                    <div class="text-left sm:text-right">
+                                        <p class="text-gray-600">Code: <span class="font-mono font-semibold"><%= coupon.couponCode %></span></p>
+                                        <p class="text-gray-600">Expires: <%= new Date(coupon.expiryDate).toLocaleDateString() %></p>
+                                        <button onclick="copyCouponCode('<%= coupon.couponCode %>')" 
+                                            class="mt-2 text-orange-500 hover:text-orange-600 font-medium">
+                                            Copy Code
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         <% }) %>
@@ -68,12 +71,12 @@
             <!-- Coupon History -->
             <div>
                 <h3 class="text-xl font-bold mb-4">Coupon History</h3>
-                <div id="couponHistory" class="space-y-4">
+                <div id="couponHistory" class="grid gap-4 grid-cols-1 lg:grid-cols-2">
                     <% if (couponHistory && couponHistory.length > 0) { %>
                         <% couponHistory.forEach(history => { %>
                             <div class="bg-gray-100 p-4 rounded-lg shadow">
-                                <div class="flex justify-between items-start">
-                                    <div>
+                                <div class="flex flex-col sm:flex-row justify-between gap-4">
+                                    <div class="flex-1">
                                         <p class="font-bold"><%= history.coupon.name %></p>
                                         <p class="text-gray-600">
                                             <% if (history.coupon.discountType === 'PERCENTAGE') { %>
@@ -82,17 +85,18 @@
                                                 ₹<%= history.coupon.discountValue %> off
                                             <% } %>
                                         </p>
-                                        <p class="text-sm text-gray-500">Order ID: <%= history.orderId %></p>
+                                        <p class="text-sm text-gray-500 mt-2">Used on: <%= new Date(history.usedAt).toLocaleDateString() %></p>
                                     </div>
-                                    <div class="text-right">
-                                        <p class="text-gray-600">Used on <%= new Date(history.usedAt).toLocaleDateString() %></p>
-                                        <p class="text-green-600">Saved ₹<%= history.savedAmount %></p>
+                                    <div class="text-left sm:text-right">
+                                        <p class="text-gray-600">Code: <span class="font-mono font-semibold"><%= history.coupon.couponCode %></span></p>
+                                        <p class="text-gray-600">Order: #<%= history.orderId %></p>
+                                        <p class="text-gray-600">Saved: ₹<%= history.discountAmount %></p>
                                     </div>
                                 </div>
                             </div>
                         <% }) %>
                     <% } else { %>
-                        <p class="text-gray-500">No coupons used yet.</p>
+                        <p class="text-gray-500">No coupons have been used yet.</p>
                     <% } %>
                 </div>
             </div>
@@ -101,71 +105,20 @@
 </div>
 
 <script>
-// Copy coupon code to clipboard
-function copyCouponCode(code) {
-    if (!code) return;
-    
-    navigator.clipboard.writeText(code).then(() => {
-        showMessage('Coupon code copied!', 'success');
-    }).catch(() => {
-        showMessage('Failed to copy code', 'error');
-    });
-}
-
-// Show message function
-function showMessage(message, type) {
-    if (!message) return;
-    
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `fixed top-4 right-4 px-6 py-3 rounded-lg ${
-        type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-    }`;
-    messageDiv.textContent = message;
-    document.body.appendChild(messageDiv);
-    setTimeout(() => messageDiv.remove(), 3000);
-}
-
-// Handle coupon application
-document.getElementById('applyCouponForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const couponInput = document.getElementById('couponCode');
-    if (!couponInput) return;
-    
-    const couponCode = couponInput.value;
-    if (!couponCode) {
-        showMessage('Please enter a coupon code', 'error');
-        return;
-    }
-    
-    try {
-        const response = await fetch('/user/coupons/apply', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ couponCode })
+    function copyCouponCode(code) {
+        navigator.clipboard.writeText(code).then(() => {
+            // Show toast or notification
+            alert('Coupon code copied!');
         });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            showMessage(data.message || 'Coupon applied successfully!', 'success');
-            setTimeout(() => location.reload(), 1500);
-        } else {
-            showMessage(data.error || 'Failed to apply coupon', 'error');
-        }
-    } catch (error) {
-        showMessage('An error occurred while applying the coupon', 'error');
     }
-});
 
-// Auto-hide messages after 3 seconds
-document.addEventListener('DOMContentLoaded', () => {
-    const messages = document.querySelectorAll('#errorMessage, #successMessage');
-    messages.forEach(msg => {
-        if (msg) setTimeout(() => msg.remove(), 3000);
-    });
-});
+    // Auto-hide messages after 3 seconds
+    setTimeout(() => {
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        if (errorMessage) errorMessage.style.display = 'none';
+        if (successMessage) successMessage.style.display = 'none';
+    }, 3000);
 </script>
 
 <%- include('../../partials/user/footer') %>
