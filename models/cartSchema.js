@@ -48,21 +48,34 @@ cartSchema.pre('save', async function (next) {
 
         // Calculate price after percentage discounts
         const percentageDiscount = Math.max(productPercentageDiscount, categoryPercentageDiscount);
-        const priceAfterPercentageDiscount = productPrice - (productPrice * (percentageDiscount / 100));
+
+        // Round the discount amount first, then subtract from price
+        const discountAmount = Math.round((productPrice * (percentageDiscount / 100)) * 100) / 100;
+        // const priceAfterPercentageDiscount = productPrice - discountAmount;
+        const priceAfterPercentageDiscount = Math.round((productPrice - discountAmount) * 100) / 100;
 
         // Fixed amount discounts
         const productFixedDiscount = product.fixedAmount || 0;
         const categoryFixedDiscount = category?.fixedAmount || 0;
 
         // Determine the best discount type
-        const priceAfterFixedDiscount = Math.max(productPrice - productFixedDiscount, productPrice - categoryFixedDiscount);
-        const finalDiscountedPrice = Math.min(priceAfterPercentageDiscount, priceAfterFixedDiscount);
+        const priceAfterFixedDiscount = Math.round(Math.max(productPrice - productFixedDiscount, productPrice - categoryFixedDiscount) * 100) / 100;
+        const finalDiscountedPrice = Math.round(Math.min(priceAfterPercentageDiscount, priceAfterFixedDiscount) * 100) / 100;
+        // const priceAfterFixedDiscount = Math.max(productPrice - productFixedDiscount, productPrice - categoryFixedDiscount);
+        // const finalDiscountedPrice = Math.min(priceAfterPercentageDiscount, priceAfterFixedDiscount);
 
-        // Ensure the final price is not negative
-        const effectivePrice = Math.max(0, finalDiscountedPrice);
+        // // Ensure the final price is not negative
+        // const effectivePrice = Math.max(0, finalDiscountedPrice);
 
+        // Round to 2 decimal places to avoid floating point issues
+        const effectivePrice = Math.round(Math.max(0, finalDiscountedPrice) * 100) / 100;
+
+        // Add to total considering quantity, rounding the multiplication result
+        const itemTotal = Math.round((effectivePrice * item.quantity) * 100) / 100;
+        return Math.round((total + itemTotal) * 100) / 100;
         // Add to total considering quantity
-        return total + (effectivePrice * item.quantity);
+        // return Math.round((total + (effectivePrice * item.quantity)) * 100) / 100;
+        // return total + (effectivePrice * item.quantity);
     }, 0);
 
     next();

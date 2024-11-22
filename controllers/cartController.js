@@ -15,26 +15,31 @@ exports.getCart = async (req, res) => {
         const products = cart ? cart.products.map(item => {
             const product = item.productId;
 
-            // Calculate discounts
-            const percentageDiscountFromProduct = product.offer ? Math.floor(product.mrp * (product.offer / 100)) : 0;
-            const fixedDiscountFromProduct = product.fixedAmount || 0;
-            const categoryDiscount = product.category.offer
-                ? Math.floor(product.mrp * (product.category.offer / 100))
-                : 0;
+            // Calculate discounts using the same method as cartSchema
+            const productPercentageDiscount = product.offer || 0;
+            const categoryPercentageDiscount = product.category.offer || 0;
+            const percentageDiscount = Math.max(productPercentageDiscount, categoryPercentageDiscount);
 
-            // Determine the best price
-            let discountedPrice = product.mrp;
+            // Calculate price after percentage discounts
+            const discountAmount = Math.round((product.mrp * (percentageDiscount / 100)) * 100) / 100;
+            const priceAfterPercentageDiscount = Math.round((product.mrp - discountAmount) * 100) / 100;
+
+            // Fixed amount discounts
+            const productFixedDiscount = product.fixedAmount || 0;
+            const categoryFixedDiscount = product.category.fixedAmount || 0;
+
+            // Determine the best discount type and price
+            const priceAfterFixedDiscount = Math.round(Math.max(product.mrp - productFixedDiscount, product.mrp - categoryFixedDiscount) * 100) / 100;
+            const finalDiscountedPrice = Math.round(Math.min(priceAfterPercentageDiscount, priceAfterFixedDiscount) * 100) / 100;
+            const discountedPrice = Math.round(Math.max(0, finalDiscountedPrice) * 100) / 100;
+
             let bestDiscountType = '';
-
-            if (percentageDiscountFromProduct > fixedDiscountFromProduct && percentageDiscountFromProduct > categoryDiscount) {
-                discountedPrice = product.mrp - percentageDiscountFromProduct;
-                bestDiscountType = `${product.offer}% off`;
-            } else if (fixedDiscountFromProduct > categoryDiscount) {
-                discountedPrice = product.mrp - fixedDiscountFromProduct;
-                bestDiscountType = `₹${fixedDiscountFromProduct} off`;
-            } else if (categoryDiscount > 0) {
-                discountedPrice = product.mrp - categoryDiscount;
-                bestDiscountType = `Category Offer: ${product.category.offer}% off`;
+            if (percentageDiscount > 0 && priceAfterPercentageDiscount <= priceAfterFixedDiscount) {
+                bestDiscountType = `${percentageDiscount}% off`;
+            } else if (productFixedDiscount > categoryFixedDiscount) {
+                bestDiscountType = `₹${productFixedDiscount} off`;
+            } else if (categoryPercentageDiscount > 0) {
+                bestDiscountType = `Category Offer: ${categoryPercentageDiscount}% off`;
             }
 
             return {
@@ -43,12 +48,9 @@ exports.getCart = async (req, res) => {
                 bestDiscountType
             };
         }) : [];
-
-        // const total = products.reduce((sum, item) => sum + (item.discountedPrice * item.quantity), 0);
-        // const totalAmount = products.reduce((sum, item) => sum + (item.discountedPrice * item.quantity), 0);
+        
         const totalAmount = cart.totalAmount; 
         const countOfProducts = products.length;
-
         res.render('user/cart/cart', {
             totalAmount,
             products,
