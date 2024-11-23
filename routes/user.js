@@ -49,7 +49,9 @@ user.get('/wishlist/check',userController.userAuth,wishlistController.checkWishl
 
 // Coupon Routes
 user.get('/dashboard/coupons', userController.userAuth, couponController.getUserCoupons);
-user.post('/coupons/apply', userController.userAuth, couponController.applyCoupon);
+user.get('/coupons/available', userController.userAuth, couponController.getAvailableCoupons);
+user.post('/applyCoupon', userController.userAuth, couponController.applyCoupon);
+user.delete('/removeCoupon', userController.userAuth, couponController.removeCoupon);
 user.get('/coupons/history', userController.userAuth, couponController.couponHistory);
 user.post('/coupons/save', userController.userAuth, couponController.saveCouponUser);
 user.get('/product/:productId/coupons', userController.userAuth, couponController.getProductDetailsCoupons);

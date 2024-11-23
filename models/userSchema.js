@@ -32,7 +32,18 @@ const userSchema = new mongoose.Schema({
         default:false
     },
     createdAt: { type: String },
-    claimedOffers: { type: Array },
+    claimedCoupons: [
+        {
+            couponId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'coupon'
+            },
+            claimedAt: {
+                type: Date,
+                default: Date.now
+            }
+        }
+    ],
     isVerified: { type: Boolean },
     googleId:{
         type:String,

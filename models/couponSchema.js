@@ -64,8 +64,7 @@ const couponSchema = new mongoose.Schema({
     totalLimit: {
         type: Number,
         required: [true, 'Total usage limit is required'],
-        min: [1, 'Limit must be at least 1'],
-        default: 10
+        min: [1, 'Limit must be at least 1']
     },
     perUserLimit: {
         type: Number,

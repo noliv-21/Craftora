@@ -1,6 +1,8 @@
 const Coupons = require('../models/couponSchema');
 const Users = require('../models/userSchema');
 const Orders = require('../models/orderSchema');
+const Carts = require('../models/cartSchema');
+const mongoose = require('mongoose');
 
 // Get user's available coupons and history
 const getUserCoupons = async (req, res) => {
@@ -52,55 +54,119 @@ const getUserCoupons = async (req, res) => {
     }
 };
 
+const getAvailableCoupons = async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const cart = await Carts.findOne({ userId });
+        const cartTotal = cart ? cart.totalAmount : 0;
+
+        // Get all active coupons
+        const coupons = await Coupons.find({
+            isActive: true,
+            expiryDate: { $gt: new Date() },
+            minAmount: { $lte: cartTotal },
+            // usedCount: { $lt: mongoose.Types.ObjectId('$totalLimit') }
+        });
+
+        // Filter out coupons user has already used
+        const userOrders = await Orders.find({ 
+            userId,
+            'coupons.couponId': { $in: coupons.map(c => c._id) }
+        });
+
+        const usedCoupons = new Set(userOrders.flatMap(order => 
+            order.coupons.map(c => c.couponId.toString())
+        ));
+
+        const availableCoupons = coupons.filter(coupon => 
+            !usedCoupons.has(coupon._id.toString()) && 
+            coupon.usedCount < coupon.totalLimit
+        ).map(coupon => ({
+            code: coupon.couponCode,
+            description: coupon.description,
+            discountType: coupon.discountType,
+            discountValue: coupon.discountValue,
+            minAmount: coupon.minAmount,
+            maxDiscount: coupon.maxDiscount,
+            expiryDate: coupon.expiryDate
+        }));
+
+        res.json(availableCoupons);
+    } catch (error) {
+        console.error('Error fetching available coupons:', error);
+        res.status(500).json({ error: 'Failed to fetch available coupons' });
+    }
+};
+
 // Apply coupon
 const applyCoupon = async (req, res) => {
     try {
-        const { couponCode } = req.body;
         const userId = req.session.user._id;
+        const { couponCode } = req.body;
 
         // Find the coupon
         const coupon = await Coupons.findOne({
             couponCode: couponCode.toUpperCase(),
             isActive: true,
             expiryDate: { $gt: new Date() },
-            $expr: { $lt: ["$usedCount", "$totalLimit"] }  // Compare usedCount with totalLimit
+            // $expr: { $lt: ["$usedCount", "$totalLimit"] }  // Compare usedCount with totalLimit
         });
 
         if (!coupon) {
             return res.status(400).json({ error: 'Invalid or expired coupon' });
         }
+        
+        if (coupon.usedCount >= coupon.totalLimit) {
+            return res.status(400).json({ error: 'This coupon has reached its maximum usage limit' });
+        }
 
         // Check if user has already used this coupon
         const userUsageCount = await Orders.countDocuments({
             userId,
-            'couponApplied.coupon': coupon._id
+            'coupons.couponId': coupon._id
         });
 
         if (userUsageCount >= coupon.perUserLimit) {
             return res.status(400).json({ error: 'You have already used this coupon' });
         }
-
-        // Save coupon to session for cart
-        req.session.coupon = {
+        // await Coupons.findByIdAndUpdate(coupon._id, { $inc: { usedCount: 1 } });
+        // await Users.findByIdAndUpdate(userId, { $addToSet: { 'claimedCoupons.couponId': coupon._id } });
+        // await Orders.findOneAndUpdate({ userId },{ $addToSet:{ "coupons.couponId": coupon._id }});
+        req.session.user.appliedCoupon = {
             id: coupon._id,
             code: coupon.couponCode,
-            type: coupon.discountType,
-            value: coupon.discountValue,
-            minAmount: coupon.minAmount,
-            maxAmount: coupon.maxAmount
+            discountType: coupon.discountType,
+            discountValue: coupon.discountValue,
+            maxDiscount: coupon.maxDiscount
         };
+        // console.log(req.session.user.appliedCoupon);
 
         res.json({
             message: 'Coupon applied successfully!',
             coupon: {
                 code: coupon.couponCode,
                 type: coupon.discountType,
-                value: coupon.discountValue
+                value: coupon.discountValue,
+                maxDiscount: coupon.maxDiscount
             }
         });
     } catch (error) {
         console.error('Error in applyCoupon:', error);
         res.status(500).json({ error: 'Failed to apply coupon' });
+    }
+};
+
+const removeCoupon = async (req, res) => {
+    try {
+        const coupon = req.session.user.appliedCoupon;
+        if (!coupon) {
+            return res.status(400).json({ error: 'No coupon applied' });
+        }
+        req.session.user.appliedCoupon = null;
+        res.json({ message: 'Coupon removed successfully', coupon });
+    } catch (error) {
+        console.error('Error in removeCoupon:', error);
+        res.status(500).json({ error: 'Failed to remove coupon' });
     }
 };
 
@@ -397,7 +463,9 @@ const toggleCouponStatus = async (req, res) => {
 
 module.exports = {
     getUserCoupons,
+    getAvailableCoupons,
     applyCoupon,
+    removeCoupon,
     couponHistory,
     saveCouponUser,
     getProductCoupons,

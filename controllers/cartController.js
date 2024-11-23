@@ -11,7 +11,13 @@ exports.getCart = async (req, res) => {
             // select: 'name mrp offer fixedAmount category',
             populate: { path: 'category', select: 'offer' }
         });
-
+        if(!cart){
+            return res.render('user/cart/cart', {
+                session,
+                countOfProducts: 0,
+                products:[]
+            });
+        }
         const products = cart ? cart.products.map(item => {
             const product = item.productId;
 
@@ -49,7 +55,7 @@ exports.getCart = async (req, res) => {
             };
         }) : [];
         
-        const totalAmount = cart.totalAmount; 
+        const totalAmount = cart.totalAmount || 0; 
         const countOfProducts = products.length;
         res.render('user/cart/cart', {
             totalAmount,

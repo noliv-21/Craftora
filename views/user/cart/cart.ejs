@@ -22,7 +22,7 @@
     <!-- Main Content -->
     <main class="p-8 flex-grow justify-center pb-24">
         <div class="w-full mx-auto max-w-4xl">
-            <h1 id="cartHeader" class="text-2xl mb-4 text-center"><%= countOfProducts %> ITEM IN YOUR CART</h1>
+            <h1 id="cartHeader" class="text-2xl mb-4 text-center"><%= countOfProducts ? countOfProducts : 0 %> ITEM IN YOUR CART</h1>
                     <% products.forEach((product,index)=>{ %>
                     <div id="product-<%= product.productId._id %>" class="border rounded-lg p-4 flex bg-orange-200 shadow-md">
                         <img alt="Product image" class="w-48 h-48 rounded-lg"
@@ -69,7 +69,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="flex items-center space-x-6" id="checkoutButton" style="display: '<%= countOfProducts > 0 ? 'flex' : 'none' %>'">
+                <div class="flex items-center space-x-6" id="checkoutButton" style="display: '<%= countOfProducts ? countOfProducts : false > 0 ? 'flex' : 'none' %>'">
                     <div class="text-right">
                         <div class="text-gray-600">Total Amount</div>
                         <div class="text-xl font-bold text-green-600">₹ <%= totalAmount %></div>

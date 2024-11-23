@@ -45,62 +45,115 @@
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <h2 class="text-2xl font-semibold text-gray-700 mb-4">Order Summary</h2>
-                        <div class="space-y-4">
+                        <!-- Product Price Breakdown -->
+                        <div class="mb-4">
+                            <table class="w-full text-sm">
+                                <thead class="text-gray-600 border-b">
+                                    <tr>
+                                        <th class="text-left py-2">Product</th>
+                                        <th class="text-right py-2">MRP × Qty</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-gray-600">
+                                    <% products.forEach(product => { %>
+                                        <tr>
+                                            <td class="py-2"><%= product.productId.name %></td>
+                                            <td class="text-right">₹<%= product.productId.mrp %> × <%= product.quantity %></td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                                <tfoot class="border-t">
+                                    <tr class="font-semibold">
+                                        <td class="py-2">Total MRP</td>
+                                        <td class="text-right">₹<%= totalMRP.toFixed(2) %></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <hr class="my-4 border-gray-200">
+
+                        <!-- Discount Breakdown -->
+                        <div class="space-y-2 mb-4">
                             <div class="flex justify-between text-gray-600">
-                                <span>Subtotal</span>
-                                <span>₹<%= total %></span>
+                                <span class="flex items-center">
+                                    <i class="fas fa-minus-circle text-red-500 mr-2"></i>
+                                    Total Discount
+                                </span>
+                                <span class="text-red-500">-₹<%= totalDiscount.toFixed(2) %></span>
+                            </div>
+                            <div id="couponDiscount" class="flex hidden justify-between text-gray-600">
+                                <span>Coupon Discount</span>
+                                <span id="couponDiscountValue" class="text-red-600">-₹0</span>
                             </div>
                             <div class="flex justify-between text-gray-600">
                                 <span>Shipping</span>
-                                <span>Free</span>
+                                <span class="text-green-600">Free</span>
                             </div>
-                            <hr class="border-gray-200">
-                            <div class="flex justify-between font-bold text-lg">
-                                <span>Total</span>
-                                <span class="text-orange-500">₹<%= total %></span>
-                            </div>
+                        </div>
 
-                            <!-- Coupon Section -->
-                            <div class="border-t border-b border-gray-200 py-4">
-                                <div class="flex items-center space-x-2">
-                                    <input type="text" id="couponCode" placeholder="Enter coupon code" style="text-transform: uppercase;" 
-                                        class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400">
-                                    <button onclick="applyCoupon()" 
-                                        class="px-4 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors">
-                                        Apply
+                        <hr class="my-4 border-gray-200">
+
+                        <!-- Final Amount -->
+                        <div class="flex justify-between font-bold text-lg">
+                            <span>Final Amount</span>
+                            <span id="totalAmount" class="text-orange-500">₹<%= finalAmount.toFixed(2) %></span>
+                        </div>
+
+                        <!-- Coupon Section -->
+                        <div class="border-t border-b border-gray-200 py-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-semibold text-gray-700">Apply Coupon</h3>
+                                <button onclick="showAvailableCoupons()" 
+                                    class="text-orange-500 hover:text-orange-600 text-sm">
+                                    View Available Coupons
+                                </button>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <input type="text" id="couponInput" placeholder="Enter coupon code" style="text-transform: uppercase;" 
+                                    class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-400">
+                                <button onclick="removeCoupon()" id="couponRemoveBtn"
+                                    class="hidden px-4 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors">
+                                    Remove
+                                </button>
+                                <button onclick="applyCoupon()" id="couponApplyBtn"
+                                    class="px-4 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors">
+                                    Apply
+                                </button>
+                            </div>
+                            <p id="couponMessage" class="text-sm mt-2"></p>
+                        </div>
+                        <!-- Available Coupons Modal -->
+                        <div id="couponsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+                            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-lg font-semibold">Available Coupons</h3>
+                                    <button onclick="closeCouponsModal()" class="text-gray-500 hover:text-gray-700">
+                                        <i class="fas fa-times"></i>
                                     </button>
                                 </div>
-                                <p id="couponMessage" class="text-sm mt-2"></p>
-                            </div>
-
-                            <div class="flex justify-between text-gray-600">
-                                <span>Discount</span>
-                                <span id="discountAmount">₹0</span>
-                            </div>
-
-                            <!-- Payment Options -->
-                            <div class="mt-6">
-                                <h3 class="font-semibold text-gray-700 mb-3">Payment Method</h3>
-                                <div class="space-y-2">
-                                    <label class="flex items-center space-x-3 p-3 bg-yellow-100 rounded-lg cursor-pointer hover:bg-yellow-200 transition-colors">
-                                        <input type="radio" name="payment" value="COD" class="text-orange-500 focus:ring-orange-500">
-                                        <span>Cash on Delivery</span>
-                                    </label>
-                                    <label class="flex items-center space-x-3 p-3 bg-yellow-100 rounded-lg cursor-pointer hover:bg-yellow-200 transition-colors">
-                                        <input type="radio" name="payment" value="online" class="text-orange-500 focus:ring-orange-500">
-                                        <span>Online Payment</span>
-                                    </label>
-                                    <label class="flex items-center space-x-3 p-3 bg-yellow-100 rounded-lg cursor-pointer hover:bg-yellow-200 transition-colors">
-                                        <input type="radio" name="payment" value="wallet" class="text-orange-500 focus:ring-orange-500">
-                                        <span>Wallet Payment</span>
-                                    </label>
+                                <div id="couponsList" class="space-y-3 max-h-96 overflow-y-auto">
+                                    <!-- Coupons will be inserted here -->
                                 </div>
                             </div>
-
-                            <button onclick="placeOrder('<%= total %>')" class="w-full py-3 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors mt-6">
-                                Place Order
-                            </button>
                         </div>
+
+                        <!-- Payment Options -->
+                        <div class="mt-6">
+                            <h3 class="font-semibold text-gray-700 mb-3">Payment Methods</h3>
+                            <div class="space-y-2">
+                                <% paymentMethods.forEach(method => { %>
+                                    <label class="flex items-center space-x-3 p-3 bg-yellow-100 rounded-lg cursor-pointer hover:bg-yellow-200 transition-colors">
+                                        <input type="radio" name="payment" value="<%= method %>" class="text-orange-500 focus:ring-orange-500">
+                                        <span><%= method %></span>
+                                    </label>
+                                <% }); %>
+                            </div>
+                        </div>
+
+                        <button onclick="placeOrder('<%= totalMRP %>')" class="w-full py-3 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors mt-6">
+                            Place Order
+                        </button>
                     </div>
                 </div>
             </div>
@@ -233,8 +286,62 @@
 </div>
 
 <script>
-let selectedAddressId = null;
 
+async function showAvailableCoupons() {
+    try {
+        const response = await axios.get('/user/coupons/available');
+        const coupons = response.data;
+        
+        const couponsHtml = coupons.map(coupon => `
+            <div class="border rounded-lg p-3 bg-yellow-50">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="font-semibold text-lg">${coupon.code}</span>
+                        <p class="text-sm text-gray-600">${coupon.description}</p>
+                    </div>
+                    <button onclick="applyCouponCode('${coupon.code}')" 
+                        class="text-orange-500 hover:text-orange-600 text-sm">
+                        Apply
+                    </button>
+                </div>
+                <div class="mt-2 text-sm text-gray-500">
+                    <div>Min Amount: ₹${coupon.minAmount}</div>
+                    <div>
+                        ${coupon.discountType === 'PERCENTAGE' 
+                            ? `${coupon.discountValue}% off up to ₹${coupon.maxDiscount}` 
+                            : `₹${coupon.discountValue} off`}
+                    </div>
+                    <div>Expires: ${new Date(coupon.expiryDate).toLocaleDateString()}</div>
+                </div>
+            </div>
+        `).join('');
+        
+        document.getElementById('couponsList').innerHTML = coupons.length 
+            ? couponsHtml 
+            : '<p class="text-center text-gray-500">No coupons available</p>';
+        
+        document.getElementById('couponsModal').style.display = 'flex';
+    } catch (error) {
+        console.error('Error fetching coupons:', error);
+        showToast('Failed to fetch available coupons', true);
+    }
+}
+
+function closeCouponsModal() {
+    document.getElementById('couponsModal').style.display = 'none';
+}
+
+function applyCouponCode(code) {
+    document.getElementById('couponInput').value = code;
+    closeCouponsModal();
+    // const couponMessage = document.getElementById('couponMessage')
+    // couponMessage.textContent = 'Coupon applied';
+    // couponMessage.classList.add('text-green-500','fas','fa-check');
+    applyCoupon();
+}
+
+// Address selection
+let selectedAddressId = null;
 function selectAddress(addressId, buttonElement) {
     selectedAddressId = addressId;
     // Remove selection from all addresses
@@ -323,14 +430,133 @@ function showToast(message, isError = false) {
     toast.textContent = message;
     document.body.appendChild(toast);
     
-    setTimeout(() => toast.classList.add('show'), 100);
+    // Show toast with animation
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+    });
+    
+    // Hide and remove toast
     setTimeout(() => {
-        toast.classList.remove('show');
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
         setTimeout(() => toast.remove(), 300);
     }, 3000);
+    // setTimeout(() => toast.classList.add('show'), 100);
+    // setTimeout(() => {
+    //     toast.classList.remove('show');
+    //     setTimeout(() => toast.remove(), 300);
+    // }, 3000);
 }
 
-async function placeOrder(total) {
+async function applyCoupon() {
+    try {
+        const couponCode = document.getElementById('couponInput').value.trim().toUpperCase();
+        const couponDiscount = document.getElementById('couponDiscount')
+        const couponMessage = document.getElementById('couponMessage')
+        const couponDiscountValue = document.getElementById('couponDiscountValue')
+        const totalAmount = document.getElementById('totalAmount');
+        const couponRemoveBtn = document.getElementById('couponRemoveBtn');
+        const couponApplyBtn = document.getElementById('couponApplyBtn');
+        if (!couponCode) {
+            showToast('Please enter a coupon code', true);
+            return;
+        }
+
+        const response = await axios.post('/user/applyCoupon',{ couponCode, totalAmount: parseFloat(totalAmount.textContent.replace(/[₹,]/g, '')) });
+        if(response.status === 200) {
+            const coupon = response.data.coupon;
+            const currentTotal = parseFloat(totalAmount.textContent.replace(/[₹,]/g, ''));
+            console.log('Current Total:', currentTotal);
+
+            let discountAmount = 0;
+            if (coupon.type === 'PERCENTAGE') {
+                    discountAmount = (currentTotal * coupon.value) / 100;
+                    if (coupon.maxDiscount) {
+                        discountAmount = Math.min(discountAmount, coupon.maxDiscount);
+                    }
+                } else if (coupon.type === 'FIXED') {
+                    discountAmount = coupon.value;
+            }
+            discountAmount = Math.min(discountAmount, currentTotal);
+
+            // const discountAmount = parseFloat(response.data.coupon.discountAmount || 0);
+            console.log("Discount amount:",discountAmount);
+            couponMessage.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Coupon applied';
+            couponMessage.className = 'text-green-500 mt-2 flex items-center';
+            couponDiscount.classList.remove('hidden')
+            couponDiscountValue.textContent = `- ₹${discountAmount.toFixed(2)}`
+            
+            const newTotal = (currentTotal - discountAmount).toFixed(2);
+            console.log('New Total:', newTotal);
+            totalAmount.textContent = `₹${newTotal}`;
+
+            couponApplyBtn.classList.add('hidden');
+            couponRemoveBtn.classList.remove('hidden');
+            showToast('Coupon applied successfully', false);
+        } else {
+            couponDiscount.classList.add('hidden')
+            couponMessage.textContent = '';
+            couponApplyBtn.classList.remove('hidden');
+            couponRemoveBtn.classList.add('hidden');
+            showToast( response.data.error, true);
+        }
+        
+    } catch (error) {
+        console.error("Error applying coupon:", error);
+        const couponDiscount = document.getElementById('couponDiscount');
+        couponDiscount.classList.add('hidden');
+        document.getElementById('couponMessage').textContent = '';
+        couponApplyBtn.classList.remove('hidden');
+        couponRemoveBtn.classList.add('hidden');
+        showToast(error.response?.data?.error || 'Failed to apply coupon', true);
+    }
+}
+
+async function removeCoupon() {
+    try {
+        const currentTotal = parseFloat(document.getElementById('totalAmount').textContent.replace(/[₹,]/g, ''));
+        console.log('Current Total (before adding back discount):', currentTotal);
+
+        const response = await axios.delete('/user/removeCoupon');
+        if(response.status === 200) {
+            const coupon = response.data.coupon;
+            let discountAmount = 0;
+            if (coupon.discountType === 'PERCENTAGE') {
+                    discountAmount = (currentTotal * coupon.discountValue) / 100;
+                    if (coupon.maxDiscount) {
+                        discountAmount = Math.min(discountAmount, coupon.maxDiscount);
+                    }
+                } else if (coupon.discountType === 'FIXED') {
+                    discountAmount = coupon.discountValue;
+            }
+            discountAmount = Math.min(discountAmount, currentTotal);
+            console.log('Remove Discount Amount:', discountAmount);
+
+            // const discountAmount = parseFloat(response.data.coupon.discountValue || 0);
+
+
+            const newTotal = ( currentTotal + discountAmount ).toFixed(2);
+            console.log('New Total (after adding back discount):', newTotal);
+
+            document.getElementById('totalAmount').textContent = `₹${newTotal}`;
+            document.getElementById('couponInput').value = '';
+            document.getElementById('couponMessage').textContent = '';
+            document.getElementById('couponDiscountValue').textContent = '';
+            document.getElementById('couponDiscount').classList.add('hidden');
+            document.getElementById('couponApplyBtn').classList.remove('hidden');
+            document.getElementById('couponRemoveBtn').classList.add('hidden');
+            showToast('Coupon removed successfully', false);
+        } else {            
+            showToast(response.data.error, true);
+        }
+    } catch (error) {
+        console.error("Error removing coupon:", error);
+        showToast(error.response?.data?.error || 'Failed to remove coupon', true);
+    }
+}
+
+async function placeOrder(totalMRP) {
     const selectedAddress = document.querySelector('[data-address-id].border-red-500');
     if (!selectedAddress) {
         showToast('Please select a delivery address', true);
@@ -346,7 +572,7 @@ async function placeOrder(total) {
     try {
         const response = await axios.post('/user/order/creation', {
             addressId: selectedAddress.dataset.addressId,
-            total: total,
+            total: totalMRP,
             paymentType: selectedPayment.value
         });
         

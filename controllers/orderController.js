@@ -12,19 +12,24 @@ exports.checkout = async (req, res) => {
         const addresses = await Addresses.find({ userId });
         const paymentMethods = Orders.schema.path('paymentMethod').enumValues;
         
-        let total = 0;
         const products = cart ? cart.products : [];
-        products.forEach(item => {
-            const price = item.productId.sellingPrice || 0;
-            total += price * item.quantity;
-        });
+
+        const totalMRP = products.reduce((sum, item) => {
+            return sum + (item.productId.mrp * item.quantity);
+        }, 0);
+
+        const finalAmount = cart ? cart.totalAmount : 0;
+        
+        const totalDiscount = totalMRP - finalAmount;
 
         res.render('user/order/checkout', {
             addresses,
             paymentMethods,
             session,
-            total,
-            products
+            products,
+            totalMRP,
+            totalDiscount,
+            finalAmount,
         });
     } catch (error) {
         console.error("Error loading checkout page:", error);
@@ -34,6 +39,7 @@ exports.checkout = async (req, res) => {
 
 exports.orderCreation = async (req,res)=>{
     const userId = req.session.user._id;
+    const coupon = req.session.user.appliedCoupon;
     const { total, paymentType, addressId } = req.body;
     
     try {
@@ -53,6 +59,11 @@ exports.orderCreation = async (req,res)=>{
             return res.status(400).json({ message: "Invalid delivery address" });
         }
 
+        let couponDiscount;
+        if(coupon){
+           couponDiscount = coupon.discountValue;
+        }
+        const effectiveTotal = total - couponDiscount;
         const newOrder = new Orders({
             userId, 
             addressId,
@@ -61,7 +72,7 @@ exports.orderCreation = async (req,res)=>{
                 quantity: item.quantity,
                 priceAtPurchase: item.productId.sellingPrice
             })),
-            totalAmount: total,
+            totalAmount: effectiveTotal,
             paymentMethod: paymentType
         });
 
