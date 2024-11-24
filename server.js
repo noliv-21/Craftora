@@ -11,9 +11,15 @@ const bodyParser = require('body-parser');
 const passport = require('./config/passport')
 const expressLayouts=require('express-ejs-layouts')
 const env = require('dotenv').config();
+// const Razorpay = require('razorpay');
 const { connectMongoDb } = require('./connection.js')
 
 connectMongoDb(process.env.MONGODB_CONNECT)
+
+// const rzp = new Razorpay({
+//     key_id: process.env.RAZORPAY_KEY_ID,
+//     key_secret: process.env.RAZORPAY_KEY_SECRET,
+// })
 
 app.set('view engine', 'ejs')
 app.use(expressLayouts)

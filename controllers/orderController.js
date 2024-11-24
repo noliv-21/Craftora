@@ -30,6 +30,7 @@ exports.checkout = async (req, res) => {
             totalMRP,
             totalDiscount,
             finalAmount,
+            razorpayKey: process.env.RAZORPAY_KEY_ID
         });
     } catch (error) {
         console.error("Error loading checkout page:", error);
@@ -142,7 +143,7 @@ exports.orderCreation = async (req,res)=>{
             await Carts.deleteOne({ userId });
         }
         console.log("order created successfully")
-        res.status(200).json({ success: true, message: "Order placed successfully" });
+        res.status(200).json({ success: true, message: "Order placed successfully", order: newOrder });
     } catch (error) {
         console.error("Error creating order:", error);
         res.status(500).json({ message: "Failed to place order" });
