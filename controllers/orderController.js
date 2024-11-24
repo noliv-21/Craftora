@@ -41,14 +41,21 @@ exports.orderCreation = async (req,res)=>{
     const userId = req.session.user._id;
     const coupon = req.session.user.appliedCoupon;
     const { total, paymentType, addressId } = req.body;
-    
+    console.log("total from req.body",total);
     try {
         // Validate address
         if (!addressId) {
             return res.status(400).json({ message: "Please select a delivery address" });
         }
 
-        const cart = await Carts.findOne({ userId }).populate('products.productId');
+        const cart = await Carts.findOne({ userId })
+            .populate({
+                path:'products.productId',
+                populate: {
+                    path: 'category',
+                    model: 'Category'
+                }
+            });
         if (!cart) {
             return res.status(400).json({ message: "Cart is empty" });
         }
@@ -59,21 +66,59 @@ exports.orderCreation = async (req,res)=>{
             return res.status(400).json({ message: "Invalid delivery address" });
         }
 
-        let couponDiscount;
-        if(coupon){
-           couponDiscount = coupon.discountValue;
+        // Calculate latest price for each product
+        const productsWithLatestPrices = cart.products.map(item => {
+            const product = item.productId;
+
+            // Calculate percentage discounts
+            const productPercentageDiscount = product.offer || 0;
+            const categoryPercentageDiscount = product.category ? product.category.offer || 0 : 0;
+            const percentageDiscount = Math.max(productPercentageDiscount, categoryPercentageDiscount);
+
+            // Calculate price after percentage discounts
+            const discountAmount = Math.round((product.mrp * (percentageDiscount / 100)) * 100) / 100;
+            const priceAfterPercentageDiscount = Math.round((product.mrp - discountAmount) * 100) / 100;
+
+            const productFixedDiscount = product.fixedAmount || 0;
+            const categoryFixedDiscount = product.category ? product.category.fixedAmount || 0 : 0;
+
+            const priceAfterFixedDiscount = Math.round(Math.max(product.mrp - productFixedDiscount, product.mrp - categoryFixedDiscount) * 100) / 100;
+            const finalDiscountedPrice = Math.round(Math.min(priceAfterPercentageDiscount, priceAfterFixedDiscount) * 100) / 100;
+            const discountedPrice = Math.round(Math.max(0, finalDiscountedPrice) * 100) / 100;
+
+            return {
+                productId: product._id,
+                quantity: item.quantity,
+                priceAtPurchase: discountedPrice
+            };
+        });
+
+        // Calculate total amount before coupon
+        const subtotal = productsWithLatestPrices.reduce((total, item) => {
+            return total + (item.priceAtPurchase * item.quantity);
+        }, 0);
+
+        let couponDiscountAmount = 0;
+        if (coupon) {
+            if (coupon.discountType === 'PERCENTAGE') {
+                couponDiscountAmount = (subtotal * coupon.discountValue) / 100;
+                if (coupon.maxDiscount) {
+                    couponDiscountAmount = Math.min(couponDiscountAmount, coupon.maxDiscount);
+                }
+            } else if (coupon.discountType === 'FIXED') {
+                couponDiscountAmount = Math.min(coupon.discountValue, subtotal);
+            }
         }
-        const effectiveTotal = total - couponDiscount;
+        const effectiveTotal = Math.round((subtotal - couponDiscountAmount) * 100) / 100; // Round to 2 decimal placessubtotal - couponDiscountAmount;
+
         const newOrder = new Orders({
             userId, 
-            addressId,
-            products: cart.products.map(item => ({
-                productId: item.productId._id,
-                quantity: item.quantity,
-                priceAtPurchase: item.productId.sellingPrice
-            })),
+            address,
+            products: productsWithLatestPrices,
             totalAmount: effectiveTotal,
-            paymentMethod: paymentType
+            paymentMethod: paymentType,
+            'coupon.couponCode':coupon ? coupon.code : null,
+            'coupon.couponId':coupon ? coupon.id : null
         });
 
         await newOrder.save();
@@ -87,8 +132,16 @@ exports.orderCreation = async (req,res)=>{
             });
         }
 
-        await Carts.deleteOne({ userId });
-        
+        // Check if all products in the order are in the cart
+        const allProductsInCart = productsWithLatestPrices.every(orderProduct =>
+            cart.products.some(cartProduct => cartProduct.productId._id.equals(orderProduct.productId))
+        );
+
+        // Only delete the cart if all products are in the order
+        if (allProductsInCart) {
+            await Carts.deleteOne({ userId });
+        }
+        console.log("order created successfully")
         res.status(200).json({ success: true, message: "Order placed successfully" });
     } catch (error) {
         console.error("Error creating order:", error);

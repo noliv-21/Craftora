@@ -47,7 +47,6 @@ user.delete('/wishlist/remove',wishlistController.removeProduct)
 user.post('/wishlist/add',wishlistController.addProduct)
 user.get('/wishlist/check',userController.userAuth,wishlistController.checkWishlist)
 
-// Coupon Routes
 user.get('/dashboard/coupons', userController.userAuth, couponController.getUserCoupons);
 user.get('/coupons/available', userController.userAuth, couponController.getAvailableCoupons);
 user.post('/applyCoupon', userController.userAuth, couponController.applyCoupon);

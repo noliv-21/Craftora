@@ -11,9 +11,43 @@ const orderSchema = new mongoose.Schema({
         required:true,
         ref:'user'
     },
-    addressId:{
-        type:mongoose.Schema.Types.ObjectId,
-        required:true
+    address:{
+        name: {
+            type: String,
+            // required: true
+        },
+        phone: {
+            type: Number,
+            // required: true
+        },
+        typeOfAddress: {
+            type: String,
+            enum: ['Work', 'Home'],
+            default: 'Home'
+        },
+        HouseNo: {
+            type: String
+        },
+        streetAddress: {
+            type: String,
+            // required: true
+        },
+        city: {
+            type: String,
+            // required: true
+        },
+        state: {
+            type: String,
+            // required: true
+        },
+        country: {
+            type: String,
+            // required: true
+        },
+        pincode: {
+            type: Number,
+            // required: true
+        }
     },
     products: [
         {
@@ -56,18 +90,15 @@ const orderSchema = new mongoose.Schema({
         type:Number,
         default:0
     },
-    coupons: [
-        {
-            couponId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'coupon'
-            },
-            appliedAt: {
-                type: Date,
-                default: Date.now
-            }
+    coupon:{
+        couponId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'coupon'
+        },
+        couponCode:{
+            type: String
         }
-    ],
+    },
     appliedOffers: [
         {
             offerId: {

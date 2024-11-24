@@ -9,7 +9,7 @@ exports.getCart = async (req, res) => {
         const cart = await Carts.findOne({ userId }).populate({
             path: 'products.productId',
             // select: 'name mrp offer fixedAmount category',
-            populate: { path: 'category', select: 'offer' }
+            populate: { path: 'category'}
         });
         if(!cart){
             return res.render('user/cart/cart', {
@@ -79,10 +79,12 @@ exports.addToCart = async (req,res)=>{
             );
             if (productIndex > -1) {
                 cart.products[productIndex].quantity += 1;
+                await cart.save();
+                return res.status(200).json("Item already in the cart, so quantity increased");
             } else {
                 cart.products.push({ productId, quantity: 1 });
+                await cart.save();
             }
-            await cart.save();
         } else {
             cart = new Carts({
                 userId,
@@ -117,7 +119,9 @@ exports.updateQuantity = async (req, res) => {
             await cart.save();
             return res.json({
                 success: true,
-                totalAmount: cart.totalAmount});
+                totalAmount: cart.totalAmount,
+                message: 'Quantity updated successfully'
+            });
         } else {
             return res.status(404).json({ success: false, message: 'Product not found in cart' });
         }
