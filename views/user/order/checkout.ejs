@@ -151,7 +151,7 @@
                             </div>
                         </div>
 
-                        <button onclick="placeOrder('<%= totalMRP %>')" class="w-full py-3 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors mt-6">
+                        <button onclick="placeOrder('<%= finalAmount %>','<%= products[0].productId._id %>','<%= products.length %>')" class="w-full py-3 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors mt-6">
                             Place Order
                         </button>
                     </div>
@@ -547,7 +547,7 @@ async function removeCoupon() {
     }
 }
 
-async function placeOrder(totalMRP) {
+async function placeOrder(finalAmount, singleProductId = null, productsLength) {
     const selectedAddress = document.querySelector('[data-address-id].border-red-500');
     if (!selectedAddress) {
         showToast('Please select a delivery address', true);
@@ -563,8 +563,10 @@ async function placeOrder(totalMRP) {
     try {
         const response = await axios.post('/user/order/creation', {
             addressId: selectedAddress.dataset.addressId,
-            total: totalMRP,
-            paymentType: selectedPayment.value
+            total: parseFloat(finalAmount),
+            paymentType: selectedPayment.value,
+            singleProductId,
+            productsLength
         });
         if (!response.data.success) {
             return console.error('Error creating order:', response.data.error);
@@ -598,6 +600,10 @@ async function placeOrder(totalMRP) {
                         });
     
                         if (verifyResponse.data.success) {
+                            await axios.post('/user/order/payment-success', {
+                                orderId: response.data.order._id,
+                                paymentId: verifyResponse.data.paymentId
+                            });
                             // Show success message with SweetAlert
                             await Swal.fire({
                                 title: 'Order Placed Successfully!',

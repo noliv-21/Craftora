@@ -49,7 +49,9 @@
                                 </div>
                                 <button onclick="updateQuantity('<%= product.productId._id %>', 1,'<%= product.productId.inventory %>','<%= product.discountedPrice %>')" class="bg-gray-300 px-2 py-1 rounded-lg">+</button>
                                 <button class="text-gray-500" onclick="removeProduct('<%= product.productId._id %>')">Remove</button>
-                                <button class="bg-orange-300 text-white px-4 py-2 rounded-lg">Buy Now</button>
+                                <a href="/user/buyNow/<%= product.productId._id %>">
+                                    <button class="bg-orange-300 text-white px-4 py-2 rounded-lg">Buy Now</button>
+                                </a>
                             </div>
                         </div>
                     </div>

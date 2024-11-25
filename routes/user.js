@@ -38,10 +38,12 @@ user.post('/addToCart',cartController.addToCart)
 user.patch('/cart/update-quantity',cartController.updateQuantity)
 user.delete('/cart/removeProduct',cartController.removeProduct)
 
+user.get('/buyNow/:productId', userController.userAuth, orderController.buyNowCheckout)
 user.get('/checkout', userController.userAuth, orderController.checkout)
 user.post('/order/creation',orderController.orderCreation)
 user.get('/orders',userController.userAuth,orderController.showOrdersUser)
 user.patch('/order/cancel/:orderId',orderController.cancelOrder)
+user.post('/order/payment-success', userController.userAuth, orderController.handlePaymentSuccess);
 
 user.get('/wishlist',userController.userAuth,wishlistController.getWishlistPage)
 user.delete('/wishlist/remove',wishlistController.removeProduct)

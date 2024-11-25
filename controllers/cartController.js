@@ -105,20 +105,25 @@ exports.updateQuantity = async (req, res) => {
     const userId = req.session.user._id;
 
     try {
-        // Find the user's cart
-        const cart = await Carts.findOne({ userId });
+        // // Find the user's cart
+        const cart = await Carts.findOne({ userId }).populate({
+            path: 'products.productId',
+            populate: { path: 'category' }
+        });
+        // const cart = await Carts.findOne({ userId });
         if (!cart) {
             return res.status(404).json({ success: false, message: 'Cart not found' });
         }
 
         // Find the product in the cart and update the quantity
-        const productIndex = cart.products.findIndex(item => item.productId.toString() === productId);
+        const productIndex = cart.products.findIndex(item => item.productId._id.toString() === productId);
         if (productIndex > -1) {
             cart.products[productIndex].quantity += change;
             if (cart.products[productIndex].quantity < 1) cart.products[productIndex].quantity = 1; // Ensure quantity stays positive
             await cart.save();
             return res.json({
                 success: true,
+                products: cart.products,
                 totalAmount: cart.totalAmount,
                 message: 'Quantity updated successfully'
             });

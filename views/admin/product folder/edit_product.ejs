@@ -172,7 +172,7 @@
                                                 <div>
                                                     <label for="percentage" class="block text-gray-700">Discount Percentage</label>
                                                     <div class="flex items-center mt-2">
-                                                        <input type="number" id="percentage" value="<%= productDetails.offerType === 'Percentage' ? productDetails.offer : '' %>" name="percentage" oninput="validatePercentage()" class="w-full p-2 border rounded-l-md" placeholder="Enter percentage">
+                                                        <input type="number" id="percentage" value="<%= productDetails.offerType === 'Percentage' ? productDetails.offer : '' %>" name="offer" oninput="validatePercentage()" class="w-full p-2 border rounded-l-md" placeholder="Enter percentage">
                                                         <span class="px-3 py-2 bg-gray-200 border border-r-0 rounded-r-md">%</span>
                                                     </div>
                                                     <p id="percentageError" class="text-red-600 text-sm hidden"></p>

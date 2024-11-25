@@ -37,7 +37,7 @@
                         onclick="updateMainImage(this,'<%= image %>')"/>
                 <% }) %>
             </div>
-        </div>　　 　 　 　
+        </div>
         <!-- Product Details -->
         <div class="w-2/3">
             <div class="text-sm text-gray-500">
@@ -95,9 +95,9 @@
                 <button class="btn bg-orange-500 text-white px-4 py-2 rounded" onclick="addToCart('<%= product._id %>')">
                     Add to Cart
                 </button>
-                <button class="btn bg-orange-500 text-white px-4 py-2 rounded">
-                    Buy Now
-                </button>
+                <a href="/user/buyNow/<%= product._id %>">
+                    <button class="btn bg-orange-500 text-white px-4 py-2 rounded">Buy Now</button>
+                </a>
             </div>
             <div id="availableCoupons" class="mt-6 hidden">
                 <h3 class="text-lg font-semibold mb-3 text-orange-800">Available Coupons</h3>
@@ -288,6 +288,37 @@
             }).showToast();
         }
     }
+
+    async function buyNow(productId, quantity = 1){
+        try {
+            const response = await axios.post('/user/buyNow', { productId, quantity });
+            if (response.status === 200) {
+                console.log("Checkout page rendered successfully")
+                Toastify({
+                    text: response.data || 'Proceeded to checkout',
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "linear-gradient(135deg, rgba(144, 238, 144, 0.9), rgba(50, 205, 50, 0.9))",
+                    stopOnFocus: true,
+                    className: "toast_style"
+                }).showToast()
+            }
+        } catch (error) {
+            console.error('Error buying now:', error);
+            Toastify({
+                text: error.response?.data || "Error buying now",
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#F44336",
+                stopOnFocus: true,
+                className: "toast_style"
+            }).showToast();
+        }
+    }
+
     // Fetch and display available coupons
     async function fetchProductCoupons() {
         try {
