@@ -14,6 +14,24 @@
         right: 40px;
         z-index: 100;
     }
+
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: all 0.3s ease-in-out;
+    }
+
+    .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
 </style>
 <!-- Header -->
 <%-include('../../partials/user/header')%>
@@ -92,19 +110,42 @@
                 </ul>
             </div>
             <div class="flex space-x-4 mt-6">
+                <!-- Quantity Selector -->
+                <div class="flex items-center bg-white border border-gray-300 rounded-lg overflow-hidden">
+                    <button onclick="updateQuantity(-1)" 
+                            class="px-3 py-2 hover:bg-gray-100 transition-colors duration-200 focus:outline-none">
+                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                        </svg>
+                    </button>
+                    <input type="number" id="quantity" value="1" min="1" max="<%= product.inventory < 6 ? product.inventory : 5 %>"
+                           class="w-12 text-center border-x border-gray-300 py-2 focus:outline-none"
+                           onchange="validateQuantity(this)">
+                    <button onclick="updateQuantity(1)"
+                            class="px-3 py-2 hover:bg-gray-100 transition-colors duration-200 focus:outline-none">
+                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                    </button>
+                </div>
+                <button class="btn bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition-colors duration-200" 
+                        onclick="addToCart('<%= product._id %>')">
+                    Add to Cart
+                </button>
+                <a href="/user/buyNow/<%= product._id %>">
+                    <button class="btn bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition-colors duration-200">
+                        Buy Now
+                    </button>
+                </a>
+            </div>
+            <!-- <div class="flex space-x-4 mt-6">
                 <button class="btn bg-orange-500 text-white px-4 py-2 rounded" onclick="addToCart('<%= product._id %>')">
                     Add to Cart
                 </button>
                 <a href="/user/buyNow/<%= product._id %>">
                     <button class="btn bg-orange-500 text-white px-4 py-2 rounded">Buy Now</button>
                 </a>
-            </div>
-            <div id="availableCoupons" class="mt-6 hidden">
-                <h3 class="text-lg font-semibold mb-3 text-orange-800">Available Coupons</h3>
-                <div id="couponsList" class="grid grid-cols-2 gap-4">
-                    <!-- Coupons will be dynamically inserted here -->
-                </div>
-            </div>
+            </div> -->
         </div>
     </div>
     <!-- User Ratings and Reviews -->
@@ -254,9 +295,43 @@
         zoomableImage.style.transform = 'scale(1)';
     }
 
+    function showToast(message, isError = false) {
+        const existingToasts = document.querySelectorAll('.toast');
+        existingToasts.forEach(toast => toast.remove());
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${isError ? 'bg-red-100 border-red-500' : 'bg-green-100 border-green-500'}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        // Trigger reflow to ensure animation works
+        toast.offsetHeight;
+        
+        // Add show class to trigger animation
+        toast.classList.add('show');
+
+        // // Show toast with animation
+        // requestAnimationFrame(() => {
+        //     toast.style.opacity = '1';
+        //     toast.style.transform = 'translateY(0)';
+        // });
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+        // // Hide and remove toast
+        // setTimeout(() => {
+        //     toast.style.opacity = '0';
+        //     toast.style.transform = 'translateY(20px)';
+        //     setTimeout(() => toast.remove(), 300);
+        // }, 3000);
+    }
+
     async function addToCart(productId){
         try {
-            const response = await axios.post('/user/addToCart', { productId });
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const response = await axios.post('/user/addToCart', { productId, quantity });
             if (response.status === 200) {
                 // Update cart count
                 const cartCount = document.getElementById('cartCount');
@@ -371,6 +446,33 @@
         }).catch(err => {
             console.error('Failed to copy code:', err);
         });
+    }
+
+    function updateQuantity(change) {
+        const input = document.getElementById('quantity');
+        const newValue = parseInt(input.value) + change;
+        const maxQuantity = parseInt(input.max);
+        
+        if (newValue >= 1 && newValue <= maxQuantity) {
+            input.value = newValue;
+        }
+    }
+
+    function validateQuantity(input) {
+        const value = parseInt(input.value);
+        const max = parseInt(input.max);
+
+        if (isNaN(value) || value < 1) {
+            input.value = 1;
+            showToast("Quantity cannot be less than 1", true);
+        } else if (value > max) {
+            input.value = max;
+            if (max === 5) {
+                showToast("Maximum 5 items allowed per order", true);
+            } else {
+                showToast(`Only ${max} items left in stock`, true);
+            }
+        }
     }
 
     // Fetch coupons when page loads

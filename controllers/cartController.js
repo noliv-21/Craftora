@@ -72,23 +72,40 @@ exports.addToCart = async (req,res)=>{
     try {
         const userId = req.session.user._id
         const productId = req.body.productId;
+        const newQuantity = parseInt(req.body.quantity) || 1;
+
+        const product = await Products.findById(productId);
+        if (!product) {
+            return res.status(404).json("Product not found");
+        }
+        const maxAllowedQuantity = Math.min(product.inventory, 5);
+
         let cart = await Carts.findOne({ userId });
         if (cart) {
             const productIndex = cart.products.findIndex(
                 (item) => item.productId.toString() === productId
             );
             if (productIndex > -1) {
-                cart.products[productIndex].quantity += 1;
+                const currentQuantity = cart.products[productIndex].quantity;
+                const totalQuantity = currentQuantity + newQuantity;
+                if (totalQuantity > maxAllowedQuantity) {
+                    if (maxAllowedQuantity === 5) {
+                        return res.status(400).json("Maximum limit of 5 items reached for this product");
+                    } else {
+                        return res.status(400).json(`Only ${maxAllowedQuantity} items available in stock`);
+                    }
+                }
+                cart.products[productIndex].quantity = totalQuantity;
                 await cart.save();
-                return res.status(200).json("Item already in the cart, so quantity increased");
+                return res.status(200).json("Product quantity updated in cart");
             } else {
-                cart.products.push({ productId, quantity: 1 });
+                cart.products.push({ productId, quantity: newQuantity });
                 await cart.save();
             }
         } else {
             cart = new Carts({
                 userId,
-                products: [{ productId, quantity: 1 }]
+                products: [{ productId, quantity: newQuantity }]
             });
             await cart.save();
         }
