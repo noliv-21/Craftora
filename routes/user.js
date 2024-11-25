@@ -38,7 +38,7 @@ user.post('/addToCart',cartController.addToCart)
 user.patch('/cart/update-quantity',cartController.updateQuantity)
 user.delete('/cart/removeProduct',cartController.removeProduct)
 
-user.get('/buyNow/:productId', userController.userAuth, orderController.buyNowCheckout)
+user.get('/buyNow', userController.userAuth, orderController.buyNowCheckout)
 user.get('/checkout', userController.userAuth, orderController.checkout)
 user.post('/order/creation',orderController.orderCreation)
 user.get('/orders',userController.userAuth,orderController.showOrdersUser)

@@ -9,10 +9,10 @@ exports.buyNowCheckout = async (req,res)=>{
     const session = req.session.user;
     const userId = session._id;
     try {
-        const productId = req.params.productId;
-        const quantity = 1;
+        const productId = req.query.productId;
+        const quantity = parseInt(req.query.quantity);
         const product = await Products.findById(productId).populate('category');
-        const totalMRP = product.mrp;
+        const totalMRP = product.mrp*quantity;
 
         // Percentage discounts
         const productPercentageDiscount = product.offer || 0;
@@ -36,7 +36,7 @@ exports.buyNowCheckout = async (req,res)=>{
 
         const products = [{
             productId: product,
-            quantity: quantity ? quantity : 1,
+            quantity: quantity,
         }];
 
         const addresses = await Addresses.find({ userId });

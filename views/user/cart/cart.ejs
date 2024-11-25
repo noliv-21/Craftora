@@ -49,9 +49,9 @@
                                 </div>
                                 <button onclick="updateQuantity('<%= product.productId._id %>', 1,'<%= product.productId.inventory %>','<%= product.discountedPrice %>')" class="bg-gray-300 px-2 py-1 rounded-lg">+</button>
                                 <button class="text-gray-500" onclick="removeProduct('<%= product.productId._id %>')">Remove</button>
-                                <a href="/user/buyNow/<%= product.productId._id %>">
-                                    <button class="bg-orange-300 text-white px-4 py-2 rounded-lg">Buy Now</button>
-                                </a>
+                                    <button onclick="buyNow('<%= product.productId._id %>','<%= product.quantity %>')" class="bg-orange-300 text-white px-4 py-2 rounded-lg">
+                                        Buy Now
+                                    </button>
                             </div>
                         </div>
                     </div>
@@ -238,6 +238,16 @@
                     backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
                     className: "toast_style"
             }).showToast();
+        }
+    }
+
+    async function buyNow(productId, quantity) {
+        try {
+            // Redirect to checkout with product and quantity information
+            window.location.href = `/user/buyNow?productId=${productId}&quantity=${quantity}&buyNow=true`;
+        } catch (error) {
+            console.error('Error processing buy now:', error);
+            showToast("Failed to process buy now request", true);
         }
     }
 </script>
