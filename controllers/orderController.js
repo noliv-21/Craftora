@@ -197,7 +197,7 @@ exports.orderCreation = async (req,res)=>{
                 {
                     productId: product._id,
                     quantity: orderData.quantity,
-                    priceAtPurchase: subtotal
+                    priceAtPurchase: totalPriceAfterDiscount
                 }
             ];
             
@@ -294,7 +294,6 @@ exports.orderCreation = async (req,res)=>{
                 } finally {
                     await session.endSession();
                     console.log("order created successfully")
-                    // res.status(200).json({ success: true, message: "Order placed successfully", order: newOrder });
                 }
             } catch (error) {
                 console.error("Error in wallet payment:", error);

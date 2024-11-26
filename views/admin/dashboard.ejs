@@ -1,538 +1,387 @@
 <style>
-    body {
-        font-family: 'Inter', sans-serif;
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+        from { transform: translateX(-20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    .stat-card {
+        animation: fadeIn 0.5s ease-out forwards;
+        transition: all 0.3s ease;
+        background: linear-gradient(145deg, #ffffff, #f3f4f6);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon-wrapper {
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover .icon-wrapper {
+        transform: scale(1.1);
+    }
+
+    .table-row {
+        transition: all 0.2s ease;
+    }
+
+    .table-row:hover {
+        background-color: rgba(59, 130, 246, 0.05);
+    }
+
+    .btn-primary {
+        transition: all 0.3s ease;
+        background: linear-gradient(145deg, #3b82f6, #2563eb);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+
+    .report-section {
+        animation: slideIn 0.5s ease-out forwards;
     }
 </style>
-<div class="flex">
+
+<div class="flex min-h-screen bg-gray-100">
     <!-- Sidebar -->
     <%-include('../partials/admin/side bar')%>
+    
     <!-- Main Content -->
-    <div class="flex-1 p-6">
+    <div class="flex-1 p-8">
         <!-- Header -->
         <%-include('../partials/admin/header')%>
-        <!-- Dashboard Content -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <div class="bg-white p-6 rounded-lg shadow">
+        
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div class="stat-card rounded-xl p-6 shadow-sm" style="animation-delay: 0.1s">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-medium text-gray-500">
-                        Total Revenue
-                    </span>
-                    <i class="fas fa-ellipsis-h text-gray-500">
-                    </i>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Total Revenue</h3>
+                        <p class="text-sm text-gray-500">Overall earnings</p>
+                    </div>
+                    <div class="icon-wrapper p-3 bg-blue-100 rounded-lg">
+                        <i class="fas fa-money-bill-wave text-blue-600 text-xl"></i>
+                    </div>
                 </div>
-                <div class="text-2xl font-bold text-gray-800">
-                    $75,500
-                </div>
+                <div class="text-3xl font-bold text-gray-800">₹ <%= totalRevenue.toFixed(2) %></div>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow">
+
+            <div class="stat-card rounded-xl p-6 shadow-sm" style="animation-delay: 0.2s">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-medium text-gray-500">
-                        Total Sales
-                    </span>
-                    <i class="fas fa-ellipsis-h text-gray-500">
-                    </i>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Total Sales</h3>
+                        <p class="text-sm text-gray-500">Number of orders</p>
+                    </div>
+                    <div class="icon-wrapper p-3 bg-green-100 rounded-lg">
+                        <i class="fas fa-shopping-cart text-green-600 text-xl"></i>
+                    </div>
                 </div>
-                <div class="text-2xl font-bold text-gray-800">
-                    31,500
-                </div>
+                <div class="text-3xl font-bold text-gray-800"><%= totalSales %></div>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow">
+
+            <div class="stat-card rounded-xl p-6 shadow-sm" style="animation-delay: 0.3s">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-medium text-gray-500">
-                        Product SKU
-                    </span>
-                    <i class="fas fa-ellipsis-h text-gray-500">
-                    </i>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Total Discounts</h3>
+                        <p class="text-sm text-gray-500">Savings provided</p>
+                    </div>
+                    <div class="icon-wrapper p-3 bg-purple-100 rounded-lg">
+                        <i class="fas fa-tags text-purple-600 text-xl"></i>
+                    </div>
                 </div>
-                <div class="text-2xl font-bold text-gray-800">
-                    247
-                </div>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-medium text-gray-500">
-                        Balance
-                    </span>
-                    <i class="fas fa-ellipsis-h text-gray-500">
-                    </i>
-                </div>
-                <div class="text-2xl font-bold text-gray-800">
-                    $24,500
-                </div>
+                <div class="text-3xl font-bold text-gray-800">₹ <%= totalDiscount %></div>
             </div>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <div class="bg-white p-6 rounded-lg shadow col-span-2">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-medium text-gray-500">
-                        Sales Progress
-                    </span>
-                    <i class="fas fa-ellipsis-h text-gray-500">
-                    </i>
+
+        <!-- Sales Report Section -->
+        <div class="report-section bg-white rounded-xl shadow-sm overflow-hidden mb-8">
+            <div class="p-6 border-b">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Sales Report</h2>
+                        <p class="text-gray-500 mt-1">Analyze your sales data</p>
+                    </div>
+                    <div class="flex gap-4 mt-4 md:mt-0">
+                        <button class="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all">
+                            <i class="fas fa-file-pdf mr-2"></i>PDF
+                        </button>
+                        <button class="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all">
+                            <i class="fas fa-file-excel mr-2"></i>Excel
+                        </button>
+                    </div>
                 </div>
-                <div class="flex items-center justify-center mb-4">
-                    <div class="relative w-32 h-32">
-                        <svg class="absolute top-0 left-0 w-full h-full" viewbox="0 0 36 36">
-                            <path class="text-gray-200"
-                                d="M18 2.0845a15.9155 15.9155 0 1 1 0 31.831 15.9155 15.9155 0 1 1 0-31.831" fill="none"
-                                stroke-width="3.8">
-                            </path>
-                            <path class="text-blue-500"
-                                d="M18 2.0845a15.9155 15.9155 0 1 1 0 31.831 15.9155 15.9155 0 1 1 0-31.831" fill="none"
-                                stroke-dasharray="75, 100" stroke-width="3.8">
-                            </path>
-                        </svg>
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <span class="text-2xl font-bold text-gray-800">
-                                75.55%
-                            </span>
+
+                <!-- Filter Options -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
+                        <select id="reportType" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                            <option value="all">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="yesterday">Yesterday</option>
+                            <option value="thisWeek">This Week</option>
+                            <option value="thisMonth">This Month</option>
+                            <option value="specificDate">Specific Date</option>
+                            <option value="customRange">Custom Range</option>
+                        </select>
+                    </div>
+
+                    <div id="specificDateContainer" style="display: none;">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Date</label>
+                        <input type="date" id="specificDate" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    </div>
+
+                    <div id="dateRangeContainer" style="display: none;" class="col-span-3">
+                        <div class="grid grid-cols-3 gap-4 items-end">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                                <input type="date" id="startDate" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                                <input type="date" id="endDate" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                            </div>
+                            <div class="flex items-end">
+                                <button id="generateReport" class="w-full btn-primary px-6 py-2 text-white rounded-lg font-medium">
+                                    Generate Report
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="text-center text-gray-500">
-                    We have reached $20k today. Great job!
-                </div>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-medium text-gray-500">
-                        Statistics
-                    </span>
-                    <i class="fas fa-ellipsis-h text-gray-500">
-                    </i>
-                </div>
-                <div class="h-40">
-                    <canvas id="statisticsChart">
-                    </canvas>
-                </div>
-            </div>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div class="bg-white p-6 rounded-lg shadow">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-medium text-gray-500">
-                        Top Selling Product
-                    </span>
-                    <i class="fas fa-ellipsis-h text-gray-500">
-                    </i>
-                </div>
-                <table class="w-full text-left">
-                    <thead>
+
+            <!-- Sales Report Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th class="py-2">
-                                Product
-                            </th>
-                            <th class="py-2">
-                                Sales
-                            </th>
-                            <th class="py-2">
-                                Amount
-                            </th>
-                            <th class="py-2">
-                                Price
-                            </th>
-                            <th class="py-2">
-                                Status
-                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Products</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Final Amount</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td class="py-2">
-                                Kawasaki Peach
-                            </td>
-                            <td class="py-2">
-                                401
-                            </td>
-                            <td class="py-2">
-                                $81,600
-                            </td>
-                            <td class="py-2">
-                                $210.00
-                            </td>
-                            <td class="py-2 text-yellow-500">
-                                Low Stock
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-2">
-                                Wall decor
-                            </td>
-                            <td class="py-2">
-                                301
-                            </td>
-                            <td class="py-2">
-                                $77,220
-                            </td>
-                            <td class="py-2">
-                                $210.00
-                            </td>
-                            <td class="py-2 text-green-500">
-                                Published
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-2">
-                                Unique handmade dress
-                            </td>
-                            <td class="py-2">
-                                299
-                            </td>
-                            <td class="py-2">
-                                $63,000
-                            </td>
-                            <td class="py-2">
-                                $210.00
-                            </td>
-                            <td class="py-2 text-yellow-500">
-                                Low Stock
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-2">
-                                Kawasaki Peach
-                            </td>
-                            <td class="py-2">
-                                298
-                            </td>
-                            <td class="py-2">
-                                $81,600
-                            </td>
-                            <td class="py-2">
-                                $210.00
-                            </td>
-                            <td class="py-2 text-green-500">
-                                Published
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-2">
-                                Paintings
-                            </td>
-                            <td class="py-2">
-                                295
-                            </td>
-                            <td class="py-2">
-                                $81,600
-                            </td>
-                            <td class="py-2">
-                                $210.00
-                            </td>
-                            <td class="py-2 text-green-500">
-                                Published
-                            </td>
-                        </tr>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <% salesReport.forEach((sale,index)=>{ %>
+                            <tr class="table-row" style="animation: fadeIn 0.5s ease-out forwards; animation-delay: 0.1s">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= sale.orderId %></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= sale.date %></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= sale.customerName %></td>
+                                <td class="px-6 py-4 text-sm text-gray-500">
+                                    <div class="text-sm text-gray-900"><%= sale.products[0] %></div>
+                                    <% if (sale.products.length > 1) { %>
+                                        <div class="text-xs text-gray-500">+ <%= sale.products.length - 1 %> more products</div>
+                                    <% } %> 
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹ <%= sale.amount.toFixed(2) %></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-red-500">₹ <%= sale.discount.toFixed(2) %></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">₹ <%= sale.finalAmount.toFixed(2) %></td>
+                            </tr>
+                        <% }) %>
                     </tbody>
+                    <tfoot class="bg-gray-50 font-medium">
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-sm text-gray-900 text-right">Totals:</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹ <%= totalAmount.toFixed(2) %></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-red-500">₹ <%= totalDiscountAmount.toFixed(2) %></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">₹ <%= totalFinalAmount.toFixed(2) %></td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-medium text-gray-500">
-                        Sales by Location
-                    </span>
-                    <i class="fas fa-ellipsis-h text-gray-500">
-                    </i>
-                </div>
-                <table class="w-full text-left">
-                    <thead>
-                        <tr>
-                            <th class="py-2">
-                                Location
-                            </th>
-                            <th class="py-2">
-                                Sales
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="py-2">
-                                United Kingdom
-                            </td>
-                            <td class="py-2">
-                                $177,000
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-2">
-                                United States
-                            </td>
-                            <td class="py-2">
-                                $129,000
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-2">
-                                France
-                            </td>
-                            <td class="py-2">
-                                $52,000
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-2">
-                                Spain
-                            </td>
-                            <td class="py-2">
-                                $50,000
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-2">
-                                Italy
-                            </td>
-                            <td class="py-2">
-                                $29,000
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-2">
-                                United Arab Emirates
-                            </td>
-                            <td class="py-2">
-                                $21,000
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-2">
-                                Japan
-                            </td>
-                            <td class="py-2">
-                                $19,000
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-2">
-                                China
-                            </td>
-                            <td class="py-2">
-                                $17,000
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-2">
-                                India
-                            </td>
-                            <td class="py-2">
-                                $15,000
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-2">
-                                Australia
-                            </td>
-                            <td class="py-2">
-                                $12,000
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow">
-            <div class="flex items-center justify-between mb-4">
-                <span class="text-sm font-medium text-gray-500">
-                    Recent Orders
-                </span>
-                <div class="flex items-center">
-                    <button class="text-gray-500 mr-4">
-                        <i class="fas fa-filter">
-                        </i>
-                    </button>
-                    <button class="text-gray-500">
-                        <i class="fas fa-ellipsis-h">
-                        </i>
-                    </button>
-                </div>
-            </div>
-            <table class="w-full text-left">
-                <thead>
-                    <tr>
-                        <th class="py-2">
-                            Order ID
-                        </th>
-                        <th class="py-2">
-                            Product
-                        </th>
-                        <th class="py-2">
-                            Date
-                        </th>
-                        <th class="py-2">
-                            Customer
-                        </th>
-                        <th class="py-2">
-                            Total
-                        </th>
-                        <th class="py-2">
-                            Payment
-                        </th>
-                        <th class="py-2">
-                            Status
-                        </th>
-                        <th class="py-2">
-                            Action
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="py-2">
-                            #302012
-                        </td>
-                        <td class="py-2">
-                            Handmade Peach
-                        </td>
-                        <td class="py-2">
-                            1 min ago
-                        </td>
-                        <td class="py-2">
-                            John Bateman
-                        </td>
-                        <td class="py-2">
-                            $210.00
-                        </td>
-                        <td class="py-2">
-                            Paypal
-                        </td>
-                        <td class="py-2 text-yellow-500">
-                            Processing
-                        </td>
-                        <td class="py-2">
-                            <button class="text-blue-500">
-                                <i class="fas fa-eye">
-                                </i>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="py-2">
-                            #302011
-                        </td>
-                        <td class="py-2">
-                            Wall decor
-                        </td>
-                        <td class="py-2">
-                            5 min ago
-                        </td>
-                        <td class="py-2">
-                            Irene Bond
-                        </td>
-                        <td class="py-2">
-                            $210.00
-                        </td>
-                        <td class="py-2">
-                            Paypal
-                        </td>
-                        <td class="py-2 text-green-500">
-                            Shipped
-                        </td>
-                        <td class="py-2">
-                            <button class="text-blue-500">
-                                <i class="fas fa-eye">
-                                </i>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="py-2">
-                            #302010
-                        </td>
-                        <td class="py-2">
-                            Wooden dress
-                        </td>
-                        <td class="py-2">
-                            6 hour ago
-                        </td>
-                        <td class="py-2">
-                            Mohammed Karim
-                        </td>
-                        <td class="py-2">
-                            $210.00
-                        </td>
-                        <td class="py-2">
-                            Transfer
-                        </td>
-                        <td class="py-2 text-green-500">
-                            Shipped
-                        </td>
-                        <td class="py-2">
-                            <button class="text-blue-500">
-                                <i class="fas fa-eye">
-                                </i>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="py-2">
-                            #302009
-                        </td>
-                        <td class="py-2">
-                            Paintings
-                        </td>
-                        <td class="py-2">
-                            1 day ago
-                        </td>
-                        <td class="py-2">
-                            Linda Blair
-                        </td>
-                        <td class="py-2">
-                            $210.00
-                        </td>
-                        <td class="py-2">
-                            COD
-                        </td>
-                        <td class="py-2 text-green-500">
-                            Shipped
-                        </td>
-                        <td class="py-2">
-                            <button class="text-blue-500">
-                                <i class="fas fa-eye">
-                                </i>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="py-2">
-                            #302008
-                        </td>
-                        <td class="py-2">
-                            Pumpkin candles
-                        </td>
-                        <td class="py-2">
-                            2 day ago
-                        </td>
-                        <td class="py-2">
-                            John Adam
-                        </td>
-                        <td class="py-2">
-                            $210.00
-                        </td>
-                        <td class="py-2">
-                            Visa
-                        </td>
-                        <td class="py-2 text-green-500">
-                            Delivered
-                        </td>
-                        <td class="py-2">
-                            <button class="text-blue-500">
-                                <i class="fas fa-eye">
-                                </i>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="py-2">
-                            #302007
-                        </td>
-                        <td class="py-2">
-                            Flying eye cards
-                        </td>
-                        <td class="py-2">
-                            3 day ago
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const reportType = document.getElementById('reportType');
+        const specificDateContainer = document.getElementById('specificDateContainer');
+        const dateRangeContainer = document.getElementById('dateRangeContainer');
+        const specificDate = document.getElementById('specificDate');
+        const startDate = document.getElementById('startDate');
+        const endDate = document.getElementById('endDate');
+        const generateReport = document.getElementById('generateReport');
+
+        // Function to format date as YYYY-MM-DD for input fields
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        // Function to set default dates based on report type
+        function setDefaultDates(type) {
+            const today = new Date();
+            
+            switch(type) {
+                case 'today':
+                    fetchSalesReport(type);
+                    break;
+
+                case 'yesterday':
+                    fetchSalesReport(type);
+                    break;
+
+                case 'thisWeek':
+                    const weekStart = new Date(today);
+                    weekStart.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
+                    startDate.value = formatDate(weekStart);
+                    endDate.value = formatDate(today);
+                    fetchSalesReport(type);
+                    break;
+
+                case 'thisMonth':
+                    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                    startDate.value = formatDate(monthStart);
+                    endDate.value = formatDate(today);
+                    fetchSalesReport(type);
+                    break;
+
+                case 'specificDate':
+                    specificDate.value = formatDate(today);
+                    break;
+
+                case 'customRange':
+                    // Set last 30 days as default range
+                    const thirtyDaysAgo = new Date(today);
+                    thirtyDaysAgo.setDate(today.getDate() - 30);
+                    startDate.value = formatDate(thirtyDaysAgo);
+                    endDate.value = formatDate(today);
+                    break;
+
+                default: // 'all'
+                    fetchSalesReport(type);
+                    break;
+            }
+        }
+
+        // Function to show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out z-50 ${
+                type === 'success' 
+                    ? 'bg-green-500 text-white' 
+                    : 'bg-red-500 text-white'
+            }`;
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-20px)';
+            
+            // Add icon based on type
+            const icon = type === 'success' ? '✓' : '⚠';
+            toast.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <span class="text-lg font-bold">${icon}</span>
+                    <p class="font-medium">${message}</p>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            }, 10);
+            
+            // Animate out after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // Handle report type changes
+        reportType.addEventListener('change', function() {
+            // Hide all date inputs first
+            specificDateContainer.style.display = 'none';
+            dateRangeContainer.style.display = 'none';
+
+            // Show relevant inputs based on selection
+            if (this.value === 'specificDate') {
+                specificDateContainer.style.display = 'block';
+                setDefaultDates(this.value);
+            } else if (this.value === 'customRange') {
+                dateRangeContainer.style.display = 'block';
+                setDefaultDates(this.value);
+            } else {
+                // For other options, fetch data immediately
+                fetchSalesReport(this.value);
+            }
+        });
+
+        // Handle specific date change
+        specificDate.addEventListener('change', function() {
+            fetchSalesReport('specificDate', { date: this.value });
+        });
+
+        // Handle custom range generate button
+        generateReport.addEventListener('click', function() {
+            if (startDate.value && endDate.value) {
+                fetchSalesReport('customRange', {
+                    startDate: startDate.value,
+                    endDate: endDate.value
+                });
+            } else {
+                showToast('Please select both start and end dates', 'error');
+            }
+        });
+
+        setDefaultDates(reportType.value);
+
+        // Function to fetch sales report data
+        function fetchSalesReport(type, dates = {}) {
+            const url = new URL('/admin/generate-sales-report', window.location.origin);
+            url.searchParams.append('type', type);
+            
+            if (dates.date) url.searchParams.append('date', dates.date);
+            if (dates.startDate) url.searchParams.append('startDate', dates.startDate);
+            if (dates.endDate) url.searchParams.append('endDate', dates.endDate);
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Update the table with new data
+                    updateSalesTable(data.salesReport);
+                    console.log("successfully fetched sales report");
+                })
+                .catch(error =>{
+                    showToast('Unable to fetch sales report', 'error');
+                    console.error('Error:', error)
+                });
+        }
+
+        // Function to update the sales table
+        function updateSalesTable(salesReport) {
+            const tbody = document.querySelector('table tbody');
+            tbody.innerHTML = salesReport.map(sale => `
+                <tr class="table-row" style="animation: fadeIn 0.5s ease-out forwards;">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${sale.orderId}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${sale.date}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${sale.customerName}</td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-900">${sale.products[0]}</div>
+                        ${sale.products.length > 1 ? `<div class="text-xs text-gray-500">+ ${sale.products.length - 1} more products</div>` : ''}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹ ${sale.amount.toFixed(2)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-500">₹ ${sale.discount.toFixed(2)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">₹ ${sale.finalAmount.toFixed(2)}</td>
+                </tr>
+            `).join('');
+        }
+    });
+</script>

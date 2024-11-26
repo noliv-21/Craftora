@@ -88,6 +88,10 @@ const orderSchema = new mongoose.Schema({
         type:Number,
         default:0
     },
+    totalDiscountAmount:{
+        type:Number,
+        default:0
+    },
     taxAmount:{
         type:Number,
         default:0

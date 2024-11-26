@@ -38,11 +38,11 @@ exports.login_verify = async (req, res) => {
     }
 };
 
-exports.home = (req, res) => {
-    res.render('admin/dashboard', {
-        activeTab: "dashboard"
-    });
-};
+// exports.home = (req, res) => {
+//     res.render('admin/dashboard', {
+//         activeTab: "dashboard"
+//     });
+// };
 
 exports.logout = (req, res) => {
     delete req.session.admin;

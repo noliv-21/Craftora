@@ -7,13 +7,14 @@ const categoryController = require('../controllers/categoryController');
 const userController = require('../controllers/userController');
 const orderController = require('../controllers/orderController')
 const couponController = require('../controllers/couponController')
+const salesController = require('../controllers/salesController')
 
 admin.use('/',express.static('public'));
 
 admin.get('/login',adminController.login);
 admin.post('/login', adminController.login_verify)
 
-admin.get('/home', adminController.home)
+admin.get('/home', salesController.dashboard)
 admin.get('/logout', adminController.logout)
 
 admin.get('/users',userController.users)
@@ -46,5 +47,8 @@ admin.get('/coupons/check-code/:code', couponController.checkCouponCode)
 admin.post('/coupons', couponController.addCoupon);
 admin.patch('/coupons/:id', couponController.updateCoupon);
 admin.patch('/coupons/:id/toggle', couponController.toggleCouponStatus)
+
+admin.get('/generate-sales-report', salesController.generateSalesReport);
+admin.get('/download-sales-report', salesController.downloadSalesReport);
 
 module.exports = admin;
