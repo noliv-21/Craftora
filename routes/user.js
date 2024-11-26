@@ -66,5 +66,6 @@ user.post('/razorpay/verify', userController.userAuth, paymentController.verifyP
 
 user.get('/dashboard/wallet', userController.userAuth, walletController.walletPage);
 user.post('/wallet/add-money', userController.userAuth, walletController.addMoneyToWallet);
+user.get('/wallet/balance', userController.userAuth, walletController.getWalletBalance);
 
 module.exports = user;

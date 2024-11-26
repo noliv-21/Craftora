@@ -151,7 +151,7 @@
                             </div>
                         </div>
 
-                        <button onclick="placeOrder('<%= finalAmount %>','<%= products[0].productId._id %>','<%= products.length %>')" class="w-full py-3 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors mt-6">
+                        <button onclick="placeOrder('<%= finalAmount %>','<%= products[0].productId._id %>')" class="w-full py-3 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors mt-6">
                             Place Order
                         </button>
                     </div>
@@ -547,7 +547,7 @@ async function removeCoupon() {
     }
 }
 
-async function placeOrder(finalAmount, singleProductId = null, productsLength) {
+async function placeOrder(finalAmount, productId = null) {
     const selectedAddress = document.querySelector('[data-address-id].border-red-500');
     if (!selectedAddress) {
         showToast('Please select a delivery address', true);
@@ -559,15 +559,49 @@ async function placeOrder(finalAmount, singleProductId = null, productsLength) {
         showToast('Please select a payment method', true);
         return;
     }
+    if(selectedPayment.value === 'Wallet'){
+        try {
+            const response = await axios.get('/user/wallet/balance');
+            if(response.status === 200 && response.data.success) {
+                const walletBalance = response.data.balance;
+                if(walletBalance < finalAmount) {
+                    console.error('Insufficient wallet balance');
+                    showToast('Insufficient wallet balance', true);
+                    return;
+                }
+            } else {
+                throw new Error(response.data.message || 'Failed to fetch wallet balance');
+            }
+        } catch (error) {
+            console.error("Error checking the wallet balance:", error);
+            showToast(error.response?.data?.message || "Failed to verify wallet balance", true);
+            return;
+        }
+    }
 
     try {
-        const response = await axios.post('/user/order/creation', {
+        // Check if this is a buyNow order using URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const isBuyNow = urlParams.get('buyNow') === 'true';
+        
+        let orderData = {
             addressId: selectedAddress.dataset.addressId,
             total: parseFloat(finalAmount),
-            paymentType: selectedPayment.value,
-            singleProductId,
-            productsLength
-        });
+            paymentType: selectedPayment.value
+        };
+        if(isBuyNow){ 
+            orderData = {
+                ...orderData,
+                productId: productId,  // Add this
+                quantity: parseInt(urlParams.get('quantity')) || 1,    // Add this
+                buyNow: true          // Add this
+            };
+        }else{
+            orderData.buyNow = false;
+        }
+
+        // In checkout.ejs
+        const response = await axios.post('/user/order/creation', { orderData });
         if (!response.data.success) {
             return console.error('Error creating order:', response.data.error);
         }

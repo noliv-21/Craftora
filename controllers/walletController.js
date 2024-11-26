@@ -1,5 +1,16 @@
 const Wallets = require('../models/walletSchema');
 
+const getWalletBalance = async (req, res) => {
+    const session = req.session.user;
+    const userId = session._id;
+    let wallet = await Wallets.findOne({ userId: userId });
+    if (!wallet) {
+        wallet = new Wallets({ userId: userId, transactions: [] });
+        await wallet.save();
+    }
+    res.json({ success: true, balance: wallet.balance });
+};
+
 const walletPage = async (req,res)=>{
     try {
         const session = req.session.user;
@@ -10,7 +21,7 @@ const walletPage = async (req,res)=>{
             await wallet.save();
         }
         res.render('user/dashboard/wallet', {
-            userWallet: wallet, session, activeTab: 'wallet'
+            userWallet: wallet, session, activeTab: 'wallet', razorpayKey: process.env.RAZORPAY_KEY_ID
         } )
     } catch (error) {
         console.error(error);
@@ -50,5 +61,5 @@ const addMoneyToWallet = async (req, res) => {
 };
 
 module.exports = {
-    addMoneyToWallet, walletPage
+    addMoneyToWallet, walletPage, getWalletBalance,
 }

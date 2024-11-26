@@ -3,7 +3,9 @@ const Orders = require('../models/orderSchema')
 const Addresses = require('../models/addressSchema')
 const Users = require('../models/userSchema')
 const Products = require('../models/productSchema')
+const Wallets = require('../models/walletSchema')
 const { products } = require('./productController')
+const mongoose = require('mongoose');
 
 exports.buyNowCheckout = async (req,res)=>{
     const session = req.session.user;
@@ -88,23 +90,22 @@ exports.checkout = async (req, res) => {
 exports.orderCreation = async (req,res)=>{
     const userId = req.session.user._id;
     const coupon = req.session.user.appliedCoupon;
-    const { total, paymentType, addressId, singleProductId, productsLength } = req.body;
-    console.log("total from req.body:", total);
-    console.log("productsLength:", productsLength);
-    console.log("singleProductId:", singleProductId);
+    // const { total, paymentType, addressId, singleProductId, productsLength } = req.body;
+    const { orderData } = req.body;
+    console.log("orderData:", orderData);
     try {
         // Validate address
-        if (!addressId) {
+        if (!orderData.addressId) {
             return res.status(400).json({ message: "Please select a delivery address" });
         }
         // Validate address belongs to user
-        const address = await Addresses.findOne({ _id: addressId, userId });
+        const address = await Addresses.findOne({ _id: orderData.addressId, userId });
         if (!address) {
             return res.status(400).json({ message: "Invalid delivery address" });
         }
 
         let subtotal, productsWithLatestPrices;
-        if(parseInt(productsLength) >1){
+        if(!orderData.buyNow){
             const cart = await Carts.findOne({ userId })
                 .populate({
                     path:'products.productId',
@@ -113,8 +114,8 @@ exports.orderCreation = async (req,res)=>{
                         model: 'Category'
                     }
                 });
-            if (!cart) {
-                return res.status(400).json({ message: "Cart is empty" });
+            if (!cart || !cart.products || cart.products.length === 0) {
+                return res.status(400).json({ success: false, message: "Cart is empty" });
             }
 
             // Calculate latest price for each product
@@ -158,13 +159,18 @@ exports.orderCreation = async (req,res)=>{
             if (allProductsInCart) {
                 await Carts.deleteOne({ userId });
             }
-        } else if(parseInt(productsLength) === 1){
-            const product = await Products.findById( singleProductId ).populate('category');
+        } else if(orderData.buyNow){
+            if (!orderData.productId) {
+                return res.status(400).json({ success: false, message: "Product ID is required for buy now order" });
+            }
+
+            const product = await Products.findById( orderData.productId ).populate('category');
             if (!product) {
-                return res.status(400).json({ message: "Product not found" });
+                return res.status(400).json({ success:false, message: "Product not found" });
             }
 
             const totalMRP = product.mrp;
+            // const totalMRP = product.mrp*orderData.quantity;
 
             // Percentage discounts
             const productPercentageDiscount = product.offer || 0;
@@ -184,12 +190,13 @@ exports.orderCreation = async (req,res)=>{
             const priceAfterFixedDiscount = Math.round(Math.max(totalMRP - productFixedDiscount, totalMRP - categoryFixedDiscount) * 100) / 100;
             const finalDiscountedPrice = Math.round(Math.min(priceAfterPercentageDiscount, priceAfterFixedDiscount) * 100) / 100;
             const totalPriceAfterDiscount = Math.round(Math.max(0, finalDiscountedPrice) * 100) / 100;
-            subtotal = Math.round(totalPriceAfterDiscount * 100) / 100;
-            
+            subtotal = totalPriceAfterDiscount*orderData.quantity;
+            console.log("Subtotal before coupon:", subtotal);
+
             productsWithLatestPrices = [
                 {
                     productId: product._id,
-                    quantity: 1,
+                    quantity: orderData.quantity,
                     priceAtPurchase: subtotal
                 }
             ];
@@ -216,46 +223,138 @@ exports.orderCreation = async (req,res)=>{
         if (isNaN(effectiveTotal)) {
             return res.status(400).json({ message: "Error calculating total amount" });
         }
-
-        const newOrder = new Orders({
-            userId, 
-            address,
-            products: productsWithLatestPrices,
-            totalAmount: effectiveTotal,
-            paymentMethod: paymentType,
-            'coupon.couponCode':coupon ? coupon.code : null,
-            'coupon.couponId':coupon ? coupon.id : null
-        });
-
-        await newOrder.save();
-
-        // Update inventory
-        if(parseInt(productsLength) === 1) {
-            await Products.findByIdAndUpdate(singleProductId, {
-                $inc: { inventory: -1 }
-            });
-        } else {
-            const cart = await Carts.findOne({ userId })
-                .populate({
-                    path:'products.productId',
-                    populate: {
-                        path: 'category',
-                        model: 'Category'
-                    }
-                });
-            if(cart){
-                for (const item of cart.products) {
-                    const productId = item.productId._id;
-                    const quantityOrdered = item.quantity;
-        
-                    await Products.findByIdAndUpdate(productId, {
-                        $inc: { inventory: -quantityOrdered }
-                    });
+        let newOrder;
+        if(orderData.paymentType === "Wallet"){
+            try {
+                const wallet = await Wallets.findOne({userId})
+                if(!wallet){
+                    return res.status(404).json({ message: "Wallet not found" });
                 }
+                if(wallet.balance < effectiveTotal){
+                    return res.status(400).json({ message: "Insufficient balance in wallet" });
+                }
+
+                // Atomicity
+                const session = await mongoose.startSession();
+                try {
+                    await session.withTransaction(async ()=>{
+                        await Wallets.findOneAndUpdate(
+                            {userId},
+                            {$inc: { balance: -effectiveTotal }},
+                            { session }
+                        )
+
+                        newOrder = new Orders({
+                            userId, 
+                            address,
+                            products: productsWithLatestPrices,
+                            totalAmount: effectiveTotal,
+                            paymentType: orderData.paymentType,
+                            'coupon.couponCode': coupon ? coupon.code : null,
+                            'coupon.couponId': coupon ? coupon.id : null
+                        });
+                        await newOrder.save({ session });
+
+                        // Inventory updation
+                        if(orderData.buyNow) {
+                            await Products.findByIdAndUpdate(
+                                orderData.productId, 
+                                { $inc: { inventory: -orderData.quantity } },
+                                { session }
+                            );
+                        } else {
+                            const cart = await Carts.findOne({ userId })
+                                .populate('products.productId');
+                            if(cart){
+                                for (const item of cart.products) {
+                                    const productId = item.productId._id;
+                                    const quantityOrdered = item.quantity;
+                        
+                                    await Products.findByIdAndUpdate(productId, {
+                                        $inc: { inventory: -quantityOrdered }},
+                                        { session }
+                                    );
+                                }
+                                await Carts.findOneAndDelete({ userId }, { session });
+                            }
+                        }
+                    });
+                    return res.status(200).json({ 
+                        success: true, 
+                        message: "Order placed successfully",
+                        order: newOrder
+                    });
+                }catch (error){
+                    console.error("Error in transaction:", error);
+                    return res.status(500).json({ 
+                        success: false, 
+                        message: "Failed to process transaction",
+                        error: error.message 
+                    }); 
+                } finally {
+                    await session.endSession();
+                    console.log("order created successfully")
+                    // res.status(200).json({ success: true, message: "Order placed successfully", order: newOrder });
+                }
+            } catch (error) {
+                console.error("Error in wallet payment:", error);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: "Failed to process wallet payment",
+                    error: error.message 
+                });
             }
         }
-        console.log("order created successfully")
-        res.status(200).json({ success: true, message: "Order placed successfully", order: newOrder });
+        
+        // Non-wallet payment
+        try {
+            newOrder = new Orders({
+                userId, 
+                address,
+                products: productsWithLatestPrices,
+                totalAmount: effectiveTotal,
+                paymentMethod: orderData.paymentType,
+                'coupon.couponCode':coupon ? coupon.code : null,
+                'coupon.couponId':coupon ? coupon.id : null
+            });
+            await newOrder.save();
+    
+            // Update inventory
+            if(orderData.buyNow) {
+                await Products.findByIdAndUpdate(singleProductId, {
+                    $inc: { inventory: -orderData.quantity }
+                });
+            } else {
+                const cart = await Carts.findOne({ userId })
+                    .populate('products.productId');
+                if(cart){
+                    for (const item of cart.products) {
+                        const productId = item.productId._id;
+                        const quantityOrdered = item.quantity;
+            
+                        await Products.findByIdAndUpdate(productId, {
+                            $inc: { inventory: -quantityOrdered }
+                        });
+                    }
+                    await Carts.findOneAndDelete({ userId });
+                }
+
+            }
+            return res.status(200).json({ 
+                success: true, 
+                message: "Order placed successfully",
+                order: newOrder
+            });
+        } catch (error) {
+            console.error("Error in non-wallet payment:", error);
+            return res.status(500).json({ 
+                success: false, 
+                message: "Failed to process payment",
+                error: error.message 
+            });
+        }
+        // console.log("order created successfully")
+        // res.status(200).json({ success: true, message: "Order placed successfully", order: newOrder });
     } catch (error) {
         console.error("Error creating order:", error);
         res.status(500).json({ message: "Failed to place order" });

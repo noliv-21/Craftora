@@ -124,7 +124,7 @@
             <!-- Balance Display -->
             <div class="balance-section">
                 <p class="text-lg mb-2 font-medium">Current Balance</p>
-                <h3 class="text-4xl font-bold">₹<%= userWallet ? userWallet.balance : '0' %></h3>
+                <h3 class="text-4xl font-bold">₹<%= userWallet ? userWallet.balance.toFixed(2): '0' %></h3>
             </div>
 
             <!-- Add Money Section -->
@@ -215,19 +215,75 @@
         }
 
         try {
-            const response = await axios.post('/user/wallet/add-money', { amount });
+            const paymentResponse = await axios.post('/user/razorpay/order', {
+                amount: amount,
+            });
+            
+            const options = {
+                key: '<%= razorpayKey %>', 
+                amount: amount * 100,
+                currency: "INR",
+                name: "Craftora",
+                description: "Order Payment",
+                order_id: paymentResponse.data.order.id,
+                handler: async function (response) {
+                    try {
+                        console.log('Payment response from Razorpay:', response);
+                        if (!response.razorpay_payment_id || !response.razorpay_order_id || !response.razorpay_signature) {
+                            showToast('Payment failed: Missing payment details', true);
+                            return;
+                        }
+                        // Verify payment
+                        const verifyResponse = await axios.post('/user/razorpay/verify', {
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature
+                        });
+    
+                        if (verifyResponse.data.success) {
+                            const response = await axios.post('/user/wallet/add-money', { amount });
 
-            if (response.status === 200) {
-                console.log('Money added successfully');
-                showToast('Money added successfully!', 'success');
-                // Refresh the page after 1 second to show updated balance
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            } else {
-                console.error('Failed to add money:', response.data);
-                showToast(response.data.message || 'Failed to add money', 'error');
-            }
+                            if (response.status === 200) {
+                                console.log('Money added successfully');
+                                // Show success message with SweetAlert
+                                await Swal.fire({
+                                    title: 'Money Added Successfully!',
+                                    text: 'Thank you for using our Wallet service',
+                                    icon: 'success',
+                                    // confirmButtonText: 'View Orders',
+                                    // confirmButtonColor: '#f97316', // orange-500
+                                    allowOutsideClick: true
+                                });
+                                window.location.href = '/user/dashboard/wallet';
+                            } else {
+                                console.error('Failed to add money:', response.data);
+                                showToast(response.data.message || 'Failed to add money', 'error');
+                            }
+                        } else {
+                            showToast('Verification failed', true);
+                        }
+                    } catch (error) {
+                        console.error('Payment verification error:', error);
+                        showToast('Payment verification failed', true);
+                    }
+                },
+                modal: {
+                    ondismiss: function() {
+                        console.log('Payment modal closed');
+                        showToast('Payment cancelled by user', true);
+                    }
+                },
+                prefill: {
+                    name: "<%= session.fullname %>",
+                    email: "<%= session.email %>",
+                },
+                theme: {
+                    color: "#fb923c"
+                }
+            };
+    
+            const rzp1 = new Razorpay(options);
+            rzp1.open();
         } catch (error) {
             console.error('Error adding money:', error);
             showToast('Something went wrong', 'error');
