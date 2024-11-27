@@ -111,10 +111,10 @@
                         <p class="text-gray-500 mt-1">Analyze your sales data</p>
                     </div>
                     <div class="flex gap-4 mt-4 md:mt-0">
-                        <button class="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all">
+                        <button id="downloadPDF" class="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all">
                             <i class="fas fa-file-pdf mr-2"></i>PDF
                         </button>
-                        <button class="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all">
+                        <button id="downloadExcel" class="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all">
                             <i class="fas fa-file-excel mr-2"></i>Excel
                         </button>
                     </div>
@@ -220,6 +220,36 @@
         function formatDate(date) {
             return date.toISOString().split('T')[0];
         }
+
+        // Function to get current filter parameters
+        function getCurrentFilterParams() {
+            const type = reportType.value;
+            const params = new URLSearchParams();
+            params.append('type', type);
+            
+            if (type === 'specificDate') {
+                params.append('date', specificDate.value);
+            } else if (type === 'customRange') {
+                params.append('startDate', startDate.value);
+                params.append('endDate', endDate.value);
+            }
+            
+            return params;
+        }
+
+        // Handle PDF download
+        document.getElementById('downloadPDF').addEventListener('click', function() {
+            const params = getCurrentFilterParams();
+            params.append('format', 'pdf');
+            window.location.href = `/admin/download-sales-report?${params.toString()}`;
+        });
+
+        // Handle Excel download
+        document.getElementById('downloadExcel').addEventListener('click', function() {
+            const params = getCurrentFilterParams();
+            params.append('format', 'excel');
+            window.location.href = `/admin/download-sales-report?${params.toString()}`;
+        });
 
         // Function to set default dates based on report type
         function setDefaultDates(type) {
@@ -344,26 +374,52 @@
         setDefaultDates(reportType.value);
 
         // Function to fetch sales report data
-        function fetchSalesReport(type, dates = {}) {
-            const url = new URL('/admin/generate-sales-report', window.location.origin);
-            url.searchParams.append('type', type);
-            
-            if (dates.date) url.searchParams.append('date', dates.date);
-            if (dates.startDate) url.searchParams.append('startDate', dates.startDate);
-            if (dates.endDate) url.searchParams.append('endDate', dates.endDate);
+        async function fetchSalesReport(type, dates = {}) {
+            try {
+                const params = new URLSearchParams();
+                params.append('type', type);
+                
+                if (dates.date) params.append('date', dates.date);
+                if (dates.startDate) params.append('startDate', dates.startDate);
+                if (dates.endDate) params.append('endDate', dates.endDate);
 
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    // Update the table with new data
-                    updateSalesTable(data.salesReport);
-                    console.log("successfully fetched sales report");
-                })
-                .catch(error =>{
-                    showToast('Unable to fetch sales report', 'error');
-                    console.error('Error:', error)
-                });
+                console.log('Fetching report with params:', Object.fromEntries(params));
+
+                const response = await axios.get(`/admin/generate-sales-report?${params.toString()}`);
+                console.log('Axios response:', response.data);
+
+                if (response.data && response.data.salesReport) {
+                    updateSalesTable(response.data.salesReport);
+                    showToast('Report updated successfully', 'success');
+                } else {
+                    throw new Error('Invalid data format received');
+                }
+            } catch (error) {
+                console.error('Axios error:', error);
+                showToast(error.response?.data?.message || error.message || 'Failed to fetch report', 'error');
+                updateSalesTable([]); // Clear the table or show empty state
+            }
         }
+        // function fetchSalesReport(type, dates = {}) {
+        //     const url = new URL('/admin/generate-sales-report', window.location.origin);
+        //     url.searchParams.append('type', type);
+            
+        //     if (dates.date) url.searchParams.append('date', dates.date);
+        //     if (dates.startDate) url.searchParams.append('startDate', dates.startDate);
+        //     if (dates.endDate) url.searchParams.append('endDate', dates.endDate);
+
+        //     fetch(url)
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             // Update the table with new data
+        //             updateSalesTable(data.salesReport);
+        //             console.log("successfully fetched sales report",data.salesReport);
+        //         })
+        //         .catch(error =>{
+        //             showToast('Unable to fetch sales report', 'error');
+        //             console.error('Error:', error)
+        //         });
+        // }
 
         // Function to update the sales table
         function updateSalesTable(salesReport) {
