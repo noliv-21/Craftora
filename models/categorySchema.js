@@ -13,6 +13,11 @@ const categorySchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    discountType: {
+        type: String,
+        enum: ["Percentage", "Fixed"],
+        default: "Percentage"
+    },
     offer: {
         type: Number,
         default: 0

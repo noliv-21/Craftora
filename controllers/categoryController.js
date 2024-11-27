@@ -29,8 +29,9 @@ exports.addCategory = (req, res) => {
     const successMessage = req.session.successMessage
     req.session.errorMessage = null
     req.session.successMessage = null
+    const discountTypes = Categories.schema.path('discountType').enumValues;
     res.render('admin/category folder/add_category', {
-        successMessage, errorMessage, activeTab: "categories"
+        successMessage, errorMessage, activeTab: "categories", discountTypes
     })
 }
 
@@ -38,11 +39,14 @@ exports.addingCategory = async (req, res) => {
     const name = req.body.category_name
     const description = req.body.description
     const isListed = req.body.status
+    const discountType = req.body.discountType;
+    const offer = req.body.offer;
+    const fixedAmount = req.body.fixedAmount;
     try {
         const catCheck = await Categories.findOne({ name: new RegExp(`^${name}$`, 'i') })
         if (!catCheck) {
             const newCategory = new Categories({
-                name,
+                name, discountType, offer, fixedAmount,
                 description: description || "No Description",
                 isListed: isListed,
                 createdAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -84,10 +88,14 @@ exports.editPage = async (req, res) => {
     const name = catDetails.name
     const description = catDetails.description
     const isListed = catDetails.isListed
+    const discountType = catDetails.discountType;
+    const offer = catDetails.offer;
+    const fixedAmount = catDetails.fixedAmount;
+    const discountTypes = Categories.schema.path('discountType').enumValues;
     req.session.errorMessage = null
     req.session.successMessage = null
     res.render('admin/category folder/edit_category', {
-        name, description, isListed, successMessage, errorMessage, activeTab: "categories"
+        name, description, isListed, successMessage, errorMessage, activeTab: "categories", discountTypes, discountType, offer, fixedAmount
     })
 }
 
@@ -96,9 +104,12 @@ exports.edittingCategory = async (req, res) => {
     const name = req.body.category_name
     const description = req.body.description
     const isListed = req.body.status
+    const discountType = req.body.discountType;
+    const offer = req.body.offer;
+    const fixedAmount = req.body.fixedAmount;
     try {
         const catCheck = await Categories.findOneAndUpdate({ name: original_catName }, {
-            name: name,
+            name: name, discountType, offer, fixedAmount,
             description: description || "No Description",
             isListed: isListed
         })

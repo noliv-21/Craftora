@@ -43,3 +43,81 @@ setTimeout(() => {
         setTimeout(() => errorDiv.style.display = "none", 300); // Remove from view
     }
 }, 3000);
+
+function showError(elementId, message) {
+    const errorElement = document.getElementById(elementId);
+    errorElement.classList.remove('hidden');
+    errorElement.innerText = message;
+}
+
+function hideError(elementId) {
+    const errorElement = document.getElementById(elementId);
+    errorElement.classList.add('hidden');
+}
+
+// Handle discount type change
+function handleDiscountTypeChange() {
+    const discountType = document.getElementById('discountType').value;
+    const percentageFields = document.getElementById('percentageFields');
+    const fixedFields = document.getElementById('fixedFields');
+
+    if (discountType === 'Percentage') {
+        percentageFields.classList.remove('hidden');
+        fixedFields.classList.add('hidden');
+        document.getElementById('fixedAmount').value = '';
+    } else {
+        percentageFields.classList.add('hidden');
+        fixedFields.classList.remove('hidden');
+        document.getElementById('percentage').value = '';
+    }
+}
+
+// Validate percentage input
+function validatePercentage() {
+    const percentage = document.getElementById('percentage').value;
+    if (percentage < 0 || percentage > 100 || !percentage) {
+        showError('percentageError', 'Percentage should be between 0 and 100.');
+        return false;
+    } else {
+        hideError('percentageError');
+        return true;
+    }
+}
+
+// Validate fixed amount input
+function validateFixedAmount() {
+    const fixedAmount = document.getElementById('fixedAmount').value;
+    if (fixedAmount < 0 || !fixedAmount) {
+        showError('fixedAmountError', 'Fixed amount cannot be negative.');
+        return false;
+    } else {
+        hideError('fixedAmountError');
+        return true;
+    }
+}
+
+// Form validation before submission
+function validateForm() {
+    const discountType = document.getElementById('discountType').value;
+    let isValid = true;
+
+    // Validate category name and description
+    const name = document.getElementById('category_name').value.trim();
+    if (name.length < 3) {
+        isValid = false;
+    }
+
+    const description = document.getElementById('description').value.trim();
+    if (description.length < 10) {
+        isValid = false;
+    }
+
+    // Validate discount fields based on type
+    if (discountType === 'Percentage') {
+        isValid = validatePercentage() && isValid;
+    } else {
+        isValid = validateFixedAmount() && isValid;
+    }
+
+    return isValid;
+}
