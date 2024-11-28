@@ -334,6 +334,7 @@ const addCoupon = async (req, res) => {
             maxDiscount,
             totalLimit,
             perUserLimit,
+            startingDate,
             expiryDate
         } = req.body;
 
@@ -364,9 +365,25 @@ const addCoupon = async (req, res) => {
             }
         }
 
-        // Validate expiry date
+        // Validate date
+        const parsedStartingDate = new Date(startingDate);
         const parsedExpiryDate = new Date(expiryDate);
-        if (isNaN(parsedExpiryDate.getTime()) || parsedExpiryDate <= new Date()) {
+        const now = new Date();
+
+        if (parsedStartingDate < now) {
+            return res.status(400).json({
+                success: false,
+                message: 'Starting date must be in the future'
+            });
+        }
+
+        if (parsedStartingDate >= parsedExpiryDate) {
+            return res.status(400).json({
+                success: false,
+                message: 'Starting date must be before expiry date'
+            });
+        }
+        if (isNaN(parsedExpiryDate.getTime()) || parsedExpiryDate <= now) {
             return res.status(400).json({
                 success: false,
                 error: 'Invalid expiry date. Must be a future date'
@@ -383,6 +400,7 @@ const addCoupon = async (req, res) => {
             maxDiscount: numericFields.maxDiscount,
             totalLimit: numericFields.totalLimit,
             perUserLimit: numericFields.perUserLimit,
+            startingDate: parsedStartingDate,
             expiryDate: parsedExpiryDate
         });
 
@@ -413,7 +431,22 @@ const updateCoupon = async (req, res) => {
         if (req.body.maxDiscount) updateData.maxDiscount = Number(req.body.maxDiscount);
         if (req.body.totalLimit) updateData.totalLimit = Number(req.body.totalLimit);
         if (req.body.perUserLimit) updateData.perUserLimit = Number(req.body.perUserLimit);
+        if(req.body.startingDate) updateData.startingDate = new Date(req.body.startingDate);
         if (req.body.expiryDate) updateData.expiryDate = new Date(req.body.expiryDate);
+
+        if (updateData.startingDate < new Date()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Starting date must be in the future'
+            });
+        }
+
+        if (updateData.startingDate >= updateData.expiryDate) {
+            return res.status(400).json({
+                success: false,
+                message: 'Starting date must be before expiry date'
+            });
+        }
 
         const updatedCoupon = await Coupons.findByIdAndUpdate(
             couponId, 

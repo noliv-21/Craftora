@@ -75,6 +75,9 @@
                                             Status</th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                            Start</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                             Expiry</th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
@@ -92,6 +95,7 @@
                                             data-max-discount="<%= coupon.maxDiscount %>"
                                             data-total-limit="<%= coupon.totalLimit %>"
                                             data-per-user-limit="<%= coupon.perUserLimit %>"
+                                            data-starting="<%= coupon.startingDate.toISOString() %>"
                                             data-expiry="<%= coupon.expiryDate.toISOString() %>">
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm font-medium text-gray-900">
@@ -129,6 +133,9 @@
                                                     class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <%= coupon.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
                                                     <%= coupon.isActive ? 'Active' : 'Inactive' %>
                                                 </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <%= new Date(coupon.startingDate).toLocaleDateString('en-IN') %>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 <%= new Date(coupon.expiryDate).toLocaleDateString('en-IN') %>
@@ -341,6 +348,13 @@
                                             </div>
 
                                             <div>
+                                                <label class="block text-sm font-medium text-gray-700">Starting Date <span
+                                                        class="text-red-500">*</span></label>
+                                                <input type="datetime-local" id="startingDate" required
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                                <div id="startingDateError" class="mt-1 text-sm text-red-600 hidden"></div>
+                                            </div>
+                                            <div>
                                                 <label class="block text-sm font-medium text-gray-700">Expiry Date &
                                                     Time <span class="text-red-500">*</span></label>
                                                 <input type="datetime-local" id="expiryDate" required
@@ -552,6 +566,7 @@
                             { id: 'maxDiscount', min: 0, max: 0, label: 'Maximum discount' },
                             { id: 'totalLimit', min: 0, max: 0, label: 'Total limit' },
                             { id: 'perUserLimit', min: 0, max: 0, label: 'Per user limit' },
+                            { id: 'startingDate', label: 'Starting date' },
                             { id: 'expiryDate', min: 0, max: 0, label: 'Expiry date' }
                         ];
 
@@ -594,7 +609,25 @@
                         }
 
                         // Validate expiry date
+                        const startingDate = new Date(document.getElementById('startingDate').value);
                         const expiryDate = new Date(document.getElementById('expiryDate').value);
+                        const now = new Date();
+
+                        if(startingDate < now) {
+                            const errorElement = document.getElementById('startingDateError');
+                            if(errorElement){
+                                errorElement.textContent = 'Starting date must be in present';
+                                errorElement.classList.remove('hidden');
+                            }
+                            isValid = false;
+                        } else if(startingDate >= expiryDate) {
+                            const errorElement = document.getElementById('startingDateError');
+                            if(errorElement){
+                                errorElement.textContent = 'Starting date must be before expiry date';
+                                errorElement.classList.remove('hidden');
+                            }
+                            isValid = false;
+                        }
                         if (expiryDate <= new Date()) {
                             const errorElement = document.getElementById('expiryDateError');
                             if (errorElement) {
@@ -725,6 +758,7 @@
                                 maxDiscount: parseFloat(document.getElementById('maxDiscount').value),
                                 totalLimit: parseInt(document.getElementById('totalLimit').value),
                                 perUserLimit: parseInt(document.getElementById('perUserLimit').value),
+                                startingDate: document.getElementById('startingDate').value,
                                 expiryDate: document.getElementById('expiryDate').value
                             };
 
@@ -816,6 +850,7 @@
                                 maxDiscount: row.getAttribute('data-max-discount'),
                                 totalLimit: row.getAttribute('data-total-limit'),
                                 perUserLimit: row.getAttribute('data-per-user-limit'),
+                                startingDate: row.getAttribute('data-starting'),
                                 expiryDate: row.getAttribute('data-expiry'),
                                 image: row.getAttribute('data-image')
                             };
@@ -858,6 +893,15 @@
                                     String(date.getHours()).padStart(2, '0') + ':' + 
                                     String(date.getMinutes()).padStart(2, '0');
                                 document.getElementById('expiryDate').value = formattedDate;
+                            }
+                            if(coupon.startingDate){
+                                const date = new Date(coupon.startingDate);
+                                const formattedDate = date.getFullYear() + '-' + 
+                                    String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                                    String(date.getDate()).padStart(2, '0') + 'T' + 
+                                    String(date.getHours()).padStart(2, '0') + ':' + 
+                                    String(date.getMinutes()).padStart(2, '0');
+                                document.getElementById('startingDate').value = formattedDate;
                             }
                         } catch (error) {
                             console.error('Error populating form:', error);

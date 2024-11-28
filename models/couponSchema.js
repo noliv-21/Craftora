@@ -47,6 +47,17 @@ const couponSchema = new mongoose.Schema({
         min: [0, 'Maximum discount cannot be negative'],
         default: 0
     },
+    startingDate: {
+        type: Date,
+        required: [true, 'Starting date is required'],
+        default: Date.now,
+        validate: {
+            validator: function(value){
+                return value < this.expiryDate;
+            },
+            message: 'Starting date must be before expiry date'
+        }
+    },
     expiryDate: {
         type: Date,
         required: [true, 'Expiry date is required'],

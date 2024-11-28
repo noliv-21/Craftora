@@ -450,42 +450,49 @@ exports.cancelOrder = async (req, res) => {
         const session = await mongoose.startSession();
         session.startTransaction();
 
-        // Update order status and product inventory
-        await Orders.findByIdAndUpdate(orderId, {
-            status: "Cancelled",
-            cancelledOn: Date.now(),
-        },{session});
-
-        // Restore product inventory
-        for (const item of order.products) {
-            await Products.findByIdAndUpdate(item.productId, {
-                $inc: { inventory: item.quantity }
+        try {
+            // Update order status and product inventory
+            await Orders.findByIdAndUpdate(orderId, {
+                status: "Cancelled",
+                cancelledOn: Date.now(),
             },{session});
-        }
-
-        if (isPrepaid) {
-            const wallet = await Wallets.findOneAndUpdate(
-                { userId: order.userId },
-                { 
-                    $inc: { balance: order.totalAmount },
-                    $push: {
-                        transactions: {
-                            type: 'credit',
-                            amount: order.totalAmount,
-                            description: `Refund for cancelled order #${order.orderId}`
+    
+            // Restore product inventory
+            for (const item of order.products) {
+                await Products.findByIdAndUpdate(item.productId, {
+                    $inc: { inventory: item.quantity }
+                },{session});
+            }
+    
+            if (isPrepaid) {
+                const wallet = await Wallets.findOneAndUpdate(
+                    { userId: order.userId },
+                    { 
+                        $inc: { balance: order.totalAmount },
+                        $push: {
+                            transactions: {
+                                type: 'credit',
+                                amount: order.totalAmount,
+                                description: `Refund for cancelled order #${order.orderId}`
+                            }
                         }
+                    },
+                    { 
+                        session,
+                        new: true,
+                        upsert: true
                     }
-                },
-                { 
-                    session,
-                    new: true,
-                    upsert: true
-                }
-            );
+                );
+            }
+            await session.commitTransaction();
+            res.status(200).json({ message: "Order cancelled successfully" });
+        } catch (error) {
+            await session.abortTransaction();
+            console.error("Error cancelling order:", error);
+            return res.status(500).json({ message: "Failed to cancel order" });
+        } finally {
+            session.endSession();
         }
-        await session.commitTransaction();
-
-        res.status(200).json({ message: "Order cancelled successfully" });
     } catch (error) {
         console.error("Error cancelling order:", error);
         res.status(500).json({ message: "Failed to cancel order" });
