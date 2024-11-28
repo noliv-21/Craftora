@@ -11,13 +11,7 @@ const rzp = new Razorpay({
 const verifyPayment = async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-        
-        console.log('Verifying payment with:', {
-            razorpay_order_id,
-            razorpay_payment_id,
-            razorpay_signature
-        });
-
+    
         const sign = razorpay_order_id + "|" + razorpay_payment_id;
         const expectedSign = crypto
             .createHmac("sha256", process.env.RAZORPAY_SECRET_KEY)

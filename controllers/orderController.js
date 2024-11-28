@@ -249,7 +249,8 @@ exports.orderCreation = async (req,res)=>{
                             address,
                             products: productsWithLatestPrices,
                             totalAmount: effectiveTotal,
-                            paymentType: orderData.paymentType,
+                            paymentMethod: orderData.paymentType,
+                            paymentStatus: "Success",
                             'coupon.couponCode': coupon ? coupon.code : null,
                             'coupon.couponId': coupon ? coupon.id : null
                         });
@@ -320,7 +321,7 @@ exports.orderCreation = async (req,res)=>{
     
             // Update inventory
             if(orderData.buyNow) {
-                await Products.findByIdAndUpdate(singleProductId, {
+                await Products.findByIdAndUpdate(orderData.productId, {
                     $inc: { inventory: -orderData.quantity }
                 });
             } else {
@@ -367,7 +368,7 @@ exports.handlePaymentSuccess = async (req,res)=>{
         res.status(200).json({message:"Payment success"})
     }catch(err){
         console.error(err)
-        res.status(500).json({message:"Error in changing payment status to success"})
+        res.status(500).json({error:"Error in changing payment status to success"})
     }
 }
 
@@ -444,18 +445,45 @@ exports.cancelOrder = async (req, res) => {
             return res.status(400).json({ message: "Order cannot be cancelled." });
         }
 
+        const isPrepaid = (order.paymentMethod === "Online" || order.paymentMethod === "Wallet") && order.paymentStatus === "Success";
+
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
         // Update order status and product inventory
         await Orders.findByIdAndUpdate(orderId, {
             status: "Cancelled",
             cancelledOn: Date.now(),
-        });
+        },{session});
 
         // Restore product inventory
         for (const item of order.products) {
             await Products.findByIdAndUpdate(item.productId, {
                 $inc: { inventory: item.quantity }
-            });
+            },{session});
         }
+
+        if (isPrepaid) {
+            const wallet = await Wallets.findOneAndUpdate(
+                { userId: order.userId },
+                { 
+                    $inc: { balance: order.totalAmount },
+                    $push: {
+                        transactions: {
+                            type: 'credit',
+                            amount: order.totalAmount,
+                            description: `Refund for cancelled order #${order.orderId}`
+                        }
+                    }
+                },
+                { 
+                    session,
+                    new: true,
+                    upsert: true
+                }
+            );
+        }
+        await session.commitTransaction();
 
         res.status(200).json({ message: "Order cancelled successfully" });
     } catch (error) {
@@ -476,31 +504,112 @@ exports.updateStatus = async (req, res) => {
         }
 
         // Check for valid status transition
-        if (["Cancelled", "Delivered", "Returned"].includes(order.status)) {
-            return res.status(400).json({ message: "Order status cannot be updated further." });
-        }
-
-        if (status === "Delivered") {
-            await Orders.findByIdAndUpdate(orderId, { status, deliveredOn: Date.now() });
-            if(order.paymentMethod === "COD"){
-                await Users.findByIdAndUpdate(orderId, { paymentStatus: "Success" });
+        if (status === "Returned") {
+            if (order.status !== "Delivered") {
+                return res.status(400).json({ message: "Only delivered orders can be returned." });
             }
-        } else if (status === "Cancelled") {
-            const updateInventoryPromises = order.products.map((item) =>
-                Products.findByIdAndUpdate(
-                    item.productId,
-                    { $inc: { inventory: item.quantity } } // Increment inventory
-                )
-            );
-            await Promise.all(updateInventoryPromises);
-            await Orders.findByIdAndUpdate(orderId, { status, cancelledOn: Date.now() });
-        } else if (status === "Returned") {
-            await Orders.findByIdAndUpdate(orderId, { status, returnedOn: Date.now() });
-        } else {
-            await Orders.findByIdAndUpdate(orderId, { status });
+        } else if (["Cancelled"].includes(order.status)) {
+            return res.status(400).json({ message: "Cancelled orders cannot be updated further." });
+        } else if (["Returned"].includes(order.status)) {
+            return res.status(400).json({ message: "Returned orders cannot be updated further." });
         }
 
-        res.status(200).json({ message: "Order status updated successfully." });
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        try {
+            if (status === "Delivered") {
+                await Orders.findByIdAndUpdate(
+                    orderId,
+                    { status, deliveredOn: Date.now() },
+                    { session }
+                );
+                if(order.paymentMethod === "COD"){
+                    await Users.findByIdAndUpdate(
+                        orderId,
+                        { paymentStatus: "Success" },
+                        { session}
+                    );
+                }
+            } else if (status === "Cancelled") {
+                const isPrepaid = (order.paymentMethod === "Online" || order.paymentMethod === "Wallet") && order.paymentStatus === "Success";
+
+                const updateInventoryPromises = order.products.map((item) =>
+                    Products.findByIdAndUpdate(
+                        item.productId,
+                        { $inc: { inventory: item.quantity } }, // Increment inventory
+                        { session }
+                    )
+                );
+                await Promise.all(updateInventoryPromises);
+
+                await Orders.findByIdAndUpdate(
+                    orderId,
+                    { status, cancelledOn: Date.now() },
+                    { session }
+                );
+
+                if (isPrepaid) {
+                    await Wallets.findOneAndUpdate(
+                        { userId: order.userId },
+                        { 
+                            $inc: { balance: order.totalAmount },
+                            $push: {
+                                transactions: {
+                                    type: 'credit',
+                                    amount: order.totalAmount,
+                                    description: `Refund for cancelled order #${order.orderId}`
+                                }
+                            }
+                        },
+                        { 
+                            session,
+                            new: true,
+                            upsert: true
+                        }
+                    );
+                }
+            } else if (status === "Returned") {
+                await Orders.findByIdAndUpdate(
+                    orderId, 
+                    { status, returnedOn: Date.now() },
+                    { session }
+                );
+
+                await Wallets.findOneAndUpdate(
+                    { userId: order.userId },
+                    { 
+                        $inc: { balance: order.totalAmount },
+                        $push: {
+                            transactions: {
+                                type: 'credit',
+                                amount: order.totalAmount,
+                                description: `Refund for returned order #${order.orderId}`
+                            }
+                        }
+                    },
+                    { 
+                        session,
+                        new: true,
+                        upsert: true
+                    }
+                );
+            } else {
+                await Orders.findByIdAndUpdate(
+                    orderId, 
+                    { status },
+                    { session }
+                );
+            }
+            await session.commitTransaction();
+            res.status(200).json({ message: "Order status updated successfully." });
+        } catch(err) {
+            console.error(err)
+            await session.abortTransaction();
+            return res.status(500).json({ message: "Failed to update order status." });
+        } finally {
+            session.endSession();
+        }
     } catch (error) {
         console.error("Error updating order status:", error);
         res.status(500).json({ message: "Failed to update order status." });

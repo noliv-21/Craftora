@@ -605,74 +605,80 @@ async function placeOrder(finalAmount, productId = null) {
         if (!response.data.success) {
             return console.error('Error creating order:', response.data.error);
         }
+        const ourOrderId = response.data.order._id;
+        console.log('Our Order ID:', ourOrderId);
         if(selectedPayment.value === 'Online'){
             const totalAmount = response.data.order.totalAmount;
     
             const response2 = await axios.post('/user/razorpay/order', {
                 amount: totalAmount,
             });
-            
-            const options = {
-                key: '<%= razorpayKey %>', 
-                amount: totalAmount * 100,
-                currency: "INR",
-                name: "Craftora",
-                description: "Order Payment",
-                order_id: response2.data.order.id,
-                handler: async function (response) {
-                    try {
-                        console.log('Payment response from Razorpay:', response);
-                        if (!response.razorpay_payment_id || !response.razorpay_order_id || !response.razorpay_signature) {
-                            showToast('Payment failed: Missing payment details', true);
-                            return;
-                        }
-                        // Verify payment
-                        const verifyResponse = await axios.post('/user/razorpay/verify', {
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_signature: response.razorpay_signature
-                        });
-    
-                        if (verifyResponse.data.success) {
-                            await axios.post('/user/order/payment-success', {
-                                orderId: response.data.order._id,
-                                paymentId: verifyResponse.data.paymentId
+            if(response2.status === 200){
+                const options = {
+                    key: '<%= razorpayKey %>', 
+                    amount: totalAmount * 100,
+                    currency: "INR",
+                    name: "Craftora",
+                    description: "Order Payment",
+                    order_id: response2.data.order.id,
+                    handler: async function (response) {
+                        try {
+                            console.log('Payment response from Razorpay:', response);
+                            if (!response.razorpay_payment_id || !response.razorpay_order_id || !response.razorpay_signature) {
+                                showToast('Payment failed: Missing payment details', true);
+                                return;
+                            }
+                            // Verify payment
+                            const verifyResponse = await axios.post('/user/razorpay/verify', {
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature
                             });
-                            // Show success message with SweetAlert
-                            await Swal.fire({
-                                title: 'Order Placed Successfully!',
-                                text: 'Thank you for your purchase.',
-                                icon: 'success',
-                                confirmButtonText: 'View Orders',
-                                confirmButtonColor: '#f97316', // orange-500
-                                allowOutsideClick: false
-                            });
-                            window.location.href = '/user/orders';
-                        } else {
-                            showToast('Payment verification failed', true);
+        
+                            if (verifyResponse.data.success) {
+                                const statusVerifyResponse = await axios.post('/user/order/payment-success', {
+                                    orderId: ourOrderId
+                                });
+                                if(statusVerifyResponse.status === 200){
+                                    // Show success message with SweetAlert
+                                    await Swal.fire({
+                                        title: 'Order Placed Successfully!',
+                                        text: 'Thank you for your purchase.',
+                                        icon: 'success',
+                                        confirmButtonText: 'View Orders',
+                                        confirmButtonColor: '#f97316', // orange-500
+                                        allowOutsideClick: false
+                                    });
+                                    window.location.href = '/user/orders';
+                                }else{
+                                    showToast(statusVerifyResponse.data.error, true);
+                                }
+                            } else {
+                                showToast('Payment verification failed', true);
+                            }
+                        } catch (error) {
+                            console.error('Payment verification error:', error);
+                            showToast('Payment verification error', true);
                         }
-                    } catch (error) {
-                        console.error('Payment verification error:', error);
-                        showToast('Payment verification failed', true);
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            console.log('Payment modal closed');
+                            showToast('Payment cancelled by user', true);
+                        }
+                    },
+                    prefill: {
+                        name: "<%= session.fullname %>",
+                        email: "<%= session.email %>",
+                    },
+                    theme: {
+                        color: "#fb923c"
                     }
-                },
-                modal: {
-                    ondismiss: function() {
-                        console.log('Payment modal closed');
-                        showToast('Payment cancelled by user', true);
-                    }
-                },
-                prefill: {
-                    name: "<%= session.fullname %>",
-                    email: "<%= session.email %>",
-                },
-                theme: {
-                    color: "#fb923c"
-                }
-            };
+                };
+                const rzp1 = new Razorpay(options);
+                rzp1.open();
+            }
     
-            const rzp1 = new Razorpay(options);
-            rzp1.open();
         } else {
             // Show success message with SweetAlert
             await Swal.fire({

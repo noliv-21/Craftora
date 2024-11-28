@@ -155,7 +155,8 @@
                             <div class="transaction-card p-4 rounded-lg flex justify-between items-center">
                                 <div>
                                     <p class="font-medium text-orange-700">
-                                        <%= transaction.type === 'credit' ? 'Money Added' : 'Money Spent' %>
+                                        <%= transaction.description %>
+                                        <!-- <%= transaction.type === 'credit' ? 'Money Added' : 'Money Spent' %> -->
                                     </p>
                                     <p class="text-sm text-orange-600">
                                         <%= new Date(transaction.timestamp).toLocaleDateString('en-IN', { 

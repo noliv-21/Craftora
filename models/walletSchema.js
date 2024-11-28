@@ -31,6 +31,11 @@ const walletSchema = new mongoose.Schema({
 
 walletSchema.pre('findOneAndUpdate', async function(next){
     const update = this.getUpdate();
+
+    if (update.$push && update.$push.transactions) {
+        return next();
+    }
+
     if (update.$inc && update.$inc.balance) {
         const amount = update.$inc.balance;
         const type = amount > 0 ? 'credit' : 'debit';
