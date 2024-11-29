@@ -187,7 +187,7 @@
                                     <% } %> 
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹ <%= sale.amount.toFixed(2) %></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-red-500">₹ <%= sale.discount.toFixed(2) %></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-red-500">₹ <%= sale.totalDiscountAmount ? sale.totalDiscountAmount.toFixed(2) : 0 %></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">₹ <%= sale.finalAmount.toFixed(2) %></td>
                             </tr>
                         <% }) %>

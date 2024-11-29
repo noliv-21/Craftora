@@ -104,7 +104,7 @@ exports.orderCreation = async (req,res)=>{
             return res.status(400).json({ message: "Invalid delivery address" });
         }
 
-        let subtotal, productsWithLatestPrices;
+        let subtotal, productsWithLatestPrices, totalDiscountAmount;
         if(!orderData.buyNow){
             const cart = await Carts.findOne({ userId })
                 .populate({
@@ -150,6 +150,12 @@ exports.orderCreation = async (req,res)=>{
                 return total + (item.priceAtPurchase * item.quantity);
             }, 0);
 
+            // Calculate total discount (difference between MRP total and discounted total)
+            const mrpTotal = cart.products.reduce((total, item) => {
+                return total + (item.productId.mrp * item.quantity);
+            }, 0);
+            totalDiscountAmount = Math.round((mrpTotal - subtotal) * 100) / 100;
+            
             // Check if all products in the order are in the cart
             const allProductsInCart = productsWithLatestPrices.every(orderProduct =>
                 cart.products.some(cartProduct => cartProduct.productId._id.equals(orderProduct.productId))
@@ -185,7 +191,7 @@ exports.orderCreation = async (req,res)=>{
             const categoryFixedDiscount = product.category.fixedAmount || 0;
             const fixedDiscountAmount = Math.max(productFixedDiscount, categoryFixedDiscount);
 
-            const totalDiscount = Math.round(Math.max(percentageDiscountAmount, fixedDiscountAmount) * 100) / 100;
+            totalDiscountAmount = Math.round(Math.max(percentageDiscountAmount, fixedDiscountAmount) * 100) / 100;
 
             const priceAfterFixedDiscount = Math.round(Math.max(totalMRP - productFixedDiscount, totalMRP - categoryFixedDiscount) * 100) / 100;
             const finalDiscountedPrice = Math.round(Math.min(priceAfterPercentageDiscount, priceAfterFixedDiscount) * 100) / 100;
@@ -220,6 +226,9 @@ exports.orderCreation = async (req,res)=>{
         const effectiveTotal = Math.round((subtotal - couponDiscountAmount) * 100) / 100; // Round to 2 decimal placessubtotal - couponDiscountAmount;
         console.log("Effective Total:", effectiveTotal);
 
+        totalDiscountAmount = Math.round((totalDiscountAmount - couponDiscountAmount) * 100) / 100;
+        console.log("Total Discount Amount:", totalDiscountAmount);
+
         if (isNaN(effectiveTotal)) {
             return res.status(400).json({ message: "Error calculating total amount" });
         }
@@ -249,6 +258,7 @@ exports.orderCreation = async (req,res)=>{
                             address,
                             products: productsWithLatestPrices,
                             totalAmount: effectiveTotal,
+                            totalDiscountAmount,
                             paymentMethod: orderData.paymentType,
                             paymentStatus: "Success",
                             'coupon.couponCode': coupon ? coupon.code : null,
@@ -313,6 +323,7 @@ exports.orderCreation = async (req,res)=>{
                 address,
                 products: productsWithLatestPrices,
                 totalAmount: effectiveTotal,
+                totalDiscountAmount,
                 paymentMethod: orderData.paymentType,
                 'coupon.couponCode':coupon ? coupon.code : null,
                 'coupon.couponId':coupon ? coupon.id : null
