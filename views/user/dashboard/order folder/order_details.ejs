@@ -104,6 +104,18 @@
                             <%= order.paymentStatus %>
                         </p>
                     </div>
+                    <% if (order.paymentStatus === 'Failed' && order.paymentMethod === 'Online') { %>
+                        <div class="mt-4">
+                            <button onclick="retryPayment('<%= order._id %>', '<%= order.totalAmount %>')" 
+                                    class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg 
+                                           flex items-center gap-2 transition duration-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                                </svg>
+                                Retry Payment
+                            </button>
+                        </div>
+                    <% } %>
                 </div>
             </div>
 
@@ -164,3 +176,86 @@
         animation: fadeIn 0.5s ease-out forwards;
     }
 </style>
+<script>
+    async function retryPayment(orderId, amount) {
+        try {
+            // Create new Razorpay order
+            const response = await axios.post('/user/razorpay/order', {
+                amount: amount
+            });
+
+            if (response.status === 200) {
+                const options = {
+                    key: '<%= razorpayKey %>',
+                    amount: amount * 100,
+                    currency: "INR",
+                    name: "Craftora",
+                    description: "Order Payment",
+                    order_id: response.data.order.id,
+                    handler: async function (response) {
+                        try {
+                            // Verify payment
+                            const verifyResponse = await axios.post('/user/razorpay/verify', {
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                orderId: orderId, status: 'Success'
+                            });
+
+                            if (verifyResponse.data.success) {
+                                Swal.fire({
+                                    title: 'Payment Successful!',
+                                    text: 'Thank you for your payment.',
+                                    icon: 'success',
+                                    confirmButtonText: 'OK',
+                                    confirmButtonColor: '#f97316'
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Payment Failed',
+                                    text: 'Please try again.',
+                                    icon: 'error',
+                                    confirmButtonColor: '#f97316'
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Payment verification error:', error);
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Payment verification failed.',
+                                icon: 'error',
+                                confirmButtonColor: '#f97316'
+                            });
+                        }
+                    },
+                    modal: {
+                        ondismiss: function () {
+                            Swal.fire({
+                                title: 'Payment Cancelled',
+                                text: 'You cancelled the payment process.',
+                                icon: 'info',
+                                confirmButtonColor: '#f97316'
+                            });
+                        }
+                    },
+                    theme: {
+                        color: "#fb923c"
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+            }
+        } catch (error) {
+            console.error('Error initiating payment:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Failed to initiate payment. Please try again.',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
+        }
+    }
+</script>

@@ -662,14 +662,11 @@ async function placeOrder(finalAmount, productId = null) {
                             const verifyResponse = await axios.post('/user/razorpay/verify', {
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_payment_id: response.razorpay_payment_id,
-                                razorpay_signature: response.razorpay_signature
+                                razorpay_signature: response.razorpay_signature,
+                                orderId: ourOrderId, status: 'Success'
                             });
         
                             if (verifyResponse.data.success) {
-                                const statusVerifyResponse = await axios.post('/user/order/payment-success', {
-                                    orderId: ourOrderId
-                                });
-                                if(statusVerifyResponse.status === 200){
                                     // Show success message with SweetAlert
                                     await Swal.fire({
                                         title: 'Order Placed Successfully!',
@@ -680,9 +677,6 @@ async function placeOrder(finalAmount, productId = null) {
                                         allowOutsideClick: false
                                     });
                                     window.location.href = '/user/orders';
-                                }else{
-                                    showToast(statusVerifyResponse.data.error, true);
-                                }
                             } else {
                                 showToast('Payment verification failed', true);
                             }
@@ -692,9 +686,15 @@ async function placeOrder(finalAmount, productId = null) {
                         }
                     },
                     modal: {
-                        ondismiss: function() {
+                        ondismiss: async function() {
                             console.log('Payment modal closed');
-                            showToast('Payment cancelled by user', true);
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Payment Cancelled',
+                                    text: 'You cancelled the payment process.'
+                                }).then(() => {
+                                    window.location.href = '/user/products';
+                                });
                         }
                     },
                     prefill: {
@@ -706,6 +706,51 @@ async function placeOrder(finalAmount, productId = null) {
                     }
                 };
                 const rzp1 = new Razorpay(options);
+                console.log('Order ID before payment:', ourOrderId);
+                rzp1.on('payment.failed', async function (response) {
+                    console.log('Payment failed:', response.error);
+                    // rzp1.close();
+                    try {
+                        console.log('📤 Sending payment failed request:', {
+                            orderId: ourOrderId,
+                            status: 'Failed'
+                        });
+
+                        const failureResponse = await axios.post('/user/razorpay/verify', {
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: null,
+                            orderId: ourOrderId,
+                            status: 'Failed'
+                        });
+
+                        if(failureResponse.status === 200){
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Payment Failed',
+                                text: response.error.description || 'Payment process failed',
+                                allowOutsideClick: false
+                            }).then(() => {
+                                setTimeout(()=>{
+                                    window.location.href = '/user/orders';
+                                }, 2000);
+                            });
+                        } else {
+                            showToast(failureResponse.data.error, true);
+                        }
+                    } catch (error) {
+                        console.error('Error updating payment status:', error);
+                        showToast('Error updating payment status', true);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Payment Failed',
+                            text: 'There was an error processing your payment',
+                            allowOutsideClick: false
+                        }).then(() => {
+                            window.location.href = '/user/orders';
+                        });
+                    }
+                });
                 rzp1.open();
             }
     

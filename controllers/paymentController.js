@@ -1,5 +1,6 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const Orders = require('../models/orderSchema')
 
 // Initialize Razorpay
 const rzp = new Razorpay({
@@ -10,6 +11,7 @@ const rzp = new Razorpay({
 // Add payment verification
 const verifyPayment = async (req, res) => {
     try {
+        const { orderId, status } = req.body;
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
     
         const sign = razorpay_order_id + "|" + razorpay_payment_id;
@@ -24,9 +26,30 @@ const verifyPayment = async (req, res) => {
         });
 
         if (razorpay_signature === expectedSign) {
+            const updateOrder = await Orders.findByIdAndUpdate(orderId,
+                {
+                    $set: {paymentStatus: status, status:"Order Placed" }
+                },
+                { new: true }
+            );
+            console.log('Updated order:', updateOrder);
             res.status(200).json({ success: true, message: "Payment verified successfully" });
-        } else {
-            res.status(400).json({ success: false, message: "Invalid signature" });
+        } else if(razorpay_signature !== expectedSign){
+            const order = await Orders.findById(orderId);
+            if (!order) {
+                console.log('Order not found:', orderId);
+                return res.status(404).json({ error: "Order not found" });
+            }
+            const updateOrder = await Orders.findByIdAndUpdate(orderId,
+                {
+                    $set: {paymentStatus: status, status:"Payment failed" }
+                },
+                { new: true }
+            );
+            console.log('Updated order:', updateOrder);
+            res.status(200).json({ success: true, message: "Order payment failed", order: updateOrder });
+        }else{
+            res.status(200).json({ success: false, message: "Payment verification failed" });
         }
     } catch (error) {
         console.error("Payment verification error:", error);
@@ -68,14 +91,14 @@ const handleWebhook = async (req, res) => {
             switch (event) {
                 case 'payment.captured':
                     // Handle successful payment
-                    await Order.findOneAndUpdate(
+                    await Orders.findOneAndUpdate(
                         { razorpay_order_id: req.body.payload.order.entity.id },
                         { $set: { status: 'PAID', payment_id: req.body.payload.payment.entity.id } }
                     );
                     break;
                 case 'payment.failed':
                     // Handle failed payment
-                    await Order.findOneAndUpdate(
+                    await Orders.findOneAndUpdate(
                         { razorpay_order_id: req.body.payload.order.entity.id },
                         { $set: { status: 'PAYMENT_FAILED' } }
                     );
@@ -93,29 +116,8 @@ const handleWebhook = async (req, res) => {
     }
 };
 
-const createRazorpaySubscription = async (req, res) => {
-    try {
-        const { plan_id, total_count, quantity, notes } = req.body; // Get subscription details from request
-        const subscriptionObject = {
-            plan_id,
-            total_count,
-            quantity,
-            customer_notify: 1,
-            notes,
-        };
-
-        const subscription = await rzp.subscriptions.create(subscriptionObject);
-
-        res.status(200).json({ success: true, subscription });
-    } catch (error) {
-        console.error("Error creating Razorpay subscription:", error);
-        res.status(500).json({ success: false, error: "Failed to create Razorpay subscription" });
-    }
-};
-
 module.exports = {
     createRazorpayOrder,
-    createRazorpaySubscription,
     verifyPayment,
     handleWebhook
 }

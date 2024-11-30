@@ -370,17 +370,6 @@ exports.orderCreation = async (req,res)=>{
     }
 }
 
-exports.handlePaymentSuccess = async (req,res)=>{
-    try{
-        const { orderId } = req.body;
-        await Orders.findByIdAndUpdate(orderId, { paymentStatus: "Success" });
-        res.status(200).json({message:"Payment success"})
-    }catch(err){
-        console.error(err)
-        res.status(500).json({error:"Error in changing payment status to success"})
-    }
-}
-
 exports.showOrdersUser = async (req,res)=>{
     try {
         const session = req.session.user
@@ -414,7 +403,7 @@ exports.orderDetailsUser = async (req,res)=>{
         const session = req.session.user
         const order = await Orders.findById(orderId).populate("products.productId")
         res.render('user/dashboard/order folder/order_details', {
-            order, session, activeTab: 'orders'
+            order, session, activeTab: 'orders', razorpayKey: process.env.RAZORPAY_KEY_ID
         })
         console.log("Order details page loaded")
     } catch (error) {

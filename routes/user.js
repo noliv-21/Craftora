@@ -46,7 +46,6 @@ user.get('/orders',userController.userAuth,orderController.showOrdersUser)
 user.get('/order/details/:orderId',userController.userAuth,orderController.orderDetailsUser)
 user.get('/order/invoice/:orderId',userController.userAuth,orderController.downloadInvoice)
 user.patch('/order/cancel/:orderId',userController.userAuth,orderController.cancelOrder)
-user.post('/order/payment-success', userController.userAuth, orderController.handlePaymentSuccess);
 
 user.get('/wishlist',userController.userAuth,wishlistController.getWishlistPage)
 user.delete('/wishlist/remove',wishlistController.removeProduct)
@@ -62,7 +61,6 @@ user.post('/coupons/save', userController.userAuth, couponController.saveCouponU
 user.get('/product/:productId/coupons', userController.userAuth, couponController.getProductDetailsCoupons);
 
 user.post('/razorpay/order', userController.userAuth, paymentController.createRazorpayOrder)
-user.post('/razorpay/subscription', userController.userAuth, paymentController.createRazorpaySubscription)
 user.post('/razorpay/verify', userController.userAuth, paymentController.verifyPayment);
 // user.post('/razorpay/webhook', paymentController.handleWebhook);
 
