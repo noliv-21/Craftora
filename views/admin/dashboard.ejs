@@ -400,26 +400,6 @@
                 updateSalesTable([]); // Clear the table or show empty state
             }
         }
-        // function fetchSalesReport(type, dates = {}) {
-        //     const url = new URL('/admin/generate-sales-report', window.location.origin);
-        //     url.searchParams.append('type', type);
-            
-        //     if (dates.date) url.searchParams.append('date', dates.date);
-        //     if (dates.startDate) url.searchParams.append('startDate', dates.startDate);
-        //     if (dates.endDate) url.searchParams.append('endDate', dates.endDate);
-
-        //     fetch(url)
-        //         .then(response => response.json())
-        //         .then(data => {
-        //             // Update the table with new data
-        //             updateSalesTable(data.salesReport);
-        //             console.log("successfully fetched sales report",data.salesReport);
-        //         })
-        //         .catch(error =>{
-        //             showToast('Unable to fetch sales report', 'error');
-        //             console.error('Error:', error)
-        //         });
-        // }
 
         // Function to update the sales table
         function updateSalesTable(salesReport) {

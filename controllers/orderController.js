@@ -4,7 +4,7 @@ const Addresses = require('../models/addressSchema')
 const Users = require('../models/userSchema')
 const Products = require('../models/productSchema')
 const Wallets = require('../models/walletSchema')
-const { products } = require('./productController')
+const PDFDocument = require('pdfkit');
 const mongoose = require('mongoose');
 
 exports.buyNowCheckout = async (req,res)=>{
@@ -364,8 +364,6 @@ exports.orderCreation = async (req,res)=>{
                 error: error.message 
             });
         }
-        // console.log("order created successfully")
-        // res.status(200).json({ success: true, message: "Order placed successfully", order: newOrder });
     } catch (error) {
         console.error("Error creating order:", error);
         res.status(500).json({ message: "Failed to place order" });
@@ -395,7 +393,7 @@ exports.showOrdersUser = async (req,res)=>{
         const orders = await Orders.find({userId}).populate("products.productId").sort({ createdAt: -1 }).skip(skip).limit(limit)
         const totalOrders = await Orders.countDocuments({ userId });
         const totalPages = Math.ceil(totalOrders / limit);
-        res.render('user/dashboard/orders',{
+        res.render('user/dashboard/order folder/orders',{
             orders,
             session,
             activeTab: 'orders',
@@ -407,6 +405,21 @@ exports.showOrdersUser = async (req,res)=>{
     } catch (error) {
         console.error(error)
         res.status(500).render('error', { message: "Unable to retrieve orders." });
+    }
+}
+
+exports.orderDetailsUser = async (req,res)=>{
+    try {
+        const orderId = req.params.orderId
+        const session = req.session.user
+        const order = await Orders.findById(orderId).populate("products.productId")
+        res.render('user/dashboard/order folder/order_details', {
+            order, session, activeTab: 'orders'
+        })
+        console.log("Order details page loaded")
+    } catch (error) {
+        console.error(error)
+        res.status(500).render('error', { message: "Unable to retrieve order details." });
     }
 }
 
@@ -633,3 +646,149 @@ exports.updateStatus = async (req, res) => {
         res.status(500).json({ message: "Failed to update order status." });
     }
 };
+
+exports.downloadInvoice = async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        const order = await Orders.findById(orderId)
+            .populate("products.productId")
+            .populate("userId", "username fullname email");
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+        if (order.status !== 'Delivered') {
+            return res.status(403).send('Invoice is only available for delivered orders');
+        }
+        // Create a new PDF document
+        const doc = new PDFDocument({ 
+            margin: 50,
+            font: 'Helvetica' // Use Helvetica font which has better Unicode support
+        });
+
+        // Helper function to format currency
+        const formatCurrency = (amount) => {
+            return `Rs. ${Number(amount).toLocaleString('en-IN', {
+                maximumFractionDigits: 2,
+                minimumFractionDigits: 2
+            })}`;
+        };
+
+        // Set response headers
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=invoice-${orderId}.pdf`);
+
+        // Pipe the PDF to the response
+        doc.pipe(res);
+
+        // Add the invoice header
+        doc.fontSize(20).text('INVOICE', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(10).text('Craftora', { align: 'center' });
+        doc.fontSize(10).text('www.craftora.com', { align: 'center' });
+        doc.moveDown();
+
+        // Add a horizontal line
+        doc.moveTo(50, doc.y)
+           .lineTo(550, doc.y)
+           .stroke();
+        doc.moveDown();
+
+        // Add order details
+        doc.fontSize(12).text(`Order ID: #${orderId}`);
+        doc.fontSize(10).text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`);
+        doc.moveDown();
+
+        // Add customer details
+        doc.fontSize(12).text('Customer Details:');
+        doc.fontSize(10).text(`Name: ${order.userId.fullname || order.userId.username}`);
+        doc.fontSize(10).text(`Email: ${order.userId.email}`);
+        doc.moveDown();
+
+        // Add product table headers
+        let yPos = doc.y;
+        doc.fontSize(10)
+           .text('Product', 50, yPos)
+           .text('Quantity', 250, yPos)
+           .text('Price', 350, yPos)
+           .text('Total', 450, yPos);
+
+        // Add a line below headers
+        doc.moveTo(50, doc.y + 5)
+           .lineTo(550, doc.y + 5)
+           .stroke();
+        doc.moveDown();
+
+        // Add products
+        let totalMRP = 0;
+        order.products.forEach(item => {
+            const price = Number(item.priceAtPurchase);
+            const quantity = Number(item.quantity);
+            const total = price * quantity;
+            
+            yPos = doc.y;
+            doc.fontSize(10)
+               .text(item.productId.name, 50, yPos, { width: 180 })
+               .text(quantity.toString(), 250, yPos)
+               .text(formatCurrency(price), 350, yPos)
+               .text(formatCurrency(total), 450, yPos);
+            
+            totalMRP += Number(item.productId.mrp) * quantity;
+            doc.moveDown();
+        });
+
+        // Add a line above totals
+        doc.moveTo(50, doc.y)
+           .lineTo(550, doc.y)
+           .stroke();
+        doc.moveDown();
+
+        // Function to add aligned text
+        const addAlignedText = (label, value, y) => {
+            doc.text(label, 350, y);
+            doc.text(value, 450, y, { align: 'left' });
+        };
+
+        // Add totals with proper alignment
+        let currentY = doc.y;
+        doc.fontSize(10);
+        
+        // Subtotal
+        addAlignedText('Subtotal:', formatCurrency(totalMRP), currentY);
+        currentY += 20;
+
+        // Discount
+        if (order.totalDiscountAmount) {
+            addAlignedText('Discount:', `-${formatCurrency(Number(order.totalDiscountAmount))}`, currentY);
+            currentY += 20;
+        }
+
+        // Coupon
+        if (order.coupon && order.coupon.discountAmount) {
+            addAlignedText(
+                `Coupon (${order.coupon.couponCode}):`,
+                `-${formatCurrency(Number(order.coupon.discountAmount))}`,
+                currentY
+            );
+            currentY += 20;
+        }
+
+        // Final total with a line above
+        doc.moveTo(350, currentY)
+           .lineTo(550, currentY)
+           .stroke();
+        currentY += 10;
+
+        doc.fontSize(12);
+        addAlignedText('Total Amount:', formatCurrency(Number(order.totalAmount)), currentY);
+
+        // Add footer
+        doc.fontSize(10)
+           .text('Thank you for shopping with us!', 50, 700, { align: 'center' });
+
+        // Finalize the PDF
+        doc.end();
+    } catch (error) {
+        console.error("Error downloading invoice:", error);
+        res.status(500).json({ message: "Failed to download invoice" });
+    }
+}

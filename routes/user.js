@@ -43,7 +43,9 @@ user.get('/buyNow', userController.userAuth, orderController.buyNowCheckout)
 user.get('/checkout', userController.userAuth, orderController.checkout)
 user.post('/order/creation',orderController.orderCreation)
 user.get('/orders',userController.userAuth,orderController.showOrdersUser)
-user.patch('/order/cancel/:orderId',orderController.cancelOrder)
+user.get('/order/details/:orderId',userController.userAuth,orderController.orderDetailsUser)
+user.get('/order/invoice/:orderId',userController.userAuth,orderController.downloadInvoice)
+user.patch('/order/cancel/:orderId',userController.userAuth,orderController.cancelOrder)
 user.post('/order/payment-success', userController.userAuth, orderController.handlePaymentSuccess);
 
 user.get('/wishlist',userController.userAuth,wishlistController.getWishlistPage)

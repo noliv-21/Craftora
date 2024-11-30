@@ -1,17 +1,17 @@
 <style>
-    .toast_style{
-        width: fit-content;
-        max-width: 300px;
-        border-radius: 8px;
-        padding: 12px 20px;
-        border: 1px solid rgba(255, 0, 0, 0.3);
-        font-family: Arial, sans-serif;
-        font-size: 16px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        z-index: 100;
+    .toast_style {
+        width: fit-content !important;
+        max-width: 300px !important;
+        border-radius: 8px !important;
+        padding: 12px 20px !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        font-family: Arial, sans-serif !important;
+        font-size: 16px !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important;
+        position: fixed !important;
+        top: 20px !important;
+        right: 20px !important;
+        z-index: 9999 !important;
     }
 </style>
 <div class="flex">
@@ -95,20 +95,16 @@
                         <td class="py-2"><%= order.totalAmount %></td>
                         <td class="py-2"><%= order.paymentMethod %></td>
                         <td class="py-2">
-                            <% if (order.status === "Cancelled" || order.status === "Out for delivery" || order.status === "Returned" || order.status === "Delivered") { %>
+                            <% if (order.status === "Cancelled" || order.status === "Returned" || order.status === "Delivered") { %>
                                 <% if(order.status === "Cancelled"){ %>
                                     <span class="inline-block bg-red-100 text-red-600 px-2 py-1 rounded-lg">
                                         <%= order.status %>
                                     </span>
-                                <% } else if(order.status === "Out for delivery"){ %>
-                                    <span class="inline-block bg-green-100 text-green-600 px-2 py-1 rounded-lg">
-                                        <%= order.status %>
-                                    </span>
-                                <% }else if(order.status === "Returned"){ %>
+                                <% } else if(order.status === "Returned"){ %>
                                     <span class="inline-block bg-blue-100 text-blue-600 px-2 py-1 rounded-lg">
                                         <%= order.status %>
                                     </span>
-                                <% } else { %>
+                                <% } else if(order.status === "Delivered") { %>
                                     <span class="inline-block bg-green-100 text-green-600 px-2 py-1 rounded-lg">
                                         <%= order.status %>
                                     </span>
@@ -118,7 +114,7 @@
                                 <select 
                                     name="status" 
                                     class="px-2 py-1 rounded-lg" 
-                                    onchange="updateOrderStatus('<%= order._id %>', this.value); updateStatusColor(this)"
+                                    onchange="updateOrderStatus('<%= order._id %>', this); updateStatusColor(this)"
                                     data-status="<%= order.status %>">
                                     <% orderStatuses.forEach((status) => { %>
                                         <% if (status !== "Returned") { %>
@@ -166,17 +162,56 @@
 </div>
 
 <script>
-    function updateOrderStatus(orderId, status) {
-        axios.patch(`/admin/updateOrderStatus/${orderId}`, { status: status })
-            .then(response => {
-                if (response.status === 200) {
-                    console.log("Order status updated successfully.");
+    async function updateOrderStatus(orderId, statusSelect) {
+        const status = statusSelect.value;
+        const parentElement = statusSelect.parentElement;
+        try {
+            const response =await axios.patch(`/admin/updateOrderStatus/${orderId}`, { status: status })
+            if (response.status === 200) {
+                const newStatus = statusSelect.value;
+                if (newStatus === 'Delivered') {
+                    const statusSpan = document.createElement('span');
+                    statusSpan.className = 'inline-block bg-green-100 text-green-600 px-2 py-1 rounded-lg';
+                    statusSpan.textContent = newStatus;
+                    parentElement.innerHTML = ''; // Clear the td
+                    parentElement.appendChild(statusSpan);
                 }
-            })
-            .catch(error => {
-                console.error("Error updating order status:", error);
-                alert("Failed to update order status.");
-            });
+                Toastify({
+                    text: "Order status updated successfully",
+                    className: "toast_style",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    style: {
+                        background: "linear-gradient(to right, #00b09b, #96c93d)",
+                    },
+                    offset: {
+                        x: 0,
+                        y: 0
+                    },
+                    onClick: function(){} // Callback after click
+                }).showToast();
+                console.log("Order status updated successfully.");
+            }
+        } catch (error) {
+            Toastify({
+                text: "Failed to update order status",
+                className: "toast_style",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                style: {
+                    background: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                },
+                offset: {
+                    x: 0,
+                    y: 0
+                },
+                onClick: function(){} // Callback after click
+            }).showToast();
+            console.error("Error updating order status:", error);
+        }
+            
     }
     async function cancelOrder(orderId){
         try {

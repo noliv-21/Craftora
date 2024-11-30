@@ -15,12 +15,12 @@
     }
 </style>
 <!-- Header -->
-<%- include('../../partials/user/header') %>
+<%- include('../../../partials/user/header') %>
 
 <!-- Main Content -->
 <div class="flex">
     <!-- Sidebar -->
-    <%- include('../../partials/user/dashboard_sideBar') %>
+    <%- include('../../../partials/user/dashboard_sideBar') %>
     <!-- Main Section -->
     <main class="p-6 w-4/5">
         <h2 class="text-2xl font-bold mb-4">Order History</h2>
@@ -79,6 +79,10 @@
                             <% } %>
                              on <%= new Date(order.updatedAt).toLocaleDateString() %></p>
                     </div>
+                    <a href="/user/order/details/<%= order._id %>" 
+                        class="inline-flex items-center justify-center px-4 py-2 bg-orange-100 text-orange-600 rounded-md hover:bg-orange-200 transition-colors duration-200">
+                         <i class="fas fa-info-circle mr-2"></i>View Details
+                     </a>
                     <% if(order.status !== "Cancelled" && order.status !== "Returned" && order.status !== "Out for delivery" && order.status !== "Delivered"){ %>
                         <button id="cancelBtn" class="btn btn-danger" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
                     <% } %>
@@ -110,7 +114,7 @@
     </main>
 </div>
 <!-- Footer -->
-<%- include('../../partials/user/footer') %>
+<%- include('../../../partials/user/footer') %>
 <script>
     function updateOrderStatus(orderId, status) {
         axios.patch(`/admin/updateOrderStatus/${orderId}`, { status: status })
