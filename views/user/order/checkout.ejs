@@ -143,9 +143,15 @@
                             <h3 class="font-semibold text-gray-700 mb-3">Payment Methods</h3>
                             <div class="space-y-2">
                                 <% paymentMethods.forEach(method => { %>
-                                    <label class="flex items-center space-x-3 p-3 bg-yellow-100 rounded-lg cursor-pointer hover:bg-yellow-200 transition-colors">
-                                        <input type="radio" name="payment" value="<%= method %>" class="text-orange-500 focus:ring-orange-500">
+                                    <label class="flex items-center space-x-3 p-3 bg-yellow-100 rounded-lg cursor-pointer hover:bg-yellow-200 transition-colors"
+                                        id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>-label">
+                                        <input type="radio" name="payment" value="<%= method %>" class="text-orange-500 focus:ring-orange-500"
+                                            id="payment-<%= method.toLowerCase().replace(/\s+/g, '-') %>"
+                                            <% if (method === 'COD' && finalAmount > 1000) { %>disabled<% } %>>
                                         <span><%= method %></span>
+                                        <% if (method === 'COD' && finalAmount > 1000) { %>
+                                            <span class="ml-2 text-sm text-red-500">(Not available for orders above ₹1000)</span>
+                                        <% } %>
                                     </label>
                                 <% }); %>
                             </div>
@@ -284,8 +290,6 @@
         </form>
     </div>
 </div>
-
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
 
@@ -443,6 +447,30 @@ function showToast(message, isError = false) {
     }, 3000);
 }
 
+function updateCODAvailability(totalAmount) {
+    const codInput = document.getElementById('payment-cod');
+    const codLabel = document.getElementById('payment-cod-label');
+    
+    if (!codInput || !codLabel) return; // Exit if elements don't exist
+    
+    if (totalAmount > 1000) {
+        codInput.disabled = true;
+        codInput.checked = false; // Uncheck if it was checked
+        if (!codLabel.querySelector('.text-red-500')) {
+            const warning = document.createElement('span');
+            warning.className = 'ml-2 text-sm text-red-500';
+            warning.textContent = '(Not available for orders above ₹1000)';
+            codLabel.appendChild(warning);
+        }
+    } else {
+        codInput.disabled = false;
+        const warning = codLabel.querySelector('.text-red-500');
+        if (warning) {
+            warning.remove();
+        }
+    }
+}
+
 async function applyCoupon() {
     try {
         const couponCode = document.getElementById('couponInput').value.trim().toUpperCase();
@@ -483,6 +511,7 @@ async function applyCoupon() {
             
             const newTotal = (currentTotal - discountAmount).toFixed(2);
             console.log('New Total:', newTotal);
+            updateCODAvailability(newTotal);
             totalAmount.textContent = `₹${newTotal}`;
 
             couponApplyBtn.classList.add('hidden');
@@ -529,6 +558,7 @@ async function removeCoupon() {
 
             const newTotal = ( currentTotal + discountAmount ).toFixed(2);
             console.log('New Total (after adding back discount):', newTotal);
+            updateCODAvailability(newTotal);
 
             document.getElementById('totalAmount').textContent = `₹${newTotal}`;
             document.getElementById('couponInput').value = '';
