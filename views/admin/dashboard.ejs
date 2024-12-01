@@ -330,6 +330,52 @@
         const endDate = document.getElementById('endDate');
         const generateReport = document.getElementById('generateReport');
 
+        // Function to create pagination controls with showing entries info
+        function createPaginationControls(pagination) {
+            const { currentPage, totalPages, totalOrders, limit } = pagination;
+            const start = (currentPage - 1) * limit + 1;
+            const end = Math.min(currentPage * limit, totalOrders);
+            
+            let paginationHtml = '<div class="flex justify-between items-center mt-4 mb-8">';
+            
+            // Showing entries info
+            paginationHtml += `
+                <div class="text-gray-500">
+                    Showing ${start}-${end} of ${totalOrders}
+                </div>`;
+            
+            // Pagination controls
+            paginationHtml += '<div class="flex items-center space-x-2">';
+            
+            // Previous button
+            if (currentPage > 1) {
+                paginationHtml += `
+                    <button data-page="${currentPage - 1}" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-300">
+                        &lt;
+                    </button>`;
+            }
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                paginationHtml += `
+                    <button data-page="${i}" 
+                        class="px-3 py-1 rounded-md ${i === currentPage ? 'bg-orange-400 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">
+                        ${i}
+                    </button>`;
+            }
+            
+            // Next button
+            if (currentPage < totalPages) {
+                paginationHtml += `
+                    <button data-page="${currentPage + 1}" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-300">
+                        &gt;
+                    </button>`;
+            }
+            
+            paginationHtml += '</div></div>';
+            return paginationHtml;
+        }
+
         // Function to format date as YYYY-MM-DD for input fields
         function formatDate(date) {
             return date.toISOString().split('T')[0];
@@ -503,7 +549,7 @@
                 console.log('Axios response:', response.data);
 
                 if (response.data && response.data.salesReport) {
-                    updateSalesTable(response.data.salesReport);
+                    updateSalesTable(response.data.salesReport,response.data.pagination);
                     showToast('Report updated successfully', 'success');
                 } else {
                     throw new Error('Invalid data format received');
@@ -516,7 +562,7 @@
         }
 
         // Function to update the sales table
-        function updateSalesTable(salesReport) {
+        function updateSalesTable(salesReport, pagination) {
             const tbody = document.querySelector('table tbody');
             tbody.innerHTML = salesReport.map(sale => `
                 <tr class="table-row" style="animation: fadeIn 0.5s ease-out forwards;">
@@ -532,6 +578,43 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">₹ ${sale.finalAmount.toFixed(2)}</td>
                 </tr>
             `).join('');
+
+            // Add pagination controls after the table
+            const paginationContainer = document.querySelector('#pagination-container');
+            if (!paginationContainer) {
+                const container = document.createElement('div');
+                container.id = 'pagination-container';
+                tbody.parentElement.parentElement.appendChild(container);
+            }
+            document.querySelector('#pagination-container').innerHTML = createPaginationControls(pagination);
+
+            // Add event listeners to pagination buttons
+            document.querySelectorAll('#pagination-container button').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const page = button.dataset.page;
+                    const reportType = document.getElementById('reportType').value;
+                    const specificDate = document.getElementById('specificDate').value;
+                    const startDate = document.getElementById('startDate').value;
+                    const endDate = document.getElementById('endDate').value;
+
+                    try {
+                        const response = await axios.get('/admin/generate-sales-report', {
+                            params: {
+                                type: reportType,
+                                date: specificDate,
+                                startDate,
+                                endDate,
+                                page
+                            }
+                        });
+
+                        updateSalesTable(response.data.salesReport, response.data.pagination);
+                    } catch (error) {
+                        console.error('Error fetching sales report:', error);
+                        showToast('Error fetching sales report', 'error');
+                    }
+                });
+            });
         }
 
         // Chart

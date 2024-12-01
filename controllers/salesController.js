@@ -112,6 +112,10 @@ const dashboard = async (req, res) => {
 const generateSalesReport = async (req, res) => {
     try {
         const { type, date, startDate, endDate } = req.query;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+
         let dateFilter = {};
 
         // Set up date filter based on report type
@@ -163,11 +167,13 @@ const generateSalesReport = async (req, res) => {
                 dateFilter = {};
         }
 
+        const totalOrders = await Orders.countDocuments(dateFilter);
+        const totalPages = Math.ceil(totalOrders / limit);
         // Get filtered orders
         const orders = await Orders.find(dateFilter)
             .populate('userId')
             .populate('products.productId')
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 }).skip(skip).limit(limit);
 
         const reportData = orders.map(order => ({
             orderId: order.orderId || order._id,
@@ -185,7 +191,13 @@ const generateSalesReport = async (req, res) => {
 
         // Send JSON response for AJAX request
         res.json({
-            salesReport: reportData
+            salesReport: reportData,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalOrders,
+                limit
+            }
         });
     } catch (error) {
         console.error('Generate Sales Report Error:', error);
