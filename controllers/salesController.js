@@ -36,6 +36,61 @@ const dashboard = async (req, res) => {
         const totalDiscountAmount = reportData.reduce((sum, order) => sum + order.discount, 0);
         const totalFinalAmount = reportData.reduce((sum, order) => sum + order.finalAmount, 0);
 
+        const productAggregation = await Orders.aggregate([
+            { $match: { status: { $ne: 'Cancelled' } } },
+            { $unwind: '$products' },
+            { $lookup: {
+                from: 'products',
+                localField: 'products.productId',
+                foreignField: '_id',
+                as: 'productDetails'
+            }},
+            { $unwind: '$productDetails'},
+            { $group: {
+                _id: '$products.productId',
+                totalSold: { $sum: '$products.quantity' },
+                name: { $first: '$productDetails.name' }
+            }},
+            { $sort: { totalSold: -1 } },
+            { $limit: 10 },
+            { $project: {
+                _id: 1,
+                totalSold: 1,
+                name: 1 // Project the name field
+            }}
+        ]);
+
+        // Aggregate to find top-selling categories
+        const categoryAggregation = await Orders.aggregate([
+            { $match: { status: { $ne: 'Cancelled' } } },
+            { $unwind: '$products' },
+            { $lookup: {
+                from: 'products',
+                localField: 'products.productId',
+                foreignField: '_id',
+                as: 'productDetails'
+            }},
+            { $unwind: '$productDetails' },
+            { $group: {
+                _id: '$productDetails.category',
+                totalSold: { $sum: '$products.quantity' }
+            }},
+            { $lookup: {
+                from: 'categories',
+                localField: '_id',
+                foreignField: '_id',
+                as: 'categoryDetails'
+            }},
+            { $unwind: '$categoryDetails' },
+            { $project: {
+                _id: 1,
+                totalSold: 1,
+                name: '$categoryDetails.name'
+            }},
+            { $sort: { totalSold: -1 } },
+            { $limit: 10 }
+        ]);
+
         res.render('admin/dashboard', {
             activeTab: "dashboard",
             totalRevenue,
@@ -44,7 +99,9 @@ const dashboard = async (req, res) => {
             salesReport: reportData,
             totalAmount,
             totalDiscountAmount,
-            totalFinalAmount
+            totalFinalAmount,
+            topProducts: productAggregation,
+            topCategories: categoryAggregation
         });
     } catch (error) {
         console.error('Dashboard Error:', error);

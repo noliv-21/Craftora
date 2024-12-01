@@ -9,6 +9,37 @@
         to { transform: translateX(0); opacity: 1; }
     }
 
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .best-seller-card {
+        animation: fadeIn 0.6s ease-out forwards;
+    }
+
+    .product-item, .category-item {
+        animation: slideInRight 0.5s ease-out forwards;
+        opacity: 0;
+    }
+
+    .best-seller-card:hover {
+        transform: translateY(-5px);
+        transition: transform 0.3s ease;
+    }
+
+    .product-item:hover, .category-item:hover {
+        background-color: rgba(59, 130, 246, 0.05);
+        transform: translateX(5px);
+        transition: all 0.3s ease;
+    }
+
     .stat-card {
         animation: fadeIn 0.5s ease-out forwards;
         transition: all 0.3s ease;
@@ -220,6 +251,70 @@
                         </tr>
                     </tfoot>
                 </table>
+            </div>
+        </div>
+        <!-- Best Sellers Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <!-- Best Selling Products -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden best-seller-card">
+                <div class="p-6 border-b">
+                    <h2 class="text-2xl font-bold text-gray-800">Best Selling Products</h2>
+                    <p class="text-gray-600 mt-1">Top <%= topProducts.length %> products by sales volume</p>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-4">
+                        <% topProducts.forEach((product, index) => { %>
+                            <li class="flex items-center justify-between product-item" 
+                                style="animation-delay: '<%= index * 100 %>'ms">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-full">
+                                        <%= index + 1 %>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium text-gray-900"><%= product.name || product._id %></h3>
+                                        <p class="text-sm text-gray-500">Sold: <%= product.totalSold %> units</p>
+                                    </div>
+                                </div>
+                                <div class="text-blue-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                    </svg>
+                                </div>
+                            </li>
+                        <% }); %>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Best Selling Categories -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden best-seller-card">
+                <div class="p-6 border-b">
+                    <h2 class="text-2xl font-bold text-gray-800">Top Categories</h2>
+                    <p class="text-gray-600 mt-1">Top <%= topCategories.length %> categories by sales volume</p>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-4">
+                        <% topCategories.forEach((category, index) => { %>
+                            <li class="flex items-center justify-between category-item"
+                                style="animation-delay: '<%= index * 100 %>'ms">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-purple-100 text-purple-600 rounded-full">
+                                        <%= index + 1 %>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium text-gray-900"><%= category.name %></h3>
+                                        <p class="text-sm text-gray-500">Sold: <%= category.totalSold %> units</p>
+                                    </div>
+                                </div>
+                                <div class="text-purple-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                    </svg>
+                                </div>
+                            </li>
+                        <% }); %>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
