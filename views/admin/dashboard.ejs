@@ -51,7 +51,7 @@
     }
 </style>
 
-<div class="flex min-h-screen bg-gray-100">
+<div class="flex min-h-screen min-w-screen bg-gray-100">
     <!-- Sidebar -->
     <%-include('../partials/admin/side bar')%>
     
@@ -98,7 +98,7 @@
                         <i class="fas fa-tags text-purple-600 text-xl"></i>
                     </div>
                 </div>
-                <div class="text-3xl font-bold text-gray-800">₹ <%= totalDiscount %></div>
+                <div class="text-3xl font-bold text-gray-800">₹ <%= totalDiscount.toFixed(2) %></div>
             </div>
         </div>
 
@@ -110,14 +110,33 @@
                         <h2 class="text-2xl font-bold text-gray-800">Sales Report</h2>
                         <p class="text-gray-500 mt-1">Analyze your sales data</p>
                     </div>
-                    <div class="flex gap-4 mt-4 md:mt-0">
-                        <button id="downloadPDF" class="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all">
-                            <i class="fas fa-file-pdf mr-2"></i>PDF
-                        </button>
-                        <button id="downloadExcel" class="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all">
-                            <i class="fas fa-file-excel mr-2"></i>Excel
-                        </button>
+                </div>
+
+                <!-- Chart -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Sales Analytics</h2>
+                        <div class="flex gap-4">
+                            <select id="chartPeriod" class="rounded-lg border-gray-300">
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="yearly">Yearly</option>
+                            </select>
+                        </div>
                     </div>
+                    <div class="h-[400px]">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Download Options -->
+                <div class="flex gap-4 justify-end">
+                    <button id="downloadPDF" class="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all">
+                        <i class="fas fa-file-pdf mr-2"></i>PDF
+                    </button>
+                    <button id="downloadExcel" class="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all">
+                        <i class="fas fa-file-excel mr-2"></i>Excel
+                    </button>
                 </div>
 
                 <!-- Filter Options -->
@@ -419,5 +438,116 @@
                 </tr>
             `).join('');
         }
+
+        // Chart
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        const salesChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [], // Will be populated with dates
+                datasets: [{
+                    label: 'Orders',
+                    data: [], // Will be populated with order counts
+                    backgroundColor: 'rgba(59, 130, 246, 0.5)', // Blue with opacity
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 1,
+                    yAxisID: 'y', // This will use the left y-axis
+                    order: 2
+                }, {
+                    label: 'Revenue',
+                    data: [], // Will be populated with revenue
+                    type: 'line',
+                    borderColor: 'rgb(16, 185, 129)', // Green
+                    borderWidth: 2,
+                    fill: false,
+                    yAxisID: 'y1', // This will use the right y-axis
+                    order: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Number of Orders'
+                        },
+                        // Start from 0 and adjust max based on data
+                        beginAtZero: true,
+                        grid: {
+                            drawOnChartArea: true
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Revenue (₹)'
+                        },
+                        // Start from 0 and adjust max based on data
+                        beginAtZero: true,
+                        grid: {
+                            drawOnChartArea: false // Only show grid lines for left axis
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Sales Performance'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.dataset.yAxisID === 'y1') {
+                                    // Format revenue with ₹ symbol and thousands separator
+                                    label += '₹' + context.parsed.y.toLocaleString();
+                                } else {
+                                    // Format order count
+                                    label += context.parsed.y;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Function to update chart data
+        async function updateChartData(period) {
+            try {
+                const response = await axios.get(`/admin/analytics/${period}`);
+                const data = response.data;
+                salesChart.data.labels = data.labels;
+                salesChart.data.datasets[0].data = data.orders;
+                salesChart.data.datasets[1].data = data.revenue;
+                salesChart.update();
+            } catch (error) {
+                console.error('Error fetching chart data:', error);
+            }
+        }
+        
+        // Add event listener for period change
+        document.getElementById('chartPeriod').addEventListener('change', (e) => {
+            updateChartData(e.target.value);
+        });
+        
+        // Initial chart data load
+        updateChartData('weekly');
     });
 </script>

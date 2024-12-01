@@ -50,5 +50,6 @@ admin.patch('/coupons/:id/toggle', couponController.toggleCouponStatus)
 
 admin.get('/generate-sales-report', salesController.generateSalesReport);
 admin.get('/download-sales-report', salesController.downloadSalesReport);
+admin.get('/analytics/:period', salesController.getAnalyticsData);
 
 module.exports = admin;

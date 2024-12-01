@@ -374,8 +374,101 @@ const downloadSalesReport = async (req, res) => {
     }
 };
 
+const getAnalyticsData = async (req,res)=>{
+    const period = req.params.period;
+    try {
+        let dateFormat, groupBy;
+        const now = new Date();
+        let startDate;
+        switch (period) {
+            case 'weekly':
+                // Last 7 weeks
+                dateFormat = '%Y-W%V'; // Year-Week format
+                groupBy = { $week: '$createdAt' };
+                startDate = new Date(now.setDate(now.getDate() - 49)); // 7 weeks ago
+                break;
+            case 'monthly':
+                // Last 6 months
+                dateFormat = '%Y-%m'; // Year-Month format
+                groupBy = { $month: '$createdAt' };
+                startDate = new Date(now.setMonth(now.getMonth() - 6));
+                break;
+            case 'yearly':
+                // Last 12 months
+                dateFormat = '%Y'; // Year format
+                groupBy = { $year: '$createdAt' };
+                startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+                break;
+            default:
+                return res.status(400).json({ error: 'Invalid period' });
+        }
+
+        const analytics = await Orders.aggregate([
+            {
+                $match: {
+                    createdAt: { $gte: startDate },
+                    status: { $ne: 'Cancelled' } // Exclude cancelled orders
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        date: groupBy,
+                        year: { $year: '$createdAt' },
+                        month: { $month: '$createdAt' }
+                    },
+                    orders: { $sum: 1 },
+                    revenue: { $sum: '$totalAmount' }
+                }
+            },
+            {
+                $sort: { 
+                    '_id.year': 1,
+                    '_id.month': 1,
+                    '_id.date': 1
+                }
+            }
+        ]);
+
+        // Format the response
+        let labels = [];
+        let orders = [];
+        let revenue = [];
+
+        // Format labels based on period
+        analytics.forEach(item => {
+            let label;
+            switch (period) {
+                case 'weekly':
+                    label = `Week ${item._id.date}`;
+                    break;
+                case 'monthly':
+                    label = new Date(0, item._id.month - 1).toLocaleString('default', { month: 'short' });
+                    break;
+                case 'yearly':
+                    label = item._id.year.toString();
+                    break;
+            }
+            
+            labels.push(label);
+            orders.push(item.orders);
+            revenue.push(item.revenue);
+        });
+
+        res.json({
+            labels,
+            orders,
+            revenue
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json("Error getting analytics data");
+    }
+}
+
 module.exports = {
     dashboard,
     generateSalesReport,
-    downloadSalesReport
+    downloadSalesReport,
+    getAnalyticsData
 }
