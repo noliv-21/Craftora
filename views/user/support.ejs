@@ -1,0 +1,637 @@
+<%- include('../partials/user/header.ejs') %>
+
+<div class="support-page">
+    <div class="support-header">
+        <h1 class="animate__animated animate__fadeIn">Craftora Help Center</h1>
+        <p class="animate__animated animate__fadeIn animate__delay-1s">24 x 7 Customer Support</p>
+    </div>
+
+    <div class="support-container">
+        <!-- Left Side: FAQ Categories -->
+        <div class="faq-section animate__animated animate__fadeInLeft">
+            <h2>Type of issue you are facing with</h2>
+            <div class="faq-accordion">
+                <div class="faq-item">
+                    <div class="faq-trigger">
+                        <span>Help with your order</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-content">
+                        <p>Track your order status, modify order details, and get assistance with order-related queries.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-trigger">
+                        <span>Delivery related</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-content">
+                        <p>Get information about delivery timelines, tracking, and delivery-related issues.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-trigger">
+                        <span>Account related</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-content">
+                        <p>Manage your account settings, update profile information, and resolve login issues.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-trigger">
+                        <span>Refunds related</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-content">
+                        <p>Learn about refund policies, track refund status, and get help with refund requests.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-trigger">
+                        <span>Payment related</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-content">
+                        <p>Get assistance with payment methods, transaction issues, and billing queries.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-trigger">
+                        <span>Cancellation related</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-content">
+                        <p>Understanding cancellation policies and process cancellation requests.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-trigger">
+                        <span>Others</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-content">
+                        <p>Get help with other queries not covered in the above categories.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Contact Form -->
+        <div class="contact-section animate__animated animate__fadeInRight">
+            <div class="contact-form">
+                <h2>Contact Support</h2>
+                <form id="supportForm">
+                    <div class="form-group">
+                        <label for="reason">Reason</label>
+                        <input type="text" id="reason" name="reason" required 
+                               class="modern-input" placeholder="Brief description of your issue">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Your E-Mail</label>
+                        <input type="email" id="email" name="email" required 
+                               class="modern-input" placeholder="Enter your email address">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="comment">Comment</label>
+                        <textarea id="comment" name="comment" required 
+                                  class="modern-textarea" placeholder="Describe your issue in detail"></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <span>Send</span>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <!-- Previous Tickets Section -->
+        <div class="previous-tickets-section">
+            <h2>Your Previous Active Support Tickets</h2>
+            <% if (existingTickets && existingTickets.length > 0) { %>
+                <div class="tickets-container" style="max-height: 400px; overflow-y: auto; max-width: 300px; margin: 0 auto;">
+                    <% existingTickets.forEach(ticket => { %>
+                        <div class="ticket-card">
+                            <div class="ticket-header">
+                                <h3><%= ticket.subject %></h3>
+                                <span class="ticket-date"><%= new Date(ticket.createdAt).toLocaleDateString() %></span>
+                                <span class="ticket-status <%= ticket.status %>"><%= ticket.status %></span>
+                            </div>
+                            <div class="ticket-messages">
+                                <% ticket.messages.forEach(msg => { %>
+                                    <div class="message <%= msg.sender %>">
+                                        <p><%= msg.content %></p>
+                                        <small><%= new Date(msg.timestamp).toLocaleString() %></small>
+                                    </div>
+                                <% }) %>
+                            </div>
+                            <% if (ticket.status === 'open') { %>
+                            <div class="ticket-actions">
+                                <button class="continue-chat-btn" onclick="sendMessage('<%= ticket._id %>',this)">Continue ticket?</button>
+                                <button class="close-ticket-btn" onclick="closeTicket('<%= ticket._id %>')">Close Ticket</button>
+                            </div>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <p>No previous tickets found.</p>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<div id="continueTicketModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2 id="modalTicketSubject"></h2>
+        <textarea id="ticketMessageInput" placeholder="Type your message here..."></textarea>
+        <button id="sendMessageButton">Send</button>
+    </div>
+</div>
+
+<style>
+    .previous-tickets-section {
+        margin-top: 2rem;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .tickets-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        max-width: 800px; /* Constrain the width to ensure text wraps */
+        margin: 0 auto; /* Center the container */
+    }
+
+    .ticket-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        background: white;
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .ticket-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .ticket-header h3 {
+        margin: 0;
+        color: #333;
+        font-weight: bold;
+    }
+
+    .ticket-date {
+        color: #666;
+        font-size: 0.9em;
+    }
+
+    .ticket-status {
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.8em;
+    }
+
+    .ticket-status.open {
+        background: rgba(239, 140, 19, 0.1);
+        color: #ef8c13;
+    }
+
+    .ticket-status.closed {
+        background: #f0f0f0;
+        color: #666;
+    }
+
+    .ticket-messages {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .message {
+        max-width: 80px; /* Limit the width of the message content */
+        padding-left: 10px; /* Add left padding */
+        padding-right: 10px; /* Add right padding */
+        word-wrap: break-word; /* Ensure long words break to the next line */
+        padding: 10px;
+        border-radius: 8px;
+        max-width: 80%;
+    }
+
+    .message.user {
+        align-self: flex-end;
+        background: rgba(239, 140, 19, 0.1);
+    }
+
+    .message.admin {
+        align-self: flex-start;
+        background: #f5f5f5;
+    }
+
+    .message p {
+        margin: 0 0 5px 0;
+    }
+
+    .message small {
+        color: #666;
+        font-size: 0.8em;
+    }
+
+    .support-page {
+        background: #f5f7fa;
+        padding: 2rem;
+        min-height: 80vh;
+    }
+
+    .support-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .support-header h1 {
+        color: #333;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        border-bottom: 3px solid #ef8c13;
+        display: inline-block;
+        padding-bottom: 0.5rem;
+    }
+
+    .support-header p {
+        color: #666;
+        font-size: 1.2rem;
+    }
+
+    .support-container {
+        display: flex;
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .faq-section, .contact-section {
+        flex: 1;
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        border: 1px solid rgba(239, 140, 19, 0.1);
+    }
+
+    /* FAQ Styles */
+    .faq-accordion {
+        margin-top: 1.5rem;
+    }
+
+    .faq-item {
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+    }
+
+    .faq-item:hover {
+        border-left-color: #ef8c13;
+    }
+
+    .faq-trigger {
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .faq-trigger:hover {
+        background: rgba(239, 140, 19, 0.05);
+    }
+
+    .faq-item.active .faq-trigger {
+        background: rgba(239, 140, 19, 0.1);
+        color: #ef8c13;
+    }
+
+    .faq-trigger i {
+        transition: transform 0.3s ease;
+        color: #ef8c13;
+    }
+
+    .faq-item.active .faq-trigger i {
+        transform: rotate(180deg);
+    }
+
+    .faq-content {
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .faq-item.active .faq-content {
+        padding: 1rem;
+        max-height: 200px;
+    }
+
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .modern-input, .modern-textarea {
+        width: 100%;
+        padding: 0.8rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .modern-input:focus, .modern-textarea:focus {
+        border-color: #ef8c13;
+        box-shadow: 0 0 0 3px rgba(239, 140, 19, 0.1);
+        outline: none;
+    }
+
+    .modern-textarea {
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 1rem;
+        background: #ef8c13;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .submit-btn:hover {
+        background: #d67b0f;
+        transform: translateY(-2px);
+    }
+
+    .ticket-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .continue-chat-btn, .close-ticket-btn {
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 14px;
+    }
+
+    .continue-chat-btn {
+        background-color: #ef8c13;
+        color: white;
+        border: none;
+    }
+
+    .close-ticket-btn {
+        background-color: #c24400;
+        color: white;
+        border: none;
+    }
+
+    .continue-chat-btn:hover {
+        background-color: #d97706;
+    }
+
+    .close-ticket-btn:hover {
+        background-color: #a83200;
+    }
+
+    /* Animations */
+    @keyframes slideDown {
+        from { max-height: 0; }
+        to { max-height: 200px; }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 8px;
+    }
+
+    .close-button {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close-button:hover,
+    .close-button:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    #ticketMessageInput {
+        width: 100%;
+        height: 100px;
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    #sendMessageButton {
+        background-color: #ef8c13;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin-top: 10px;
+    }
+
+    #sendMessageButton:hover {
+        background-color: #d97706;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // FAQ Accordion functionality
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+        const trigger = item.querySelector('.faq-trigger');
+        
+        trigger.addEventListener('click', () => {
+            const isActive = item.classList.contains('active');
+            
+            // Close all items
+            faqItems.forEach(faqItem => {
+                faqItem.classList.remove('active');
+            });
+            
+            // If clicked item wasn't active, open it
+            if (!isActive) {
+                item.classList.add('active');
+            }
+        });
+    });
+
+    // Form submission animation
+    const form = document.getElementById('supportForm');
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const submitBtn = form.querySelector('.submit-btn');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        submitBtn.disabled = true;
+        
+        const formData = new FormData(form);
+        const formDataObject = Object.fromEntries(formData.entries());
+        try {
+            const response = await axios.post('/user/submit-support', formDataObject, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            });
+            if(response.status === 200){
+                console.log('Form data sent successfully:', response.data);
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> Sent Successfully';
+                submitBtn.style.background = '#28a745';
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            submitBtn.innerHTML = '<span>Send</span><i class="fas fa-paper-plane"></i>';
+            submitBtn.disabled = false;
+        }
+    });
+});
+
+async function sendMessage(ticketId, buttonElement) {
+    const modal = document.getElementById('continueTicketModal');
+    const closeButton = document.querySelector('.close-button');
+    const messageInput = document.getElementById('ticketMessageInput');
+    const sendMessageButton = document.getElementById('sendMessageButton');
+    const modalTicketSubject = document.getElementById('modalTicketSubject');
+
+    const ticketCard = buttonElement.closest('.ticket-card');
+    const ticketSubject = ticketCard.querySelector('h3').innerText;
+    modalTicketSubject.innerText = ticketSubject;
+    modal.style.display = 'block';
+
+    const closeModal = () => {
+        modal.style.display = 'none';
+        closeButton.removeEventListener('click', closeModal);
+        window.removeEventListener('click', windowClickHandler);
+        sendMessageButton.removeEventListener('click', sendMessageHandler);
+    };
+
+    closeButton.addEventListener('click', function() {
+        modal.style.display = 'none';
+    });
+
+    const windowClickHandler = (event) => {
+        if (event.target == modal) {
+            closeModal();
+        }
+    };
+
+    const sendMessageHandler = async () => {
+        const message = messageInput.value;
+        if (message.trim() !== '') {
+            try {
+                const messageResponse = await axios.post(`/user/support/continueTicket/${ticketId}`, { message });
+                if (messageResponse.status === 200) {
+                    console.log('Message sent successfully:', messageResponse.data.message);
+                    messageInput.value = '';
+                    closeModal();
+                    window.location.reload();
+                } else {
+                    console.error('Error sending message:', messageResponse.data.message);
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+            }
+        }
+    };
+
+    closeButton.addEventListener('click', closeModal);
+    window.addEventListener('click', windowClickHandler);
+    sendMessageButton.addEventListener('click', sendMessageHandler);
+}
+
+async function closeTicket(ticketId) {
+    try {
+        const response = await axios.post(`/user/support/closeTicket/${ticketId}`);
+        if (response.status === 200) {
+            console.log('Ticket closed successfully:', response.data?.message);
+            window.location.reload();
+        } else {
+            console.error('Error closing ticket:', response.data?.message);
+        }
+    } catch (error) {
+        console.error('Network error:', error);
+    }
+}
+</script>
+
+<%- include('../partials/user/footer.ejs') %>

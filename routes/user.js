@@ -9,6 +9,7 @@ const wishlistController = require('../controllers/wishlistController')
 const couponController = require('../controllers/couponController')
 const paymentController = require('../controllers/paymentController');
 const walletController = require('../controllers/walletController');
+const supportController = require('../controllers/supportController')
 const passport = require('passport');
 
 user.use('/',express.static('public'));
@@ -67,5 +68,10 @@ user.post('/razorpay/verify', userController.userAuth, paymentController.verifyP
 user.get('/dashboard/wallet', userController.userAuth, walletController.walletPage);
 user.post('/wallet/add-money', userController.userAuth, walletController.addMoneyToWallet);
 user.get('/wallet/balance', userController.userAuth, walletController.getWalletBalance);
+
+user.get('/support', userController.userAuth, supportController.supportPage);
+user.post('/submit-support', userController.userAuth, supportController.submitSupport);
+user.post('/support/continueTicket/:ticketId', userController.userAuth, supportController.addMessage);
+user.post('/support/closeTicket/:ticketId', userController.userAuth, supportController.closeTicket);
 
 module.exports = user;
