@@ -419,6 +419,11 @@ exports.getOrdersAdmin = async (req,res)=>{
         const limit = 6;
         const skip = (page - 1) * limit;
 
+        const returnRequests = await Orders.find({ 'returnDetails.returnStatus':'Requested'}).populate({
+            path: 'products.productId',
+            select: 'name'
+        }).populate('userId')
+
         const orders = await Orders.find({})
             .populate('userId', 'username email')
             .populate({
@@ -431,7 +436,7 @@ exports.getOrdersAdmin = async (req,res)=>{
         const totalPages = Math.ceil(totalOrders / limit);
 
         res.render('admin/order folder/orders', {
-            orders, activeTab: 'orders', orderStatuses,
+            orders, activeTab: 'orders', orderStatuses, returnRequests,
             page,
             totalPages,
             limit,
@@ -635,6 +640,50 @@ exports.updateStatus = async (req, res) => {
         res.status(500).json({ message: "Failed to update order status." });
     }
 };
+
+exports.returnOrder = async (req,res)=>{
+    try {
+        const orderId = req.params.orderId;
+        const returnReason = req.body.returnReason;
+        await Orders.findByIdAndUpdate(orderId, { 'returnDetails.returnRequested': true, 'returnDetails.returnReason': returnReason })
+        res.status(200).json({ message: "Return request sent" })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message:"Server error" })
+    }
+}
+
+exports.approveReturnRequest = async (req,res)=>{
+    try {
+        const orderId = req.params.orderId;
+        const order = await Orders.findByIdAndUpdate(orderId, { 'returnDetails.returnStatus': 'Approved', status:'Returned' })
+        await Wallets.findOneAndUpdate({ userId: order.userId},{ 
+            $inc: { balance: order.totalAmount },
+            $push: {
+                transactions: {
+                    type: 'credit',
+                    amount: order.totalAmount,
+                    description: `Refund for returned order #${order.orderId}`
+                }
+            }
+        })
+        res.status(200).json({ message: "Return request approved" })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message:"Server error" })
+    }
+}
+
+exports.rejectReturnRequest = async (req,res)=>{
+    try {
+        const orderId = req.params.orderId;
+        await Orders.findByIdAndUpdate(orderId, { 'returnDetails.returnStatus': 'Rejected' })
+        res.status(200).json({ message: "Return request rejected" })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message:"Server error" })
+    }
+}
 
 exports.downloadInvoice = async (req, res) => {
     try {

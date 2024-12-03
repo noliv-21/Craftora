@@ -13,6 +13,82 @@
         right: 20px !important;
         z-index: 9999 !important;
     }
+
+    .notification-icon {
+    position: fixed;
+    top: 50px;
+    right: 20px;
+    background-color: #007BFF;
+    color: white;
+    padding:5px 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1000;
+    transition: right 0.3s ease, left 0.3s ease;
+}
+
+.return-requests-sidebar.show + .notification-icon {
+    top:20px !important;
+    left:20px !important;
+    border-radius: 0 50% 50% 0;
+}
+
+.return-requests-sidebar {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 300px;
+    height: 100%;
+    background-color: #f0f8ff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+    padding: 20px;
+    transition: right 0.3s ease;
+    z-index: 999;
+}
+
+.return-requests-sidebar.show {
+    right: 0;
+}
+
+.return-requests-sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.return-requests-sidebar li {
+    background-color: #e7f0ff;
+    border: 1px solid #007BFF;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    padding: 15px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.return-requests-sidebar li:hover {
+    background-color: #d0e7ff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.return-requests-sidebar p {
+    margin: 5px 0;
+    color: #333;
+}
+
+.approve-btn, .reject-btn {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    margin-top: 10px;
+    margin-right: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.approve-btn:hover, .reject-btn:hover {
+    background-color: #0056b3;
+}
 </style>
 <div class="flex">
     <!-- Sidebar -->
@@ -32,7 +108,7 @@
                 &gt;
                 <span>Order List</span>
             </div>
-            <div class="flex justify-between items-center mb-4">
+            <!-- <div class="flex justify-between items-center mb-4">
                 <div class="flex space-x-2">
                     <button class="bg-blue-100 text-blue-600 px-4 py-2 rounded-lg">
                         All Time
@@ -58,7 +134,7 @@
                         Filters
                     </button>
                 </div>
-            </div>
+            </div> -->
             <table class="w-full text-left">
                 <thead>
                     <tr class="text-gray-600">
@@ -161,7 +237,65 @@
     </div>
 </div>
 
+<!-- Notification Icon -->
+<div id="notification-icon" class="notification-icon">
+    <i class="fas fa-bell"></i>
+</div>
+
+<!-- Return Requests Sidebar -->
+<div id="return-requests-sidebar" class="return-requests-sidebar">
+    <h3>Return Requests</h3>
+    <ul>
+        <% returnRequests.forEach(request => { %>
+            <li>
+                <p><strong>Order ID:</strong> <%= request.orderId %></p>
+                <p><strong>User:</strong> <%= request.userId.fullname || request.userId.username %> (<%= request.userId.email %>)</p>
+                <p><strong>Reason:</strong> <%= request.returnDetails.returnReason %></p>
+                <button class="approve-btn" onclick="approveReturnRequest('<%= request._id %>')">Approve</button>
+                <button class="reject-btn" onclick="rejectReturnRequest('<%= request._id %>')">Reject</button>
+            </li>
+        <% }) %>
+    </ul>
+</div>
+
 <script>
+    async function approveReturnRequest(orderId){
+        try {
+            const response = await axios.patch(`/admin/order/approveReturnRequest/${orderId}`);
+            if(response.status === 200){
+                alert('approved')
+            }
+        } catch (error) {
+            console.error("Error approving return request:", error);
+        }
+    }
+
+    async function rejectReturnRequest(orderId){
+        try {
+            const response = await axios.patch(`/admin/order/rejectReturnRequest/${orderId}`);
+            if(response.status === 200){
+                alert('rejected')
+            }
+        } catch (error) {
+            console.error("Error approving return request:", error);
+        }
+    }
+
+    document.getElementById('notification-icon').addEventListener('click', function() {
+        const sidebar = document.getElementById('return-requests-sidebar');
+        const icon = this.querySelector('i');
+        
+        sidebar.classList.toggle('show');
+        
+        if (sidebar.classList.contains('show')) {
+            icon.classList.remove('fa-bell');
+            icon.classList.add('fa-chevron-right');
+        } else {
+            icon.classList.remove('fa-chevron-right');
+            icon.classList.add('fa-bell');
+        }
+    });
+
     async function updateOrderStatus(orderId, statusSelect) {
         const status = statusSelect.value;
         const parentElement = statusSelect.parentElement;

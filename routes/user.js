@@ -47,6 +47,7 @@ user.get('/orders',userController.userAuth,orderController.showOrdersUser)
 user.get('/order/details/:orderId',userController.userAuth,orderController.orderDetailsUser)
 user.get('/order/invoice/:orderId',userController.userAuth,orderController.downloadInvoice)
 user.patch('/order/cancel/:orderId',userController.userAuth,orderController.cancelOrder)
+user.post('/order/return/:orderId',userController.userAuth,orderController.returnOrder)
 
 user.get('/wishlist',userController.userAuth,wishlistController.getWishlistPage)
 user.delete('/wishlist/remove',wishlistController.removeProduct)

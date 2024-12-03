@@ -40,6 +40,8 @@ admin.get('/viewProduct',productController.productDetails)
 admin.get('/orders',orderController.getOrdersAdmin)
 admin.post('/cancelOrder/:orderId',orderController.cancelOrder)
 admin.patch('/updateOrderStatus/:orderId',orderController.updateStatus)
+admin.patch('/order/approveReturnRequest/:orderId',orderController.approveReturnRequest)
+admin.patch('/order/rejectReturnRequest/:orderId',orderController.rejectReturnRequest)
 
 // Coupon routes
 admin.get('/coupons',couponController.couponsPage_admin)

@@ -72,6 +72,19 @@ const orderSchema = new mongoose.Schema({
         required: true,
         default: "Order Placed"
     },
+    returnDetails: {
+        returnRequested: {
+            type: Boolean,
+            default: false
+        },
+        returnStatus: {
+            type: String,
+            enum: ["Requested", "Approved", "Rejected"]
+        },
+        returnReason: {
+            type: String
+        }
+    },
     paymentMethod:{
         type:String,
         enum:["COD","Online","Wallet"],
@@ -125,6 +138,20 @@ const orderSchema = new mongoose.Schema({
     cancelledOn: { type: Date, default: null },
     returnedOn: { type: Date, default: null },
 }, { timestamps: true })
+
+function updateReturnStatus(next) {
+    const update = this.getUpdate();
+    if (update['returnDetails.returnRequested'] && update['returnDetails.returnStatus'] !== "Requested") {
+        update['returnDetails.returnStatus'] = "Requested";
+    }
+    if (update['returnDetails.returnStatus'] === "Approved") {
+        update.status = "Returned";
+    }
+    next();
+}
+
+orderSchema.pre('findByIdAndUpdate', updateReturnStatus);
+orderSchema.pre('findOneAndUpdate', updateReturnStatus);
 
 orderSchema.pre('save', async function (next) {
     if (!this.orderId) {

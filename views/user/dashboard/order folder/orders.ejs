@@ -13,6 +13,42 @@
         right: 20px;
         z-index: 100;
     }
+
+    .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+    padding-top: 60px;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
 </style>
 <!-- Header -->
 <%- include('../../../partials/user/header') %>
@@ -86,8 +122,8 @@
                     <% if(order.status !== "Cancelled" && order.status !== "Returned" && order.status !== "Out for delivery" && order.status !== "Delivered"){ %>
                         <button id="cancelBtn" class="btn btn-danger" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
                     <% } %>
-                    <% if(order.status === "Delivered" && Date.now() <= (new Date(order.deliveredOn).getTime() + 7 * 24 * 60 * 60 * 1000)){ %>
-                        <button class="btn btn-primary" onclick="updateOrderStatus('<%= order._id %>', 'Returned')">Return Order</button>
+                    <% if(order.status === "Delivered" && Date.now() <= (new Date(order.deliveredOn).getTime() + 7 * 24 * 60 * 60 * 1000) && order.returnDetails.returnStatus !== 'Rejected'){ %>
+                        <button class="btn btn-primary" data-order-id="<%= order._id %>" onclick="returnOrder('<%= order.orderId %>','<%= order._id %>')">Return Order</button>
                     <% } %>
                 </div>
             </div>
@@ -113,9 +149,59 @@
         </div>
     </main>
 </div>
+<!-- Return Order Modal -->
+<div id="returnOrderModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalOrderId">Order ID: </h2>
+        <label for="returnReason">Reason for Return:</label>
+        <textarea id="returnReason" rows="4" cols="50"></textarea>
+        <button id="submitReturnRequest">Submit Return Request</button>
+    </div>
+</div>
 <!-- Footer -->
 <%- include('../../../partials/user/footer') %>
 <script>
+    function returnOrder(orderId, actualOrderId){
+        const modal = document.getElementById('returnOrderModal');
+        const modalOrderId = document.getElementById('modalOrderId');
+        modalOrderId.textContent = 'Order ID: ' + orderId;
+        modal.style.display = 'block';
+        const submitReturnRequest = document.getElementById('submitReturnRequest');
+        submitReturnRequest.addEventListener('click', async () => {
+            await sendReturnRequest(actualOrderId);
+            modal.style.display = 'none';
+        });
+        const closeBtn = document.getElementsByClassName('close')[0];
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    }
+
+    async function sendReturnRequest(orderId) {
+        try {
+            const returnReason = document.getElementById('returnReason').value
+            if(returnReason !== ''){
+                const response = await axios.post(`/user/order/return/${orderId}`,{
+                    returnReason: returnReason
+                })
+                if(response.status === 200){
+                    Toastify({
+                        text: response.data.message,
+                        duration: 2000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
+                        stopOnFocus: true,
+                        className: "toast_style"
+                    }).showToast();
+                }
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
     function updateOrderStatus(orderId, status) {
         axios.patch(`/admin/updateOrderStatus/${orderId}`, { status: status })
             .then(response => {
