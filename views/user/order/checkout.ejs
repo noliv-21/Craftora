@@ -220,6 +220,30 @@
         background-image: linear-gradient(to right, #ffecd2, #ffcb8c);
         color: inherit;
     }
+
+    .border-red-500 {
+        border: 3px solid #ff6347; /* Tomato color for a more vibrant border */
+        background-color: #fff5f5; /* Softer background to match the theme */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+        transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+        border-radius: 8px; /* Rounded corners for a modern look */
+    }
+
+    .selected-button {
+        background-color: #ff6347; /* Tomato color for a vibrant button */
+        color: #ffffff; /* White text for contrast */
+        border: none; /* Remove default border */
+        padding: 8px 16px; /* Add padding for a comfortable click area */
+        border-radius: 5px; /* Rounded corners for a modern look */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+        transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+        cursor: pointer; /* Pointer cursor to indicate clickability */
+    }
+    
+    .selected-button:hover {
+        background-color: #e5533d; /* Slightly darker shade on hover */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+    }
 </style>
 
 <!-- Address Modal -->
@@ -356,6 +380,7 @@ function selectAddress(addressId, buttonElement) {
     const addressCard = buttonElement.closest('[data-address-id]');
     addressCard.classList.add('border-red-500');
     buttonElement.textContent = 'Selected';
+    buttonElement.classList.add('selected-button');
 }
 
 function editAddress(addressData) {
