@@ -56,13 +56,10 @@
                 </ul>
             </div>
             <div class="mb-4">
-                <h3 class="font-bold mb-2">
+                <h3 class="font-bold mb-6 ml-5">
                     Price
                 </h3>
-                <input class="w-full" max="399" min="50" type="range" />
-                <div class="text-center">
-                    $50 - $399+
-                </div>
+                <div id="price-slider" class="mb-4"></div>
             </div>
             <!-- <div>
                 <h3 class="font-bold mb-2">
@@ -129,6 +126,50 @@
     <%-include('../../partials/user/footer')%>
 
 <script>
+    // Initialize the noUiSlider
+    var priceSlider = document.getElementById('price-slider');
+
+    noUiSlider.create(priceSlider, {
+        start: [Number(parseInt('<%= minPrice %>')), Number(parseInt('<%= maxPrice %>'))], // Initial min and max values
+        connect: true,
+        range: {
+            'min': 0,
+            'max': Number(parseInt('<%= maxPrice %>'))
+        },
+        tooltips: true,
+        format: {
+            to: function (value) {
+                return value.toFixed(0);
+            },
+            from: function (value) {
+                return Number(value);
+            }
+        }
+    });
+    
+    // Debouncing
+    function debounce(func, delay) {
+        let debounceTimeout;
+        return function(...args) {
+            const context = this;
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => func.apply(context, args), delay);
+        };
+    }
+    // Listen for changes on the slider
+    priceSlider.noUiSlider.on('update', debounce(function (values, handle) {
+        var minPrice = parseInt(values[0], 10);
+        var maxPrice = parseInt(values[1], 10);
+        // Call a function to fetch products based on the price range
+        fetchProductsByPriceRange(minPrice, maxPrice);
+    },1000));
+
+    function fetchProductsByPriceRange(minPrice, maxPrice) {
+        // Implement the logic to fetch products based on the price range
+        fetchProducts(document.getElementById('searchInput').value, 1, document.getElementById('sortSelection').value, '', { max: maxPrice, min: minPrice });
+        console.log('Fetching products with price between ' + minPrice + ' and ' + maxPrice);
+    }
+
     function categoryFilter(categoryId) {
         fetchProducts(document.getElementById('searchInput').value, 1, document.getElementById('sortSelection').value, categoryId);
     }
@@ -148,13 +189,13 @@
         const searchQuery = document.getElementById('searchInput').value;
         const selectedSort = document.getElementById('sortSelection').value;
         currentPage = 1;
-        await fetchProducts(searchQuery, currentPage, selectedSort, categoryId);
+        await fetchProducts(searchQuery, currentPage, selectedSort);
     }
 
-    async function fetchProducts(searchQuery = '', page = 1, sortBy = 'new', categoryId = '') {
+    async function fetchProducts(searchQuery = '', page = 1, sortBy = 'new', categoryId = '', priceRange = {}) {
         try {
             const response = await axios.get(`/user/api/products`, {
-                params: { search: searchQuery, page: page, sortBy: sortBy, category: categoryId },
+                params: { search: searchQuery, page: page, sortBy: sortBy, category: categoryId, ...priceRange },
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
 

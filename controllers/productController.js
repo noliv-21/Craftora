@@ -295,14 +295,28 @@ exports.productDetailsUser = async (req, res) => {
 
 // Product page
 exports.showProductsPage = async (req, res) => {
-    const session = req.session.user || {}; // Check if a user is logged in
+    const session = req.session.user || {};
     const title = "All Products";
     try {
+        const priceRange = await Products.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    minPrice: { $min: "$mrp" },
+                    maxPrice: { $max: "$mrp" }
+                }
+            }
+        ]);
+        const minPrice = Number(priceRange[0]?.minPrice) || 0;
+        const maxPrice = Number(priceRange[0]?.maxPrice) || 5000;
+
         const categories = await Categories.find({},{name:1});
         res.render('user/product folder/products', {
             title,
             session: session ? session.username || session.fullname : null,
-            categories
+            categories,
+            minPrice,
+            maxPrice
         });
     } catch(error) {
         console.error(error);
@@ -344,6 +358,10 @@ exports.fetchProducts = async (req, res) => {
 
         let search = req.query.search || '';
         let categoryId = req.query.category || '';
+
+        const minPrice = parseInt(req.query.min, 10) || 0;
+        const maxPrice = parseInt(req.query.max, 10) || Infinity;
+        console.log("max:",maxPrice," min:",minPrice)
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
         const skip = (page - 1) * limit;
@@ -479,7 +497,8 @@ exports.fetchProducts = async (req, res) => {
         } else {
             let query = {
                 name: { $regex: search, $options: 'i' },
-                isListed: true
+                isListed: true,
+                mrp: { $gte: minPrice, $lte: maxPrice}
             };
             
             if (categoryId) {
