@@ -294,14 +294,19 @@ exports.productDetailsUser = async (req, res) => {
 };
 
 // Product page
-exports.showProductsPage = (req, res) => {
+exports.showProductsPage = async (req, res) => {
     const session = req.session.user || {}; // Check if a user is logged in
     const title = "All Products";
-
-    res.render('user/product folder/products', {
-        title,
-        session: session ? session.username || session.fullname : null, // Use null if session or username is undefined
-    });
+    try {
+        const categories = await Categories.find({},{name:1});
+        res.render('user/product folder/products', {
+            title,
+            session: session ? session.username || session.fullname : null,
+            categories
+        });
+    } catch(error) {
+        console.error(error);
+    }
 };
 
 // Dynamic product update
@@ -338,6 +343,7 @@ exports.fetchProducts = async (req, res) => {
         }      
 
         let search = req.query.search || '';
+        let categoryId = req.query.category || '';
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
         const skip = (page - 1) * limit;
@@ -471,12 +477,21 @@ exports.fetchProducts = async (req, res) => {
             ]);
             totalProducts = products.length;         
         } else {
-            products = await Products.find({ name: { $regex: search, $options: 'i' }, isListed: true })
+            let query = {
+                name: { $regex: search, $options: 'i' },
+                isListed: true
+            };
+            
+            if (categoryId) {
+                query.category = categoryId;
+            }
+            
+            products = await Products.find(query)
                 .sort(sortCriteria)
                 .skip(skip)
                 .limit(limit)
                 .populate('category', 'name');
-            totalProducts = await Products.countDocuments({ name: { $regex: search, $options: 'i' }, isListed: true });
+            totalProducts = await Products.countDocuments(query);
             // totalProducts = products.length;
         }
         

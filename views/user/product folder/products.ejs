@@ -2,6 +2,35 @@
     body {
         font-family: 'Roboto', sans-serif;
     }
+
+    .category-filter-button {
+    background-color: #ffcc80; /* Light orange background */
+    border: none;
+    padding: 10px 15px;
+    margin: 5px 0;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.category-filter-button i {
+    margin-right: 8px;
+    color: #ff6f00; /* Darker orange for the icon */
+}
+
+.category-filter-button:hover {
+    background-color: #ffb74d; /* Slightly darker orange on hover */
+    transform: scale(1.02);
+}
+
+.category-filter-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.25); /* Orange shadow for focus */
+}
 </style>
 <!-- Header -->
 <%-include('../../partials/user/header')%>
@@ -17,27 +46,13 @@
                     Categories
                 </h3>
                 <ul class="space-y-1">
+                    <% categories.forEach((category) => { %>
                     <li>
-                        Halloween candles
+                        <button class="category-filter-button" onclick="categoryFilter('<%= category.id %>')">
+                            <i class="fas fa-filter"></i> <%= category.name %>
+                        </button>
                     </li>
-                    <li>
-                        Autumn candles
-                    </li>
-                    <li>
-                        Mushroom candles
-                    </li>
-                    <li>
-                        Fig tree candles
-                    </li>
-                    <li>
-                        Pine cone candles
-                    </li>
-                    <li>
-                        Ghost candles
-                    </li>
-                    <li>
-                        Designed candles
-                    </li>
+                    <% }) %>
                 </ul>
             </div>
             <div class="mb-4">
@@ -49,35 +64,7 @@
                     $50 - $399+
                 </div>
             </div>
-            <div class="mb-4">
-                <h3 class="font-bold mb-2">
-                    Colours
-                </h3>
-                <ul class="space-y-1">
-                    <li>
-                        Orange
-                    </li>
-                    <li>
-                        Green
-                    </li>
-                    <li>
-                        Blue
-                    </li>
-                    <li>
-                        Red
-                    </li>
-                    <li>
-                        White
-                    </li>
-                    <li>
-                        Pink
-                    </li>
-                    <li>
-                        Brown
-                    </li>
-                </ul>
-            </div>
-            <div>
+            <!-- <div>
                 <h3 class="font-bold mb-2">
                     Offers
                 </h3>
@@ -107,7 +94,7 @@
                         80% and above
                     </li>
                 </ul>
-            </div>
+            </div> -->
         </aside>
         <div class="flex flex-col w-5/6">
             <!-- Breadcrumb and Sort -->
@@ -142,12 +129,16 @@
     <%-include('../../partials/user/footer')%>
 
 <script>
+    function categoryFilter(categoryId) {
+        fetchProducts(document.getElementById('searchInput').value, 1, document.getElementById('sortSelection').value, categoryId);
+    }
+
     // Event listener for sorting
     document.getElementById('sortSelection').addEventListener('change', async (e) => {
         const searchQuery = document.getElementById('searchInput').value;
         const selectedSort = e.target.value;
         currentPage = 1;
-        await fetchProducts(searchQuery, currentPage, selectedSort);
+        await fetchProducts(searchQuery, currentPage, selectedSort, categoryId);
     });
 
     let currentPage = 1;
@@ -157,13 +148,13 @@
         const searchQuery = document.getElementById('searchInput').value;
         const selectedSort = document.getElementById('sortSelection').value;
         currentPage = 1;
-        await fetchProducts(searchQuery, currentPage, selectedSort);
+        await fetchProducts(searchQuery, currentPage, selectedSort, categoryId);
     }
 
-    async function fetchProducts(searchQuery = '', page = 1, sortBy = 'new') {
+    async function fetchProducts(searchQuery = '', page = 1, sortBy = 'new', categoryId = '') {
         try {
             const response = await axios.get(`/user/api/products`, {
-                params: { search: searchQuery, page: page, sortBy: sortBy },
+                params: { search: searchQuery, page: page, sortBy: sortBy, category: categoryId },
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
 
@@ -251,7 +242,7 @@
             prevButton.addEventListener('click', () => {
                 currentPage -= 1;
                 // fetchProducts(document.getElementById('searchInput').value, currentPage);
-                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
+                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value, categoryId);
             });
             paginationContainer.appendChild(prevButton);
         }
@@ -285,7 +276,7 @@
             nextButton.addEventListener('click', () => {
                 currentPage += 1;
                 // fetchProducts(document.getElementById('searchInput').value, currentPage);
-                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
+                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value, categoryId);
             });
             paginationContainer.appendChild(nextButton);
         }
