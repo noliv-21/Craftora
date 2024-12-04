@@ -13,7 +13,7 @@ const supportController = require('../controllers/supportController')
 const passport = require('passport');
 
 user.use('/',express.static('public'));
-
+// Authentication
 user.get('/login', userController.login);
 user.post('/login', userController.login_verify)
 user.get('/forgotPassword',userController.forgotPasswordPage)
@@ -26,20 +26,20 @@ user.post('/otp_resend',userController.resend_otp)
 
 user.get('/home', userController.home)
 user.get('/logout', userController.logout)
-
+// Products
 user.get('/products',productController.showProductsPage)
 user.get('/api/products', productController.fetchProducts);
 user.get('/product/:productId',productController.productDetailsUser)
-
+// Profile
 user.get('/profile',userController.userAuth,userController.dashboard)
 user.post('/dash/saveUserDetails',userController.saveUserDetails)
 user.post('/changePassword',userController.changePassword)
-
+// Cart
 user.get('/cart',userController.userAuth,cartController.getCart)
 user.post('/addToCart',cartController.addToCart)
 user.patch('/cart/update-quantity',cartController.updateQuantity)
 user.delete('/cart/removeProduct',cartController.removeProduct)
-
+// Orders
 user.get('/buyNow', userController.userAuth, orderController.buyNowCheckout)
 user.get('/checkout', userController.userAuth, orderController.checkout)
 user.post('/order/creation',orderController.orderCreation)
@@ -48,12 +48,12 @@ user.get('/order/details/:orderId',userController.userAuth,orderController.order
 user.get('/order/invoice/:orderId',userController.userAuth,orderController.downloadInvoice)
 user.patch('/order/cancel/:orderId',userController.userAuth,orderController.cancelOrder)
 user.post('/order/return/:orderId',userController.userAuth,orderController.returnOrder)
-
+// Wishlist
 user.get('/wishlist',userController.userAuth,wishlistController.getWishlistPage)
 user.delete('/wishlist/remove',wishlistController.removeProduct)
 user.post('/wishlist/add',wishlistController.addProduct)
 user.get('/wishlist/check',userController.userAuth,wishlistController.checkWishlist)
-
+// Coupons
 user.get('/dashboard/coupons', userController.userAuth, couponController.getUserCoupons);
 user.get('/coupons/available', userController.userAuth, couponController.getAvailableCoupons);
 user.post('/applyCoupon', userController.userAuth, couponController.applyCoupon);
@@ -61,15 +61,15 @@ user.delete('/removeCoupon', userController.userAuth, couponController.removeCou
 user.get('/coupons/history', userController.userAuth, couponController.couponHistory);
 user.post('/coupons/save', userController.userAuth, couponController.saveCouponUser);
 user.get('/product/:productId/coupons', userController.userAuth, couponController.getProductDetailsCoupons);
-
+// Razorpay
 user.post('/razorpay/order', userController.userAuth, paymentController.createRazorpayOrder)
 user.post('/razorpay/verify', userController.userAuth, paymentController.verifyPayment);
 // user.post('/razorpay/webhook', paymentController.handleWebhook);
-
+// Wallet
 user.get('/dashboard/wallet', userController.userAuth, walletController.walletPage);
 user.post('/wallet/add-money', userController.userAuth, walletController.addMoneyToWallet);
 user.get('/wallet/balance', userController.userAuth, walletController.getWalletBalance);
-
+// Support
 user.get('/support', userController.userAuth, supportController.supportPage);
 user.post('/submit-support', userController.userAuth, supportController.submitSupport);
 user.post('/support/continueTicket/:ticketId', userController.userAuth, supportController.addMessage);

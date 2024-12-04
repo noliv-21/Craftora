@@ -380,8 +380,7 @@ exports.saveUserDetails = async (req,res)=>{
                 gender:userDet.gender,
                 phone:userDet.phone
             })
-            
-            res.redirect(`/user/profile`)
+            res.status(200).json('Successfully updated');
         }else{
             req.session.user.errorMess = 'Username already exists'
             res.redirect(`/user/profile`)
