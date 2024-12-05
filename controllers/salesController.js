@@ -547,7 +547,7 @@ const getAnalyticsData = async (req,res)=>{
 
             // Create map of existing data
             analytics.forEach(item => {
-                const dateStr = `${item._id.year}-${String(item._id.month).padStart(2, '0')}-${String(item._id.day).padStart(2, '0')}`;
+                const dateStr = `${String(item._id.day).padStart(2, '0')}-${String(item._id.month).padStart(2, '0')}-${item._id.year}`;
                 dateMap.set(dateStr, {
                     orders: item.orders,
                     revenue: item.revenue
@@ -556,7 +556,7 @@ const getAnalyticsData = async (req,res)=>{
 
             // Fill in all dates including those with no orders
             for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                const dateStr = d.toISOString().split('T')[0];
+                const dateStr = `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
                 const data = dateMap.get(dateStr) || { orders: 0, revenue: 0 };
                 
                 labels.push(dateStr);
@@ -569,7 +569,7 @@ const getAnalyticsData = async (req,res)=>{
                 let label;
                 if (customStartDate && customEndDate) {
                     // Format as YYYY-MM-DD for custom range
-                    label = `${item._id.year}-${String(item._id.month).padStart(2, '0')}-${String(item._id.day).padStart(2, '0')}`;
+                    label = `${String(item._id.day).padStart(2, '0')}-${String(item._id.month).padStart(2, '0')}-${item._id.year}`;
                 } else {
                     switch (period) {
                         case 'weekly':
