@@ -445,57 +445,92 @@ const downloadSalesReport = async (req, res) => {
 
 const getAnalyticsData = async (req,res)=>{
     const period = req.params.period;
+    const { startDate: customStartDate, endDate: customEndDate } = req.query;
     try {
         let dateFormat, groupBy;
         const now = new Date();
         let startDate;
-        switch (period) {
-            case 'weekly':
-                // Last 7 weeks
-                dateFormat = '%Y-W%V'; // Year-Week format
-                groupBy = { $week: '$createdAt' };
-                startDate = new Date(now.setDate(now.getDate() - 49)); // 7 weeks ago
-                break;
-            case 'monthly':
-                // Last 6 months
-                dateFormat = '%Y-%m'; // Year-Month format
-                groupBy = { $month: '$createdAt' };
-                startDate = new Date(now.setMonth(now.getMonth() - 6));
-                break;
-            case 'yearly':
-                // Last 12 months
-                dateFormat = '%Y'; // Year format
-                groupBy = { $year: '$createdAt' };
-                startDate = new Date(now.setFullYear(now.getFullYear() - 1));
-                break;
-            default:
-                return res.status(400).json({ error: 'Invalid period' });
+
+        if (customStartDate && customEndDate) {
+            // Custom range
+            startDate = new Date(customStartDate);
+            groupBy = { 
+                year: { $year: '$createdAt' },
+                month: { $month: '$createdAt' },
+                day: { $dayOfMonth: '$createdAt' }
+            };
+        } else {
+            switch (period) {
+                case 'weekly':
+                    // Last 7 weeks
+                    dateFormat = '%Y-W%V'; // Year-Week format
+                    groupBy = { $week: '$createdAt' };
+                    startDate = new Date(now.setDate(now.getDate() - 49)); // 7 weeks ago
+                    break;
+                case 'monthly':
+                    // Last 6 months
+                    dateFormat = '%Y-%m'; // Year-Month format
+                    groupBy = { $month: '$createdAt' };
+                    startDate = new Date(now.setMonth(now.getMonth() - 6));
+                    break;
+                case 'yearly':
+                    // Shows all years
+                    dateFormat = '%Y'; // Year format
+                    groupBy = { $year: '$createdAt' };
+                    startDate = new Date(2000, 0, 1);
+                    break;
+                default:
+                    return res.status(400).json({ error: 'Invalid period' });
+            }
+        }
+
+        const matchStage = {
+            status: { $ne: 'Cancelled' }
+        };
+
+        // Add date filters
+        if (customStartDate && customEndDate) {
+            matchStage.createdAt = { 
+                $gte: new Date(customStartDate), 
+                $lte: new Date(customEndDate)
+            };
+        } else {
+            matchStage.createdAt = { $gte: startDate };
         }
 
         const analytics = await Orders.aggregate([
             {
-                $match: {
-                    createdAt: { $gte: startDate },
-                    status: { $ne: 'Cancelled' } // Exclude cancelled orders
-                }
+                $match: matchStage
             },
             {
                 $group: {
-                    _id: {
-                        date: groupBy,
-                        year: { $year: '$createdAt' },
-                        month: { $month: '$createdAt' }
-                    },
+                    _id: customStartDate && customEndDate
+                        ? groupBy
+                        : period === 'yearly'
+                            ? { year: { $year: '$createdAt' } }
+                            : {
+                                date: groupBy,
+                                year: { $year: '$createdAt' },
+                                month: { $month: '$createdAt' }
+                            },
                     orders: { $sum: 1 },
                     revenue: { $sum: '$totalAmount' }
                 }
             },
             {
-                $sort: { 
-                    '_id.year': 1,
-                    '_id.month': 1,
-                    '_id.date': 1
-                }
+                $sort: customStartDate && customEndDate
+                    ? { 
+                        '_id.year': 1,
+                        '_id.month': 1,
+                        '_id.day': 1
+                    }
+                    : period === 'yearly'
+                        ? { '_id.year': 1 }
+                        : {
+                            '_id.year': 1,
+                            '_id.month': 1,
+                            '_id.date': 1
+                        }
             }
         ]);
 
@@ -504,25 +539,56 @@ const getAnalyticsData = async (req,res)=>{
         let orders = [];
         let revenue = [];
 
-        // Format labels based on period
-        analytics.forEach(item => {
-            let label;
-            switch (period) {
-                case 'weekly':
-                    label = `Week ${item._id.date}`;
-                    break;
-                case 'monthly':
-                    label = new Date(0, item._id.month - 1).toLocaleString('default', { month: 'short' });
-                    break;
-                case 'yearly':
-                    label = item._id.year.toString();
-                    break;
+        if (customStartDate && customEndDate) {
+            // Generate all dates in range
+            const start = new Date(customStartDate);
+            const end = new Date(customEndDate);
+            const dateMap = new Map();
+
+            // Create map of existing data
+            analytics.forEach(item => {
+                const dateStr = `${item._id.year}-${String(item._id.month).padStart(2, '0')}-${String(item._id.day).padStart(2, '0')}`;
+                dateMap.set(dateStr, {
+                    orders: item.orders,
+                    revenue: item.revenue
+                });
+            });
+
+            // Fill in all dates including those with no orders
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                const dateStr = d.toISOString().split('T')[0];
+                const data = dateMap.get(dateStr) || { orders: 0, revenue: 0 };
+                
+                labels.push(dateStr);
+                orders.push(data.orders);
+                revenue.push(data.revenue);
             }
-            
-            labels.push(label);
-            orders.push(item.orders);
-            revenue.push(item.revenue);
-        });
+        } else {
+            // Format labels based on period
+            analytics.forEach(item => {
+                let label;
+                if (customStartDate && customEndDate) {
+                    // Format as YYYY-MM-DD for custom range
+                    label = `${item._id.year}-${String(item._id.month).padStart(2, '0')}-${String(item._id.day).padStart(2, '0')}`;
+                } else {
+                    switch (period) {
+                        case 'weekly':
+                            label = `Week ${item._id.date}`;
+                            break;
+                        case 'monthly':
+                            label = new Date(0, item._id.month - 1).toLocaleString('default', { month: 'short' });
+                            break;
+                        case 'yearly':
+                            label = item._id.year.toString();
+                            break;
+                    }
+                }
+                
+                labels.push(label);
+                orders.push(item.orders);
+                revenue.push(item.revenue);
+            });
+        }
 
         res.json({
             labels,

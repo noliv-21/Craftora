@@ -152,7 +152,18 @@
                                 <option value="weekly">Weekly</option>
                                 <option value="monthly">Monthly</option>
                                 <option value="yearly">Yearly</option>
+                                <option value="custom">Custom Range</option>
                             </select>
+
+                            <!-- Custom range inputs for chart -->
+                            <div id="chartDateRange" class="flex items-center gap-2" style="display: none;">
+                                <input type="date" id="chartStartDate" class="rounded-lg border-gray-300">
+                                <span class="text-gray-500">to</span>
+                                <input type="date" id="chartEndDate" class="rounded-lg border-gray-300">
+                                <button id="applyChartRange" class="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all">
+                                    Apply
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="h-[400px]">
@@ -705,11 +716,24 @@
                 }
             }
         });
+
+        // Chart period and custom range handling
+        const chartPeriod = document.getElementById('chartPeriod');
+        const chartDateRange = document.getElementById('chartDateRange');
+        const chartStartDate = document.getElementById('chartStartDate');
+        const chartEndDate = document.getElementById('chartEndDate');
+        const applyChartRange = document.getElementById('applyChartRange');
         
         // Function to update chart data
-        async function updateChartData(period) {
+        async function updateChartData(period, startDate = null, endDate = null) {
             try {
-                const response = await axios.get(`/admin/analytics/${period}`);
+                let url = `/admin/analytics/${period}`;
+                if (startDate && endDate) {
+                    url += `?startDate=${startDate}&endDate=${endDate}`;
+                }
+
+                const response = await axios.get(url);
+
                 const data = response.data;
                 salesChart.data.labels = data.labels;
                 salesChart.data.datasets[0].data = data.orders;
@@ -717,14 +741,51 @@
                 salesChart.update();
             } catch (error) {
                 console.error('Error fetching chart data:', error);
+                showToast('Error updating chart data', 'error');
             }
         }
         
         // Add event listener for period change
-        document.getElementById('chartPeriod').addEventListener('change', (e) => {
-            updateChartData(e.target.value);
+        chartPeriod.addEventListener('change', function() {
+            const period = this.value;
+            if (period === 'custom') {
+                chartDateRange.style.display = 'flex';
+                // Set default date range (last 30 days)
+                const today = new Date();
+                const thirtyDaysAgo = new Date(today);
+                thirtyDaysAgo.setDate(today.getDate() - 30);
+
+                chartEndDate.value = formatDate(today);
+                chartStartDate.value = formatDate(thirtyDaysAgo);
+            } else {
+                chartDateRange.style.display = 'none';
+                updateChartData(period);
+            }
         });
-        
+
+        // Handle custom range apply
+        applyChartRange.addEventListener('click', function() {
+            const startDate = chartStartDate.value;
+            const endDate = chartEndDate.value;
+
+            if (!startDate || !endDate) {
+                showToast('Please select both start and end dates', 'error');
+                return;
+            }
+
+            if (new Date(startDate) > new Date(endDate)) {
+                showToast('Start date cannot be after end date', 'error');
+                return;
+            }
+
+            updateChartData('custom', startDate, endDate);
+        });
+
+        // Helper function to format date
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
         // Initial chart data load
         updateChartData('weekly');
     });
