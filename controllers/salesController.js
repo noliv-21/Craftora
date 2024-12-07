@@ -207,7 +207,7 @@ const generateSalesReport = async (req, res) => {
 
 async function getFilteredOrders(type, date, startDate, endDate) {
     let dateFilter = {};
-    
+
     switch(type) {
         case 'today':
             const today = new Date();
@@ -260,16 +260,10 @@ async function getFilteredOrders(type, date, startDate, endDate) {
 
 const downloadSalesReport = async (req, res) => {
     try {
-        // const mockReq = { query: req.query };
-        // const reportData = await generateSalesReport(mockReq, null, true);
-        // const { format } = req.query;
-
         const { type, date, startDate, endDate, format } = req.query;
-        
-        // Get the filtered orders first
+
         const orders = await getFilteredOrders(type, date, startDate, endDate);
-        
-        // Transform orders into report data
+
         const reportData = orders.map(order => ({
             orderId: order.orderId || order._id,
             date: order.createdAt.toLocaleDateString(),
@@ -282,104 +276,193 @@ const downloadSalesReport = async (req, res) => {
 
         if (format === 'pdf') {
             const doc = new PDFDocument({
-                margin: 50,
+                margin: 30,
                 size: 'A4'
             });
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', `attachment; filename=sales-report-${Date.now()}.pdf`);
             doc.pipe(res);
 
-            // Add header with logo or company name
-            doc.fontSize(24)
+            // Add header with modern styling
+            doc.rect(0, 0, doc.page.width, 120)
+               .fill('#2196f3'); // Changed to a lighter blue
+
+            // Add a subtle accent line
+            doc.rect(0, 120, doc.page.width, 3)
+               .fill('#1976d2');
+
+            // Add header text with shadow effect
+            doc.fontSize(32)
                .font('Helvetica-Bold')
-               .text('Sales Report', { align: 'center' });
-            doc.moveDown();
+               .fillColor('#ffffff')
+               .text('Sales Report', 50, 45, { align: 'center' });
 
             // Add date range info
-            doc.fontSize(12)
-               .font('Helvetica')
-               .text(`Generated on: ${new Date().toLocaleDateString()}`, { align: 'right' });
-            doc.moveDown();
+            let dateRangeText = 'All Time';
+            if (date) {
+                dateRangeText = new Date(date).toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            } else if (startDate && endDate) {
+                dateRangeText = `${new Date(startDate).toLocaleDateString('en-US', { 
+                    month: 'long', 
+                    day: 'numeric' 
+                })} - ${new Date(endDate).toLocaleDateString('en-US', { 
+                    month: 'long', 
+                    day: 'numeric',
+                    year: 'numeric'
+                })}`;
+            }
 
-            // Define table layout
-            const tableTop = 150;
+            doc.fontSize(14)
+               .font('Helvetica')
+               .text(`Period: ${dateRangeText}`, 50, 85, { align: 'center' });
+
+            // Add metadata section with better visibility
+            doc.fontSize(10)
+               .fillColor('#ffffff')  // Changed from #e8eaf6 to white for better visibility
+               .text(`Generated on: ${new Date().toLocaleString()}`, 50, 140, { align: 'right' })
+               .text(`Total Orders: ${reportData.length}`, 50, 155, { align: 'right' });
+
+            // Define table layout with modern styling and adjusted spacing
+            const tableTop = 190;
+            const pageWidth = doc.page.width;
+            const rightMargin = 50;  // Increased right margin
             const columnSpacing = {
-                orderId: 50,
-                date: 150,
-                customer: 250,
-                amount: 350,
-                discount: 450,
-                final: 550
+                srNo: 35,      // Serial number
+                orderId: 85,   // Order ID position
+                date: 230,     // Date position
+                customer: 310,  // Customer position
+                amount: 380,   // Adjusted Amount position
+                discount: 445, // Adjusted Discount position
+                final: 500     // Adjusted Final amount position to ensure right margin
             };
 
-            // Add table headers with background
+            // Add table headers with modern styling
             doc.fontSize(10)
                .font('Helvetica-Bold');
             
-            // Draw header background
-            doc.rect(40, tableTop - 5, 520, 20)
+            // Draw header background with rounded corners
+            doc.roundedRect(30, tableTop - 5, pageWidth - 80, 25, 3)  // Increased width to match table
                .fill('#f3f4f6');
             
-            // Draw headers
-            doc.fillColor('#000000')
-               .text('Order ID', columnSpacing.orderId, tableTop)
-               .text('Date', columnSpacing.date, tableTop)
-               .text('Customer', columnSpacing.customer, tableTop)
-               .text('Amount', columnSpacing.amount, tableTop)
-               .text('Discount', columnSpacing.discount, tableTop)
-               .text('Final', columnSpacing.final, tableTop);
+            // Draw headers with modern styling
+            doc.fillColor('#1976d2')
+               .text('Sr.', columnSpacing.srNo, tableTop, { width: 30, align: 'center' })
+               .text('Order ID', columnSpacing.orderId, tableTop, { width: 130 })
+               .text('Date', columnSpacing.date, tableTop, { width: 70 })
+               .text('Customer', columnSpacing.customer, tableTop, { width: 60 })
+               .text('Amount', columnSpacing.amount, tableTop, { width: 55, align: 'right' })
+               .text('Discount', columnSpacing.discount, tableTop, { width: 55, align: 'right' })
+               .text('Final', columnSpacing.final, tableTop, { width: 55, align: 'right' });
 
-            // Draw rows
-            let position = tableTop + 25;
+            // Draw a subtle line under headers
+            doc.moveTo(30, tableTop + 20)
+               .lineTo(pageWidth - 50, tableTop + 20)
+               .strokeColor('#e0e0e0')
+               .stroke();
+
+            let position = tableTop + 30;
             doc.font('Helvetica');
 
             reportData.forEach((sale, index) => {
-                // Add new page if needed
-                if (position > 700) {
+                if (position > 750) {  // Adjusted page break threshold
                     doc.addPage();
-                    position = 50;
+                    // Add header to new page with gradient
+                    doc.rect(0, 0, doc.page.width, 50)
+                       .fill('#1a237e');
+                    doc.rect(0, 50, doc.page.width, 2)
+                       .fill('#4527a0');
+                    
+                    doc.fontSize(16)
+                       .font('Helvetica-Bold')
+                       .fillColor('#ffffff')
+                       .text('Sales Report (Continued)', 50, 20, { align: 'center' });
+                    
+                    // Reset position and redraw column headers
+                    position = 70;
+                    doc.fontSize(10)
+                       .font('Helvetica-Bold')
+                       .fillColor('#1a237e');
+                    
+                    // Redraw headers on new page with matching background width
+                    doc.roundedRect(30, position - 5, pageWidth - 80, 25, 3)
+                       .fill('#f3f4f6');
+                    
+                    doc.fillColor('#1a237e')
+                       .text('Sr.', columnSpacing.srNo, position, { width: 30, align: 'center' })
+                       .text('Order ID', columnSpacing.orderId, position, { width: 130 })
+                       .text('Date', columnSpacing.date, position, { width: 70 })
+                       .text('Customer', columnSpacing.customer, position, { width: 60 })
+                       .text('Amount', columnSpacing.amount, position, { width: 55, align: 'right' })
+                       .text('Discount', columnSpacing.discount, position, { width: 55, align: 'right' })
+                       .text('Final', columnSpacing.final, position, { width: 55, align: 'right' });
+                    
+                    position += 30;
                 }
 
-                // Alternate row background for better readability
+                // Alternate row background with rounded corners
                 if (index % 2 === 0) {
-                    doc.rect(40, position - 5, 520, 20)
+                    doc.roundedRect(30, position - 5, pageWidth - (rightMargin + 30), 22, 2)
                        .fill('#f8f9fa');
                 }
 
-                doc.fillColor('#000000')
-                   .text(sale.orderId.toString().slice(0, 8), columnSpacing.orderId, position)
+                doc.fillColor('#333333')
+                   .fontSize(9)  // Slightly smaller font for data
+                   .text(index + 1, columnSpacing.srNo, position)
+                   .text(sale.orderId.toString(), columnSpacing.orderId, position, { width: 130 })
                    .text(sale.date, columnSpacing.date, position)
-                   .text(sale.customerName.slice(0, 15), columnSpacing.customer, position)
-                   .text(`₹${sale.amount.toFixed(2)}`, columnSpacing.amount, position)
-                   .text(`₹${sale.discount.toFixed(2)}`, columnSpacing.discount, position)
-                   .text(`₹${sale.finalAmount.toFixed(2)}`, columnSpacing.final, position);
+                   .text(sale.customerName.slice(0, 20), columnSpacing.customer, position)
+                   .text(`₹${sale.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, columnSpacing.amount, position, { width: 55, align: 'right' })
+                   .text(`₹${sale.discount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, columnSpacing.discount, position, { width: 55, align: 'right' })
+                   .text(`₹${sale.finalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, columnSpacing.final, position, { width: 55, align: 'right' });
 
-                position += 20;
+                position += 22;
             });
 
-            // Add summary section at the bottom
-            doc.moveDown(2);
+            // Add summary section with proper spacing
+            const summaryTop = Math.min(position + 30, 750);
             
-            // Draw summary box
-            const summaryTop = Math.min(position + 20, 700);
-            doc.rect(40, summaryTop, 520, 80)
-               .fill('#f3f4f6');
+            // Draw summary container with gradient and rounded corners
+            doc.roundedRect(30, summaryTop, pageWidth - (rightMargin + 30), 100, 5)
+               .fill('#f8f9fa');
             
-            // Calculate totals
+            // Add subtle border
+            doc.roundedRect(30, summaryTop, pageWidth - (rightMargin + 30), 100, 5)
+               .strokeColor('#e0e0e0')
+               .stroke();
+
             const totalAmount = reportData.reduce((sum, sale) => sum + sale.amount, 0);
             const totalDiscount = reportData.reduce((sum, sale) => sum + sale.discount, 0);
             const totalFinal = reportData.reduce((sum, sale) => sum + sale.finalAmount, 0);
 
-            // Add summary text
+            // Add summary content with modern styling
             doc.font('Helvetica-Bold')
-               .fontSize(12)
-               .fillColor('#000000')
-               .text('Summary', 60, summaryTop + 10)
-               .fontSize(10)
-               .text(`Total Orders: ${reportData.length}`, 60, summaryTop + 30)
-               .text(`Total Amount: ₹${totalAmount.toFixed(2)}`, 60, summaryTop + 45)
-               .text(`Total Discount: ₹${totalDiscount.toFixed(2)}`, 300, summaryTop + 45)
-               .text(`Final Revenue: ₹${totalFinal.toFixed(2)}`, 60, summaryTop + 60);
+               .fontSize(16)
+               .fillColor('#1976d2')
+               .text('Summary', 50, summaryTop + 15);
+
+            // Add summary details with grid layout and improved typography
+            const summaryLeftCol = 50;
+            const summaryValueCol = 150;
+            const summaryRightCol = 280;
+            const summaryRightValueCol = 380;
+
+            doc.fontSize(11)
+               .font('Helvetica-Bold')
+               .fillColor('#333333')
+               .text('Total Orders:', summaryLeftCol, summaryTop + 45)
+               .text(`${reportData.length}`, summaryValueCol, summaryTop + 45)
+               .text('Total Amount:', summaryRightCol, summaryTop + 45)
+               .text(`₹${totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, summaryRightValueCol, summaryTop + 45);
+
+            doc.text('Total Discount:', summaryLeftCol, summaryTop + 65)
+               .text(`₹${totalDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, summaryValueCol, summaryTop + 65)
+               .text('Final Revenue:', summaryRightCol, summaryTop + 65)
+               .fillColor('#1976d2')
+               .text(`₹${totalFinal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, summaryRightValueCol, summaryTop + 65);
 
             doc.end();
 
@@ -387,28 +470,68 @@ const downloadSalesReport = async (req, res) => {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Sales Report');
 
-            // Add headers
+            let dateRangeText = 'All Time';
+            if (date) {
+                dateRangeText = new Date(date).toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            } else if (startDate && endDate) {
+                dateRangeText = `${new Date(startDate).toLocaleDateString('en-US', { 
+                    month: 'long', 
+                    day: 'numeric' 
+                })} - ${new Date(endDate).toLocaleDateString('en-US', { 
+                    month: 'long', 
+                    day: 'numeric',
+                    year: 'numeric'
+                })}`;
+            }
+
             worksheet.columns = [
-                { header: 'Order ID', key: 'orderId', width: 15 },
-                { header: 'Date', key: 'date', width: 12 },
-                { header: 'Customer Name', key: 'customerName', width: 20 },
-                { header: 'Products', key: 'products', width: 30 },
-                { header: 'Amount', key: 'amount', width: 12 },
-                { header: 'Discount', key: 'discount', width: 12 },
-                { header: 'Final Amount', key: 'finalAmount', width: 12 }
+                { header: 'Sr. No.', key: 'srNo', width: 8 },
+                { header: 'Order ID', key: 'orderId', width: 30 }, // Increased width
+                { header: 'Date', key: 'date', width: 15 },
+                { header: 'Customer Name', key: 'customerName', width: 30 },
+                { header: 'Products', key: 'products', width: 40 },
+                { header: 'Amount', key: 'amount', width: 15 },
+                { header: 'Discount', key: 'discount', width: 15 },
+                { header: 'Final Amount', key: 'finalAmount', width: 15 }
             ];
 
+            worksheet.spliceRows(1, 0, ['Sales Report']);
+            worksheet.spliceRows(2, 0, [`Period: ${dateRangeText}`]);
+            worksheet.spliceRows(3, 0, [`Generated on: ${new Date().toLocaleString()}`]);
+            worksheet.spliceRows(4, 0, []); // Empty row for spacing
+
+            // Enhanced Excel styling
+            worksheet.getRow(1).font = { bold: true, size: 16, color: { argb: 'FF1A237E' } };
+            worksheet.getRow(1).height = 30;
+            worksheet.getRow(2).font = { size: 12, color: { argb: 'FF333333' } };
+            worksheet.getRow(3).font = { size: 10, color: { argb: 'FF666666' } };
+
             // Style the header row
-            worksheet.getRow(1).font = { bold: true };
-            worksheet.getRow(1).fill = {
+            const headerRow = worksheet.getRow(5);
+            headerRow.font = { bold: true, color: { argb: 'FFFFFF' }, size: 11 };
+            headerRow.height = 25;
+            headerRow.fill = {
                 type: 'pattern',
                 pattern: 'solid',
-                fgColor: { argb: 'FFE0E0E0' }
+                fgColor: { argb: '2196F3' }  // Updated to lighter blue
             };
 
-            // Add data
-            reportData.forEach(sale => {
-                worksheet.addRow({
+            // Improve cell borders and alignment
+            headerRow.eachCell((cell) => {
+                cell.border = {
+                    top: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+                    bottom: { style: 'thin', color: { argb: 'FFE0E0E0' } }
+                };
+                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            });
+
+            reportData.forEach((sale, idx) => {
+                const row = worksheet.addRow({
+                    srNo: idx + 1,
                     orderId: sale.orderId,
                     date: sale.date,
                     customerName: sale.customerName,
@@ -417,25 +540,45 @@ const downloadSalesReport = async (req, res) => {
                     discount: sale.discount,
                     finalAmount: sale.finalAmount
                 });
+
+                if (idx % 2 === 0) {
+                    row.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFF8F9FA' }
+                    };
+                }
+
+                // Center align the serial number
+                row.getCell('srNo').alignment = { horizontal: 'center' };
             });
 
-            // Format number columns
             ['amount', 'discount', 'finalAmount'].forEach(col => {
                 worksheet.getColumn(col).numFmt = '₹#,##0.00';
+                worksheet.getColumn(col).alignment = { horizontal: 'right' };
             });
 
-            // Add summary at the bottom
             worksheet.addRow([]); // Empty row
-            worksheet.addRow(['Total Sales:', reportData.length]);
-            worksheet.addRow(['Total Revenue:', reportData.reduce((sum, sale) => sum + sale.finalAmount, 0)]);
+            const summaryStartRow = worksheet.rowCount + 1;
+
+            worksheet.addRow(['Summary']);
+            worksheet.getRow(summaryStartRow).font = { bold: true, size: 12 };
+
+            worksheet.addRow(['Total Orders:', reportData.length]);
+            worksheet.addRow(['Total Amount:', `=SUM(E6:E${reportData.length + 5})`]);
+            worksheet.addRow(['Total Discount:', `=SUM(F6:F${reportData.length + 5})`]);
+            worksheet.addRow(['Final Revenue:', `=SUM(G6:G${reportData.length + 5})`]);
+
+            for (let i = summaryStartRow + 1; i <= summaryStartRow + 4; i++) {
+                const row = worksheet.getRow(i);
+                row.getCell(2).numFmt = '₹#,##0.00';
+            }
 
             res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             res.setHeader('Content-Disposition', `attachment; filename=sales-report-${Date.now()}.xlsx`);
 
             await workbook.xlsx.write(res);
             res.end();
-        } else {
-            throw new Error('Invalid format specified');
         }
     } catch (error) {
         console.error('Download Report Error:', error);

@@ -80,6 +80,11 @@
     .report-section {
         animation: slideIn 0.5s ease-out forwards;
     }
+
+    canvas#topCategoriesChart {
+        min-height: 300px;
+        width: 100%;
+    }
 </style>
 
 <div class="flex min-h-screen min-w-screen bg-gray-100">
@@ -294,6 +299,10 @@
                             </li>
                         <% }); %>
                     </ul>
+                    <!-- Top products Pie Charts Section -->
+                    <div class="mt-6">
+                        <canvas id="topProductsChart"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -325,6 +334,10 @@
                             </li>
                         <% }); %>
                     </ul>
+                    <!-- Top categories Pie Charts Section -->
+                    <div class="mt-6">
+                        <canvas id="topCategoriesChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -595,6 +608,7 @@
             if (!paginationContainer) {
                 const container = document.createElement('div');
                 container.id = 'pagination-container';
+                container.classList.add('px-3')
                 tbody.parentElement.parentElement.appendChild(container);
             }
             document.querySelector('#pagination-container').innerHTML = createPaginationControls(pagination);
@@ -788,5 +802,98 @@
 
         // Initial chart data load
         updateChartData('weekly');
+        
+    });
+
+    // Create the top categories pie chart
+    const topCategoriesCtx = document.getElementById('topCategoriesChart').getContext('2d');
+    const topCategoriesChart = new Chart(topCategoriesCtx, {
+        type: 'pie',
+        data: {
+            labels: JSON.parse('<%- JSON.stringify(topCategories.map(cat => cat.name)) %>'),
+            datasets: [{
+                data: JSON.parse('<%- JSON.stringify(topCategories.map(cat => cat.totalSold)) %>'),
+                backgroundColor: [
+                    '#4F46E5', // Indigo
+                    '#7C3AED', // Purple
+                    '#EC4899', // Pink
+                    '#F59E0B', // Amber
+                    '#10B981', // Emerald
+                    '#3B82F6', // Blue
+                    '#6366F1', // Indigo-600
+                    '#8B5CF6', // Purple-600
+                    '#EF4444', // Red-500
+                    '#14B8A6'  // Teal-50
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Sales Distribution by Category',
+                    padding: {
+                        top: 10,
+                        bottom: 30
+                    }
+                }
+            }
+        }
+    });
+
+    // Create the top products pie chart
+    const topProductsCtx = document.getElementById('topProductsChart').getContext('2d');
+    const topProductsChart = new Chart(topProductsCtx, {
+        type: 'pie',
+        data: {
+            labels: JSON.parse('<%- JSON.stringify(topProducts.map(prod => prod.name)) %>'),
+            datasets: [{
+                data: JSON.parse('<%- JSON.stringify(topProducts.map(prod => prod.totalSold)) %>'),
+                backgroundColor: [
+                    '#4F46E5', // Indigo
+                    '#7C3AED', // Purple
+                    '#EC4899', // Pink
+                    '#F59E0B', // Amber
+                    '#10B981', // Emerald
+                    '#3B82F6', // Blue
+                    '#6366F1', // Indigo-600
+                    '#8B5CF6', // Purple-600
+                    '#EF4444', // Red-500
+                    '#14B8A6'  // Teal-50
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Sales Distribution by Product',
+                    padding: {
+                        top: 10,
+                        bottom: 30
+                    }
+                }
+            }
+        }
     });
 </script>
