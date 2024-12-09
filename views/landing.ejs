@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Craftora</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+
+        .landing-container {
+            display: flex;
+            height: 100vh;
+            transition: all 0.5s ease;
+        }
+
+        .section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .section:hover {
+            flex: 1.5;
+        }
+
+        .user-section {
+            background: linear-gradient(135deg, #f97316, #fbbf24);
+        }
+
+        .admin-section {
+            background: linear-gradient(135deg, #3b82f6, #ffffff);
+        }
+
+        .content {
+            text-align: center;
+            color: white;
+            z-index: 1;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .section:hover .content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .landing-container p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            border: 2px solid white;
+            border-radius: 50px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: white;
+        }
+
+        .user-section .btn:hover {
+            color: #f97316;
+        }
+
+        .admin-section .btn:hover {
+            color: #3b82f6;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .section:hover::after {
+            opacity: 1;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @media (max-width: 768px) {
+            .landing-container {
+                flex-direction: column;
+            }
+            .section:hover {
+                flex: 2;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="landing-container">
+        <div class="section user-section">
+            <div class="content">
+                <div class="icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h2>User Side</h2>
+                <p>Access your account and make a purchase!</p>
+                <a href="/user/login" class="btn">Go to User login</a>
+            </div>
+        </div>
+        <div class="section admin-section">
+            <div class="content">
+                <div class="icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h2>Admin Side</h2>
+                <p>Manage your products and users!</p>
+                <a href="/admin/login" class="btn">Go to Admin login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.section');
+            
+            sections.forEach(section => {
+                section.addEventListener('mousemove', (e) => {
+                    const rect = section.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    section.style.background = section.classList.contains('user-section') 
+                        ? `linear-gradient(${x/10}deg, #f97316, #fbbf24)`
+                        : `linear-gradient(${x/10}deg, #3b82f6, #ffffff)`;
+                });
+
+                section.addEventListener('mouseleave', () => {
+                    section.style.background = section.classList.contains('user-section')
+                        ? 'linear-gradient(135deg, #f97316, #fbbf24)'
+                        : 'linear-gradient(135deg, #3b82f6, #ffffff)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

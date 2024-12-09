@@ -41,6 +41,11 @@ app.use(passport.session());
 
 app.use(nocache());
 
+// Root route for landing page
+app.get('/', (req, res) => {
+    res.render('landing', { title: 'Welcome to Craftora' });
+});
+
 app.use('/admin', adminAuth, adminRoute)
 app.use('/user', userRoute);
 app.use('/', authRoute)
