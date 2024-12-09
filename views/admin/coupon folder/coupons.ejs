@@ -380,11 +380,7 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Function to show image preview for existing image -->
                 <script>
-                    // Global variables
-                    let cropper = null;
 
                     // Toast function
                     function showToast(message, type = 'success') {
@@ -426,31 +422,34 @@
                         const availableDiv = document.getElementById('codeAvailable');
                         const unavailableDiv = document.getElementById('codeUnavailable');
 
-                        // Hide all status messages first
-                        availableDiv.classList.add('hidden');
-                        unavailableDiv.classList.add('hidden');
+                        
+                        if(code.length > 5){
+                            // Hide all status messages first
+                            availableDiv.classList.add('hidden');
+                            unavailableDiv.classList.add('hidden');
+    
+                            // Show checking message
+                            availabilityDiv.classList.remove('hidden');
+                            checkingDiv.classList.remove('hidden');
 
-                        // Show checking message
-                        availabilityDiv.classList.remove('hidden');
-                        checkingDiv.classList.remove('hidden');
-
-                        try {
-                            const response = await axios.get(`/admin/coupons/check-code/${code}`);
-                            
-                            // Hide checking message
-                            checkingDiv.classList.add('hidden');
-
-                            if (!response.data.exists) {
-                                availableDiv.classList.remove('hidden');
-                                unavailableDiv.classList.add('hidden');
-                            } else {
-                                availableDiv.classList.add('hidden');
-                                unavailableDiv.classList.remove('hidden');
+                            try {
+                                const response = await axios.get(`/admin/coupons/check-code/${code}`);
+                                
+                                // Hide checking message
+                                checkingDiv.classList.add('hidden');
+    
+                                if (!response.data.exists) {
+                                    availableDiv.classList.remove('hidden');
+                                    unavailableDiv.classList.add('hidden');
+                                } else {
+                                    availableDiv.classList.add('hidden');
+                                    unavailableDiv.classList.remove('hidden');
+                                }
+                            } catch (error) {
+                                console.error('Error checking coupon code:', error);
+                                checkingDiv.classList.add('hidden');
+                                showToast('Error checking coupon availability', 'error');
                             }
-                        } catch (error) {
-                            console.error('Error checking coupon code:', error);
-                            checkingDiv.classList.add('hidden');
-                            showToast('Error checking coupon availability', 'error');
                         }
                     }
 
@@ -510,6 +509,12 @@
                         const discountType = document.getElementById('discountType').value.toUpperCase();
                         
                         if (!errorElement) return false;
+
+                        // Skip validation for fixed discount type
+                        if (discountType === 'FIXED') {
+                            errorElement.classList.add('hidden');
+                            return true;
+                        }
                         
                         if (isNaN(value) || value <= 0) {
                             errorElement.textContent = 'Maximum discount must be greater than 0';
@@ -517,7 +522,6 @@
                             return false;
                         }
 
-                        // For percentage discounts, make sure maxDiscount makes sense with the discount percentage
                         if (discountType === 'PERCENTAGE' && !isNaN(discountValue)) {
                             const minAmount = parseFloat(document.getElementById('minAmount').value);
                             if (!isNaN(minAmount) && value > (minAmount * discountValue / 100)) {
@@ -746,16 +750,19 @@
                                 showToast('Please fix the validation errors', 'error');
                                 return;
                             }
+                            const discountType = document.getElementById('discountType').value.toUpperCase();
 
                             // Get form data
                             const formData = {
                                 name: document.getElementById('couponName').value.trim(),
                                 couponCode: document.getElementById('couponCode').value.trim().toUpperCase(),
                                 description: document.getElementById('description').value.trim(),
-                                discountType: document.getElementById('discountType').value.toUpperCase(),
+                                discountType: discountType,
                                 discountValue: parseFloat(document.getElementById('discountValue').value),
                                 minAmount: parseFloat(document.getElementById('minAmount').value),
-                                maxDiscount: parseFloat(document.getElementById('maxDiscount').value),
+                                ...(discountType === 'PERCENTAGE' 
+                                    ? { maxDiscount: parseFloat(document.getElementById('maxDiscount').value) } 
+                                    : { maxDiscount: 0 }),
                                 totalLimit: parseInt(document.getElementById('totalLimit').value),
                                 perUserLimit: parseInt(document.getElementById('perUserLimit').value),
                                 startingDate: document.getElementById('startingDate').value,
@@ -871,6 +878,7 @@
 
                     function populateModalForEdit(coupon) {
                         try {
+                            const maxDiscountDiv = document.getElementById('maxDiscountDiv');
                             document.getElementById('modalTitle').textContent = 'Edit Coupon';
                             document.getElementById('couponId').value = coupon._id || '';
                             document.getElementById('couponName').value = coupon.name || '';
@@ -883,6 +891,11 @@
                             document.getElementById('totalLimit').value = coupon.totalLimit || '';
                             document.getElementById('perUserLimit').value = coupon.perUserLimit || '';
 
+                            if(coupon.discountType === 'PERCENTAGE'){
+                                maxDiscountDiv.classList.remove('hidden');
+                            }else {
+                                maxDiscountDiv.classList.add('hidden');
+                            }
                             // Format the expiry date for datetime-local input
                             if (coupon.expiryDate) {
                                 const date = new Date(coupon.expiryDate);

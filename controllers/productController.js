@@ -361,7 +361,6 @@ exports.fetchProducts = async (req, res) => {
 
         const minPrice = parseInt(req.query.min, 10) || 0;
         const maxPrice = parseInt(req.query.max, 10) || Infinity;
-        console.log("max:",maxPrice," min:",minPrice)
         const page = parseInt(req.query.page) || 1;
         const limit = 8;
         const skip = (page - 1) * limit;

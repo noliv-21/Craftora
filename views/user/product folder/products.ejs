@@ -41,7 +41,21 @@
             <h2 class="text-xl font-bold mb-4">
                 Filters
             </h2>
-            <div class="mb-4">
+            <div class="space-y-2">
+                <h3 class="text-lg font-semibold mb-2">Categories</h3>
+                <div class="space-y-1">
+                    <% categories.forEach((category) => { %>
+                        <button 
+                            id="category-<%= category._id %>"
+                            class="category-item w-full text-left px-3 py-2 rounded-md transition duration-300 bg-orange-300 hover:bg-yellow-200 text-grey-100"
+                            onclick="categoryFilter('<%= category._id %>')"
+                        >
+                            <%= category.name %>
+                        </button>
+                    <% }); %>
+                </div>
+            </div>
+            <!-- <div class="mb-4">
                 <h3 class="font-bold mb-2">
                     Categories
                 </h3>
@@ -54,44 +68,13 @@
                     </li>
                     <% }) %>
                 </ul>
-            </div>
+            </div> -->
             <div class="mb-4">
                 <h3 class="font-bold mb-6 ml-5">
                     Price
                 </h3>
                 <div id="price-slider" class="mb-4"></div>
             </div>
-            <!-- <div>
-                <h3 class="font-bold mb-2">
-                    Offers
-                </h3>
-                <ul class="space-y-1">
-                    <li>
-                        10% and above
-                    </li>
-                    <li>
-                        20% and above
-                    </li>
-                    <li>
-                        30% and above
-                    </li>
-                    <li>
-                        40% and above
-                    </li>
-                    <li>
-                        50% and above
-                    </li>
-                    <li>
-                        60% and above
-                    </li>
-                    <li>
-                        70% and above
-                    </li>
-                    <li>
-                        80% and above
-                    </li>
-                </ul>
-            </div> -->
         </aside>
         <div class="flex flex-col w-5/6">
             <!-- Breadcrumb and Sort -->
@@ -169,9 +152,26 @@
         fetchProducts(document.getElementById('searchInput').value, 1, document.getElementById('sortSelection').value, '', { max: maxPrice, min: minPrice });
         console.log('Fetching products with price between ' + minPrice + ' and ' + maxPrice);
     }
-
+    
     function categoryFilter(categoryId) {
-        fetchProducts(document.getElementById('searchInput').value, 1, document.getElementById('sortSelection').value, categoryId);
+        const categoryElements = document.querySelectorAll('.category-item');
+        categoryElements.forEach(el => {
+            el.classList.remove('bg-orange-500', 'text-white');
+            el.classList.add('bg-orange-300', 'hover:bg-yellow-200', 'text-grey-100');
+        });
+    
+        // Add active class to selected category
+        const selectedCategory = document.getElementById(`category-${categoryId}`);
+        if (selectedCategory) {
+            selectedCategory.classList.remove('bg-orange-300', 'hover:bg-yellow-200', 'text-grey-100');
+            selectedCategory.classList.add('bg-orange-500', 'text-white');
+        }
+    
+        // Fetch products for the selected category
+        currentPage = 1;
+        const searchQuery = document.getElementById('searchInput').value;
+        const selectedSort = document.getElementById('sortSelection').value;
+        fetchProducts(searchQuery, currentPage, selectedSort, categoryId);
     }
 
     // Event listener for sorting
@@ -179,7 +179,7 @@
         const searchQuery = document.getElementById('searchInput').value;
         const selectedSort = e.target.value;
         currentPage = 1;
-        await fetchProducts(searchQuery, currentPage, selectedSort, categoryId);
+        await fetchProducts(searchQuery, currentPage, selectedSort);
     });
 
     let currentPage = 1;
@@ -283,7 +283,7 @@
             prevButton.addEventListener('click', () => {
                 currentPage -= 1;
                 // fetchProducts(document.getElementById('searchInput').value, currentPage);
-                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value, categoryId);
+                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
             });
             paginationContainer.appendChild(prevButton);
         }
@@ -317,7 +317,7 @@
             nextButton.addEventListener('click', () => {
                 currentPage += 1;
                 // fetchProducts(document.getElementById('searchInput').value, currentPage);
-                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value, categoryId);
+                fetchProducts(document.getElementById('searchInput').value, currentPage, document.getElementById('sortSelection').value);
             });
             paginationContainer.appendChild(nextButton);
         }
