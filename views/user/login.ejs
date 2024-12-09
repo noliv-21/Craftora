@@ -1,5 +1,6 @@
 <link rel="stylesheet" href="css/user/login.css">
 <title>User Login</title>
+<div class="pattern"></div>
 <div class="container">
     <div class="login-box" id="login-box">
       <h2>Login</h2>
@@ -54,24 +55,25 @@
         <div class="user-box">
           <input type="password" name="password" id="password-input" class="password-input"
             oninput="validate_password()" required="">
-          <span id="password_error"></span>
           <label>Password</label>
+          <span id="password_error"></span>
           <div class="btn btn-transparent toggle-password">Show</div>
         </div>
         <div class="user-box">
           <input type="password" name="cfm_password" id="cfm_password-input" class="password-input"
             oninput="validate_cfm_password()" required="">
+          <label>Confirm Password</label>
           <span id="cfm_password_error"></span>
-          <label> Confirm Password</label>
           <div class="btn btn-transparent toggle-password">Show</div>
         </div>
-        <div class="d-flex justify-content-center">
+        <div class="button-group" style="grid-column: 1 / -1;">
           <button class="btn Login_btn" type="submit">Send OTP</button>
+          <a class="sign-in_up" onclick="hideSignUp()">Already have an Account? <b>Sign in</b></a>
         </div>
-        <a class="sign-in_up" onclick="hideSignUp()">Already have an Account? <b>Sign in</b></a>
       </form>
       <p class="or">Or</p>
-      <a href="/auth/google" class="btn btn-outline-light" id="google-signUp"><img src="images/user/google_logo.png" style="width:24px; height:24px">Sign Up with Google
+      <a href="/auth/google" class="btn btn-outline-light" id="google-signUp">
+        <img src="images/user/google_logo.png" style="width:24px; height:24px">Sign Up with Google
       </a>
     </div>
 
@@ -81,7 +83,6 @@
   color: #000 !important; /* Adjust text color if needed */
   box-shadow: 0 0 0 1000px #f0f0f0 inset !important; /* Remove default shadow */
 } -->
-
 <script>
   const passwordInputs = document.querySelectorAll('.password-input');
   const toggleButtons = document.querySelectorAll('.toggle-password');
@@ -99,5 +100,5 @@
     });
   }
 </script>
-<script src="JS/user/Functionings.js"></script>
-<script src="JS/user/validation.js"></script>
+<script src="/JS/user/Functionings.js"></script>
+<script src="/JS/user/validation.js"></script>

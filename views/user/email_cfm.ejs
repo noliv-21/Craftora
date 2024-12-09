@@ -1,86 +1,179 @@
 <style>
-  .toast_style{
-        width: fit-content;
-        max-width: 300px;
-        border-radius: 8px;
-        padding: 12px 20px;
-        border: 1px solid rgba(255, 0, 0, 0.3);
-        font-family: Arial, sans-serif;
-        font-size: 16px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        position: absolute;
-        top: 20px;
-        right: 20px;
-    }
-
-    :root {
-    --primary-color: #4a90e2;
-    --secondary-color: #f5f5f5;
-    --text-color: #333;
-    --error-color: #ff4d4d;
-    --success-color: #2ecc71;
+  :root {
+    --primary-orange: #f97316;
+    --secondary-yellow: #fbbf24;
+    --gradient-orange: linear-gradient(45deg, #f97316, #fbbf24);
+    --text-dark: #1f2937;
+    --text-light: #f3f4f6;
+    --error-color: #ef4444;
   }
 
-  .container {
+  #toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    pointer-events: none;
+  }
+
+  #toast-container .toastify {
+    margin-bottom: 10px;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
+  }
+
+  #toast-container .toastify:hover {
+    transform: translateX(-10px);
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
     min-height: 100vh;
+    background: 
+      radial-gradient(circle at 0% 0%, #fbbf24 0%, transparent 50%),
+      radial-gradient(circle at 100% 0%, #f97316 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, #fdba74 0%, transparent 50%),
+      radial-gradient(circle at 0% 100%, #fed7aa 0%, transparent 50%);
+    background-color: #fff7ed;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+
+  .toast_style {
+    background: linear-gradient(135deg, #f97316, #fbbf24) !important;
+    color: var(--text-light) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 500 !important;
+    border-radius: 12px !important;
+    padding: 12px 20px !important;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    text-transform: none !important;
+    letter-spacing: 0.5px !important;
+    max-width: 300px !important;
+    word-wrap: break-word !important;
+    z-index: 9999 !important;
+  }
+
+  .pattern {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+    background: 
+      linear-gradient(30deg, #f97316 12%, transparent 12.5%, transparent 87%, #f97316 87.5%, #f97316);
+    background-size: 80px 140px;
+    animation: patternMove 30s linear infinite;
+    z-index: -1;
+  }
+
+  @keyframes patternMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 200px 200px; }
+  }
+
+  .container {
+    width: 100%;
+    max-width: 400px;
+    perspective: 1000px;
   }
 
   .otp_box {
-    background: white;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
     padding: 2.5rem;
-    border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-    transform: translateY(0);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transform: translateY(0) rotateX(0);
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.125);
   }
 
   .otp_box:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    transform: translateY(-10px) rotateX(-5deg);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
   }
 
-  .otp_box h2 {
-    color: var(--text-color);
+  h2 {
+    color: var(--text-dark);
     text-align: center;
     margin-bottom: 2rem;
     font-size: 1.8rem;
-    font-weight: 600;
+    font-weight: 700;
+    background: var(--gradient-orange);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .user-box {
     position: relative;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
   }
 
   .user-box input {
     width: 100%;
     padding: 15px;
     font-size: 1rem;
-    border: 2px solid #e1e1e1;
+    border: 2px solid rgba(249, 115, 22, 0.3);
     border-radius: 12px;
     background: transparent;
     transition: all 0.3s ease;
-    margin-bottom: 1rem;
-  }
-
-  .user-box input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    color: var(--text-dark);
   }
 
   .user-box label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #666;
+    color: var(--text-dark);
     font-size: 0.9rem;
     transition: color 0.3s ease;
+    font-weight: 500;
+    position: absolute;
+    top: -1.25rem;
+    left: 0.5rem;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 0 0.25rem;
+    border-radius: 4px;
+  }
+
+  .user-box input:focus + label,
+  .user-box input:not(:placeholder-shown) + label {
+    color: var(--primary-orange);
+    font-size: 0.8rem;
+  }
+
+  .user-box input::placeholder {
+    color: transparent;
+  }
+
+  .user-box input:focus::placeholder,
+  .user-box input:not(:placeholder-shown)::placeholder {
+    color: rgba(31, 41, 55, 0.5);
+  }
+
+  .timer-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  .timer-label {
+    color: var(--text-dark);
+    font-size: 0.85rem;
+    opacity: 0.7;
+  }
+
+  #timer {
+    color: var(--primary-orange);
+    font-weight: 600;
+    margin-left: 0.25rem;
   }
 
   #otp_error {
@@ -88,11 +181,14 @@
     font-size: 0.85rem;
     margin-top: 0.5rem;
     display: block;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
   }
 
-  #timer {
-    color: var(--primary-color);
-    font-weight: 600;
+  #otp_error:not(:empty) {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   .btn {
@@ -105,26 +201,30 @@
     cursor: pointer;
     transition: all 0.3s ease;
     margin-top: 1rem;
+    background: var(--gradient-orange);
+    color: var(--text-light);
+    position: relative;
+    overflow: hidden;
   }
 
-  .btn-primary {
-    background: var(--primary-color);
-    color: white;
+  .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 14px rgba(249, 115, 22, 0.25);
   }
 
-  .btn-primary:hover {
-    background: #357abd;
-    transform: translateY(-2px);
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: all 0.5s;
   }
 
-  .btn-success {
-    background: var(--success-color);
-    color: white;
-  }
-
-  .btn-success:hover {
-    background: #27ae60;
-    transform: translateY(-2px);
+  .btn:hover::before {
+    left: 100%;
   }
 
   .btn:disabled {
@@ -133,29 +233,106 @@
     transform: none;
   }
 
-  .toast_style {
-    backdrop-filter: blur(8px);
-    animation: slideIn 0.3s ease-out;
-  }
-
-  @keyframes slideIn {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
+  @media (max-width: 768px) {
+    .container {
+      width: 95%;
+      max-width: 400px;
+      padding: 0 1rem;
     }
-    to {
-      transform: translateX(0);
-      opacity: 1;
+
+    .otp_box {
+      width: 100%;
+      padding: 1.5rem;
+      margin: 1rem;
+    }
+
+    .user-box {
+      position: relative;
+      margin-bottom: 3.5rem;
+    }
+
+    .user-box label {
+      top: -1.5rem;
+      font-size: 0.85rem;
+    }
+
+    .user-box input {
+      font-size: 0.95rem;
+      padding: 12px;
+    }
+
+    .timer-container {
+      margin-top: 0.75rem;
+    }
+
+    .timer-label {
+      font-size: 0.8rem;
+    }
+
+    .btn {
+      padding: 10px;
+      font-size: 0.95rem;
     }
   }
 
   @media (max-width: 480px) {
+    .container {
+      width: 100%;
+      padding: 0;
+    }
+
     .otp_box {
-      margin: 1rem;
-      padding: 1.5rem;
+      width: 95%;
+      padding: 1rem;
+      margin: 0.5rem auto;
+      border-radius: 12px;
+    }
+
+    .user-box {
+      margin-bottom: 3.25rem;
+    }
+
+    .user-box label {
+      top: -1.25rem;
+      font-size: 0.8rem;
+    }
+
+    .user-box input {
+      font-size: 0.9rem;
+      padding: 10px;
+    }
+
+    .timer-container {
+      margin-top: 0.5rem;
+    }
+
+    .timer-label {
+      font-size: 0.75rem;
+    }
+
+    .btn {
+      padding: 8px;
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 320px) {
+    .container,
+    .otp_box {
+      width: 100%;
+      margin: 0;
+      padding: 0.5rem;
+    }
+
+    .user-box input,
+    .btn {
+      font-size: 0.85rem;
+      padding: 8px;
     }
   }
 </style>
+
+<div class="pattern"></div>
 <div class="container">
   <div class="otp_box">
     <h2>Confirm your E-Mail</h2>
@@ -163,56 +340,14 @@
       <div class="user-box">
         <input type="text" name="otp" id="otp-input" required="">
         <label>OTP</label>
-        <span style="color:red;" id="otp_error"></span>
-        <label>Didn't get the OTP? Try again in <span id="timer">30</span> seconds</label>
-        <button class="btn btn-primary" type="submit">Verify OTP</button>
+        <span id="otp_error"></span>
       </div>
+      <div class="timer-container">
+        <label class="timer-label">Didn't get the OTP? Try again in <span id="timer">30</span> seconds</label>
+      </div>
+      <button class="btn" type="submit">Verify OTP</button>
     </form>
-    <button class="btn btn-success" type="button" id="resend-btn" disabled onclick="resendOtp()">Resend OTP</button>
+    <button class="btn" type="button" id="resend-btn" disabled onclick="resendOtp()">Resend OTP</button>
   </div>
 </div>
-<script src="JS/user/functionings.js"></script>
-<script>
-  async function resendOtp() {
-    try {
-        const response = await axios.post('/user/otp_resend');
-        if (response.status === 200) {
-            Toastify({
-                text: response.data.message,
-                duration: 2000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "linear-gradient(135deg, rgba(238, 174, 202, 0.9), rgba(148, 187, 233, 0.9))",
-                stopOnFocus: true,
-                className: "toast_style"
-            }).showToast();
-
-            // Reload the page after a short delay to allow the toast to be seen
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-        } else {
-            Toastify({
-                text: response.data,
-                duration: 3000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
-                stopOnFocus: true,
-                className: "toast_style"
-            }).showToast();
-        }
-    } catch (error) {
-        console.error(error);
-        Toastify({
-            text: error.response?.data || "An error occurred",
-            duration: 3000,
-            gravity: "top",
-            position: "right",
-            backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
-            stopOnFocus: true,
-            className: "toast_style"
-        }).showToast();
-    }
-}
-</script>
+<script src="/JS/user/functionings.js"></script>

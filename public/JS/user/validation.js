@@ -11,7 +11,7 @@ var login_pass_error = document.getElementById('login_pass_error')
 
 function validate_login_cred() {
   if (login_cred.value.trim() === '') {
-    login_cred_error.textContent = '*Username or E-Mail is required'
+    login_cred_error.textContent = 'Username or E-Mail is required'
   } else {
     login_cred_error.textContent = ''
   }
@@ -20,7 +20,7 @@ function validate_login_pass() {
   if (login_pass.value.trim() === '') {
     login_pass_error.textContent = 'Password is required'
   } else if (!password_check.test(login_pass.value)) {
-    login_pass_error.textContent = "*Must include at least one uppercase, lowercase, symbols, digits, and it should be of 8 letters."
+    login_pass_error.textContent = "Must include at least one uppercase, lowercase, symbols, digits, and it should be of 8 letters."
   } else {
     login_pass_error.textContent = ''
   }
@@ -61,7 +61,7 @@ function validate_email() {
   if (emailInput.value.trim() === "") {
     email_error.textContent = "Email is required.";
   } else if (!email_check.test(emailInput.value)) {
-    email_error.textContent = "*E-mail is not in correct format";
+    email_error.textContent = "E-mail is not in correct format";
   } else {
     email_error.textContent = "";
   }
