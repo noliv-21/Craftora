@@ -367,7 +367,7 @@
                     <div class="mb-4">
                         <label class="block font-bold mb-2">Joined At</label>
                         <div class="form-input">
-                            <%= user.createdAt %>
+                            <%= user.createdAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
                         </div>
                     </div>
                 </div>

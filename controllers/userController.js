@@ -181,8 +181,7 @@ exports.signup_verify = async (req, res) => {
                 username: req.body.username,
                 password: await bcrypt.hash(req.body.password, 10),  // Hashing password for security
                 email: req.body.email,
-                phone: req.body.phone,
-                createdAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                phone: req.body.phone
             });
 
             // Save the new user

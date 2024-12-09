@@ -31,7 +31,6 @@ const userSchema = new mongoose.Schema({
         type:Boolean,
         default:false
     },
-    createdAt: { type: String },
     claimedCoupons: [
         {
             couponId: {
@@ -49,7 +48,7 @@ const userSchema = new mongoose.Schema({
         type:String,
         unique:false
     }
-})
+},{ timestamps: true })
 
 //userReview
 // const user_review=new mongoose.Schema({

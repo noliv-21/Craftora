@@ -7,7 +7,8 @@ const env=require('dotenv').config()
 passport.use(new GoogleStrategy({
     clientID:process.env.GOOGLE_CLIENT_ID,
     clientSecret:process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:'https://craftora.store/auth/google/callback'
+    // callbackURL:'https://craftora.store/auth/google/callback',
+    callbackURL:'http://localhost:4004/auth/google/callback'
 },
 async (AccessToken,refreshToken,profile,done)=>{
     try {
@@ -15,14 +16,14 @@ async (AccessToken,refreshToken,profile,done)=>{
         if(user){
             return done(null,{user,isNewUser:false});
         }else{
-            user=new User({
+            const newUser=new User({
                 fullname:profile.displayName,
                 email:profile.emails[0].value,
                 googleId:profile.id,
                 isVerified:true
-            }, { timestamps:true })
-            await user.save()
-            return done(null,{user,isNewUser:true})
+            })
+            await newUser.save()
+            return done(null,{user:newUser,isNewUser:true})
         }
     } catch (error) {
         return done(error,null)
