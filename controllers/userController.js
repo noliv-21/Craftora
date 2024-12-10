@@ -107,7 +107,7 @@ exports.home = async (req, res) => {
         const session = req.session.user
         const title = 'Craftora Home'
         const userGreet = req.session.user ? session.username || session.fullname : 'Guest';
-        const products = await Products.find({isListed : true}).sort({ createdAt: -1 }).limit(5)
+        const products = await Products.find({isListed : true}).sort({ createdAt: -1 }).limit(4)
         const categories = await Categories.find({}).sort({ createdAt: -1 }).limit(5)
         res.render('user/home', {
             title, session:userGreet, products, categories,

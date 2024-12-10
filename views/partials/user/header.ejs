@@ -1,36 +1,200 @@
 <link rel="stylesheet" href="/css/user/Nav.css">
+<style>
+    .navbar {
+        position:relative;
+        z-index: 1050 !important;
+    }
+  /* Optional: Add custom styles for the toggle button */
+  .navbar-toggler {
+    border: none;
+    color: #f5894a; /* Set color to orange */
+  }
+
+.navbar-collapse {
+    position: relative;
+    z-index: 1050 !important; /* Ensure dropdown menu is above carousel */
+}
+
+  @media (min-width: 769px) {
+    .navbar-toggler {
+      display: none; /* Hide toggle button on larger screens */
+    }
+
+    /* Center the div containing the search form */
+    .flex.items-center.space-x-4 {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .search-form {
+        display: flex;
+        justify-content: center;
+    }
+
+    #searchInput {
+        max-width: 400px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .brand-logo {
+      display: none; /* Hide brand logo on small screens */
+    }
+    .sign-up {
+      display: none; /* Hide sign up button on small screens */
+    }
+    .userControls {
+      display: none; /* Hide user controls on extra small screens */
+    }
+  }
+
+  @media (max-width: 375px) {
+    .brand-logo {
+      display: block; /* Show brand logo on extra small screens */
+    }
+    .search-form {
+      display: none; /* Hide search bar on extra small screens */
+    }
+  }
+
+  @keyframes dropdownFade {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .dropdown {
+    position: static;
+  }
+
+  /* Styles for the dropdown menu */
+  .dropdown-menu {
+    position: absolute;
+    background: linear-gradient(to bottom right, #ffcc80, #fff176); /* Lighter orange to yellow gradient */
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(245, 137, 74, 0.15);
+    padding: 1rem;
+    min-width: 220px;
+    z-index: 1051 !important;
+    border: none;
+    animation: dropdownFade 0.2s ease-in-out;
+}
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    color: #4a5568;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    margin-bottom: 4px;
+  }
+
+  .dropdown-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .dropdown-item:hover {
+    background: rgba(245, 137, 74, 0.1);
+    color: #f5894a;
+    transform: translateX(5px);
+  }
+
+  .dropdown-item i {
+    width: 20px;
+    margin-right: 12px;
+    color: #f5894a;
+  }
+
+  /* Add a subtle divider */
+  .dropdown-divider {
+    height: 1px;
+    background: rgba(245, 137, 74, 0.1);
+    margin: 8px 0;
+  }
+
+  /* Special styling for logout */
+  .dropdown-item.logout {
+    color: #ef4444;
+  }
+
+  .dropdown-item.logout:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+
+  .dropdown-item.logout i {
+    color: #ef4444;
+  }
+</style>
+
 <div class="navbar ">
     <header class="navHeader w-full p-4 flex justify-between items-center text-white">
-        <div><img class="w-[120px] h-auto" src="/images/Craftora_logo.png" alt="brand icon"></div>
+        <div class="brand-logo"><img class="w-[120px] h-auto" src="/images/Craftora_logo.png" alt="brand icon"></div>
         <div class="flex items-center space-x-4">
-            <form id="searchForm" class="flex items-center space-x-2">
+            <form id="searchForm" class="search-form flex items-center space-x-2">
                 <input 
                     name="search" 
                     id="searchInput"
-                    class="px-4 py-2 text-orange-500 rounded-full" 
+                    class="px-4 py-2 text-orange-500 rounded-full border border-gray-300" 
                     placeholder="Search for products..." 
                     type="search" oninput="searchProducts()"
                 />
-                <button type="submit" class="bg-white text-pink-500 px-3 py-1 rounded-full">
-                    <i class="fas fa-search"></i>
-                </button>
             </form>
         </div>               
+        <div class="flex-grow"></div> <!-- This div pushes the toggler to the right -->
         <div class="flex space-x-4">
             <% if (!session || typeof session==='undefined' || session === 'Guest' ){ %>
-                <a class="hover:underline" href="/user/login"><button class="glass_btn text-white-500 px-2 py-1 rounded-full">Sign Up</button></a>
+                <a class="hover:underline sign-up" href="/user/login"><button class="glass_btn text-white-500 px-2 py-1 rounded-full">Sign Up</button></a>
                 <a class="hover:underline" href="/user/login"><button class="glass_btn text-white-500 px-2 py-1 rounded-full">Sign In</button></a>
-            <% } else{ %>
-                <div class="text-white space-x-2">
-                    <a href="/user/support"><i class="fas fa-question-circle"></i></a>
-                    <a href="/user/wishlist"><i class="fas fa-heart"></i></a>
-                    <a href="/user/cart"><i class="fas fa-shopping-cart"></i></a>
-                    <a href="/user/profile"><i class="fas fa-user"></i></a>
-                </div>
-                <a class="flex items-center text-gray-600 hover:bg-gray-200 rounded-md" href="/user/logout">
-                    <button class="bg-white text-orange-500 px-2 py-1 rounded-full"><i class="fas fa-sign-out-alt mr-3"></i>Log out</button>
-                    </a>
-            <% } %>
+                <% } else{ %>
+                    <div class="dropdown">
+                        <button class="navbar-toggler" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/user/support">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Support</span>
+                            </a></li>
+                            <li><a class="dropdown-item" href="/user/wishlist">
+                                <i class="fas fa-heart"></i>
+                                <span>Wishlist</span>
+                            </a></li>
+                            <li><a class="dropdown-item" href="/user/cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Cart</span>
+                            </a></li>
+                            <li><a class="dropdown-item" href="/user/profile">
+                                <i class="fas fa-user"></i>
+                                <span>Profile</span>
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-orange-500" href="/user/logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Log out</span>
+                            </a></li>
+                        </ul>
+                    </div>
+                    <div class="userControls flex space-x-3">
+                        <div class="text-white space-x-2">
+                            <a href="/user/support"><i class="fas fa-question-circle"></i></a>
+                            <a href="/user/wishlist"><i class="fas fa-heart"></i></a>
+                            <a href="/user/cart"><i class="fas fa-shopping-cart"></i></a>
+                            <a href="/user/profile"><i class="fas fa-user"></i></a>
+                        </div>
+                        <a class="flex items-center text-gray-600 hover:bg-gray-200 rounded-md" href="/user/logout">
+                            <button class="bg-white text-orange-500 px-2 py-1 rounded-full"><i class="fas fa-sign-out-alt mr-3"></i>Log out</button>
+                        </a>
+                    </div>
+                <% } %>
         </div>
     </header>
     <!-- Navigation -->
