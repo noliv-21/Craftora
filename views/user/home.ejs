@@ -255,6 +255,19 @@
       font-size: 0.75rem; /* Decrease font size for captions below 375px */
     }
   }
+
+  @media (max-width: 320px) {
+    .responsive-image {
+      height: 60px; /* Further decrease image size for widths below 320px */
+      width: 60px;
+    }
+    .image-caption {
+      font-size: 0.6rem; /* Further decrease font size for captions below 320px */
+    }
+    .image_section {
+      flex-wrap: nowrap;
+    }
+  }
 </style>
 <%-include('../partials/user/header')%>
   <% if (session && session!=='Guest'){ %>
@@ -346,7 +359,7 @@
           </div>
           
           <!-- Images Section -->
-          <div class="flex justify-evenly z-10 mt-4 flex-wrap gap-1">
+          <div class="image_section flex justify-evenly z-10 mt-4 flex-wrap gap-1">
             <div class="text-center">
               <img alt="Marble earrings" class="mx-auto rounded-full responsive-image"
                    src="https://storage.googleapis.com/a1aa/image/ON43A51Ozlo0F9Rn11mzSNUQK0eqIIB5fmexnBTkmhltD3TnA.jpg" height="150" width="150"/>
