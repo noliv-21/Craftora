@@ -328,6 +328,7 @@ exports.fetchProducts = async (req, res) => {
     try {
         const sortOption = req.query.sortBy || 'new';
         let sortCriteria;
+        let collationOptions = null;
         switch (sortOption) {
             case 'popularity':
                 break;
@@ -348,9 +349,11 @@ exports.fetchProducts = async (req, res) => {
                 break;
             case 'a-z':
                 sortCriteria = { name: 1 };
+                collationOptions = { locale: 'en', strength: 2 };
                 break;
             case 'z-a':
                 sortCriteria = { name: -1 };
+                collationOptions = { locale: 'en', strength: 2 };
                 break;
             default:
                 sortCriteria = { createdAt: -1 };
@@ -506,6 +509,7 @@ exports.fetchProducts = async (req, res) => {
             
             products = await Products.find(query)
                 .sort(sortCriteria)
+                .collation(collationOptions)
                 .skip(skip)
                 .limit(limit)
                 .populate('category', 'name');

@@ -31,59 +31,116 @@
     outline: none;
     box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.25); /* Orange shadow for focus */
 }
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px; 
+}
+
+.sidebar {
+    transform: translateX(-100%); /* Hide sidebar off-screen */
+    transition: transform 0.3s ease; /* Smooth transition */
+    z-index: 1000;
+}
+
+.sidebar.show {
+    transform: translateX(0); /* Show sidebar */
+}
+
+@media (max-width: 1024px) {
+    .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+@media (min-width: 768px) {
+    .sidebar {
+        transform: translateX(0);
+        display:block;
+        position: none;
+    }
+}
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+        position: absolute;
+        left:0;
+        top: 50px;
+        height: 80vh;
+        width: 250px;
+    }
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .navbar-toggler {
+        display: block;
+    }
+}
+
+@media (max-width: 425px) {
+    .product-grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
+
+.breadcrumbs {
+    margin-bottom: 16px;
+}
+
+#overlay {
+    display: none; /* Hidden by default */
+    z-index: 999; /* Ensure it appears above other content */
+}
+#overlay.show {
+    display: block; /* Show overlay */
+}
 </style>
 <!-- Header -->
 <%-include('../../partials/user/header')%>
     <!-- Main Content -->
     <div class="flex">
+        <div id="overlay" class="fixed inset-0 bg-black opacity-50 hidden" onclick="toggleSidebar()"></div>
         <!-- Sidebar -->
-        <aside class="w-1/6 bg-yellow-100 p-4">
-            <h2 class="text-xl font-bold mb-4">
-                Filters
-            </h2>
-            <div class="space-y-2">
+        <aside id="sidebar" class="sidebar w-1/6 bg-yellow-100 p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Filters</h2>
+            <div class="space-y-4">
                 <h3 class="text-lg font-semibold mb-2">Categories</h3>
-                <div class="space-y-1">
+                <div class="space-y-2">
                     <% categories.forEach((category) => { %>
                         <button 
                             id="category-<%= category._id %>"
-                            class="category-item w-full text-left px-3 py-2 rounded-md transition duration-300 bg-orange-300 hover:bg-yellow-200 text-grey-100"
-                            onclick="categoryFilter('<%= category._id %>')"
-                        >
+                            class="category-item w-full text-left px-4 py-3 rounded-md transition duration-300 bg-orange-300
+                            hover:bg-yellow-200 text-grey-100 font-semibold md:text-sm lg:text-base"
+                            onclick="categoryFilter('<%= category._id %>')">
                             <%= category.name %>
                         </button>
                     <% }); %>
                 </div>
             </div>
-            <!-- <div class="mb-4">
-                <h3 class="font-bold mb-2">
-                    Categories
-                </h3>
-                <ul class="space-y-1">
-                    <% categories.forEach((category) => { %>
-                    <li>
-                        <button class="category-filter-button" onclick="categoryFilter('<%= category.id %>')">
-                            <i class="fas fa-filter"></i> <%= category.name %>
-                        </button>
-                    </li>
-                    <% }) %>
-                </ul>
-            </div> -->
             <div class="mb-4">
-                <h3 class="font-bold mb-6 ml-5">
+                <h3 class="font-bold mb-4 text-gray-800">
                     Price
                 </h3>
                 <div id="price-slider" class="mb-4"></div>
             </div>
         </aside>
-        <div class="flex flex-col w-5/6">
+        <div class="flex flex-col w-full md:w-5/6">
             <!-- Breadcrumb and Sort -->
-            <div class="bg-orange-100 p-2 flex justify-between items-center">
-                <div class="text-gray-600">
-                    <a href="/user/home">Home</a> &gt; <a href="/user/products">Products</a>
+            <div class="bg-orange-100 p-1 flex flex-wrap flex-col sm:flex-row justify-between items-center rounded-lg shadow-md mb-4 breadcrumbs min-w-[300px] max-h-24">
+                <div class="flex space-x-2">
+                    <button class="navbar-toggler" type="button" onclick="toggleSidebar()" aria-expanded="false">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="text-gray-600 text-sm md:text-base sm:text-lg flex items-center">
+                        <i class="fas fa-home mr-2"></i>
+                        <a href="/user/home">Home</a>
+                        <i class="fas fa-chevron-right mx-2"></i>
+                        <i class="fas fa-box-open mx-2"></i>
+                        <a href="/user/products">Products</a>
+                    </div>
                 </div>
-                <div>
-                    <select id="sortSelection" class="p-2 border border-gray-300 rounded">
+                <div class="w-full sm:w-1/3">
+                    <select id="sortSelection" class="p-2 sm:p-1 w-full border border-gray-300 rounded-lg transition duration-300 hover:border-orange-500">
                         <option value="popularity">Popularity</option>
                         <option value="price-low-high">Price: Low to High</option>
                         <option value="price-high-low">Price: High to Low</option>
@@ -97,7 +154,7 @@
             </div>
             <!-- Products -->
             <div class="flex flex-col px-2 w-full justify-between">
-                <div id="productsContainer" class="grid grid-cols-2 gap-4 md:grid-cols-4 mt-4"></div>
+                <div class="grid product-grid" id="productsContainer"></div>
                 <div class="flex justify-between items-center p-4">
                     <div id="rangeInfo" class="text-gray-500"></div>
                     <div id="paginationContainer" class="flex items-center space-x-2"></div>
@@ -109,6 +166,18 @@
     <%-include('../../partials/user/footer')%>
 
 <script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        sidebar.classList.toggle('show');
+        overlay.classList.toggle('show');
+        if (sidebar.style.display === 'none' || sidebar.style.display === '') {
+            sidebar.style.display = 'block'; // Show the sidebar
+        } else {
+            sidebar.style.display = 'none'; // Hide the sidebar
+        }
+    }
+
     // Initialize the noUiSlider
     var priceSlider = document.getElementById('price-slider');
 
@@ -227,20 +296,20 @@
         products.forEach(product => {
             
             let productHtml = `
-                <div class="relative">
+                <div class="relative rounded-lg overflow-hidden shadow-lg transition-transform transform hover:scale-105 hover:shadow-xl">
                     <a href="/user/product/${product._id}">
-                        <div class="bg-white p-4 rounded shadow">
+                        <div class="bg-white p-4 rounded-lg">
                             <img 
                                 alt="Product Image" 
-                                class="w-full h-48 object-cover rounded mb-2" 
+                                class="w-full h-48 object-cover rounded-lg mb-2" 
                                 src="${product.image && product.image.length ? '/uploads/product-images/' + product.image[0] : '/images/no_productImage.png'}"
                             />
                             <div class="text-center">
-                                <h3 class="font-bold">${product.name}</h3>
-                                <div class="text-green-500">
+                                <h3 class="font-bold text-lg text-gray-800">${product.name}</h3>
+                                <div class="text-green-500 text-xl">
                                     <b>₹</b> ${product.sellingPrice}
-                                    <span class="line-through text-gray-500">₹ ${product.mrp}</span>
-                                    ${product.offer ? `<span class="text-red-500">(${product.offer}% off)</span>` : ''}
+                                    <span class="line-through text-gray-500 text-sm">₹ ${product.mrp}</span>
+                                    ${product.offer ? `<span class="text-red-500 text-sm">(${product.offer}% off)</span>` : ''}
                                 </div>
                             </div>
                         </div>
