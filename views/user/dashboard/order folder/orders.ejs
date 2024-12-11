@@ -61,6 +61,9 @@
     <main class="p-6 w-4/5">
         <h2 class="text-2xl font-bold mb-4">Order History</h2>
         <div class="space-y-4">
+        <% if(totalOrders < 1){ %>
+            <img src="/images/user/make_order.jpg" alt="">
+        <% } %>
         <!-- Order Items -->
         <% orders.forEach((order, index) => { %>
             <div class="flex justify-between items-center p-4 border rounded mb-4">
@@ -129,9 +132,15 @@
             </div>
             <% }) %>
             <div class="flex justify-between items-center mt-4">
-                <div class="text-gray-500">
-                    Showing <%= (page - 1) * limit + 1 %>-<%= Math.min(page * limit, totalOrders) %> of <%= totalOrders %>
-                </div>
+                <% if (totalOrders > 0) { %>
+                    <div class="text-gray-500">
+                        Showing <%= (page - 1) * limit + 1 %>-<%= Math.min(page * limit, totalOrders) %> of <%= totalOrders %>
+                    </div>
+                <% } else { %>
+                    <div class="text-gray-500">
+                        No orders to display
+                    </div>
+                <% } %>
                 <div class="flex items-center space-x-2">
                     <% if (page > 1) { %>
                         <a href="?page=<%= page - 1 %>" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">&lt;</a>
