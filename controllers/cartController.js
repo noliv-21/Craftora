@@ -70,7 +70,10 @@ exports.getCart = async (req, res) => {
 
 exports.addToCart = async (req,res)=>{
     try {
-        const userId = req.session.user._id
+        if (req.session.user === undefined) {
+            return res.status(401).json("Unauthorized");
+        }
+        const userId = req.session.user._id;
         const productId = req.body.productId;
         const newQuantity = parseInt(req.body.quantity) || 1;
 

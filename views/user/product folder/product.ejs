@@ -320,72 +320,33 @@
                 });
             }
         } catch (error) {
-            console.error('Error adding to cart:', error);
-            Toastify({
-                text: error.response?.data || "Error adding to cart",
-                duration: 3000,
-                close: true,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#F44336",
-                stopOnFocus: true,
-                className: "toast_style"
-            }).showToast();
-        }
-    }
-
-    // Fetch and display available coupons
-    async function fetchProductCoupons() {
-        try {
-            const productId = '<%= product._id %>'; // Get product ID from EJS
-            const response = await fetch(`/user/product/${productId}/coupons`);
-            const data = await response.json();
-            
-            if (data.coupons && data.coupons.length > 0) {
-                const couponsHtml = data.coupons.map(coupon => `
-                    <div class="bg-orange-50 p-3 rounded-lg border border-orange-200 hover:shadow-md transition-all">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="font-mono font-bold text-orange-600">${coupon.code}</span>
-                                ${coupon.type === 'FIRST_ORDER' ? 
-                                    '<span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">First Order</span>' : 
-                                    ''}
-                            </div>
-                            <p class="text-sm text-gray-600">${coupon.description}</p>
-                            <div class="flex items-center justify-between mt-2">
-                                <div class="text-sm">
-                                    <span class="font-semibold text-orange-700">${coupon.discount}</span>
-                                    ${coupon.minAmount ? `<span class="text-gray-500"> • Min. ₹${coupon.minAmount}</span>` : ''}
-                                </div>
-                                <button onclick="copyCouponCode('${coupon.code}')" 
-                                    class="px-3 py-1 text-sm bg-orange-100 hover:bg-orange-200 text-orange-700 rounded transition-all">
-                                    Copy
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-                
-                document.getElementById('couponsList').innerHTML = couponsHtml;
-                document.getElementById('availableCoupons').classList.remove('hidden');
+            if (error.response && error.response.status === 401) {
+                Toastify({
+                    text: "You're not logged in",
+                    duration: 1700,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "linear-gradient(135deg, rgba(255, 121, 121, 0.9), rgba(255, 182, 193, 0.9))",
+                    stopOnFocus: true,
+                    className: "toast_style"
+                }).showToast();
+                setTimeout(() => {
+                    window.location.href = '/user/login';
+                }, 1700);
+            } else {
+                console.error('Error adding to cart:', error);
+                Toastify({
+                    text: error.response?.data || "Error adding to cart",
+                    duration: 3000,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#F44336",
+                    stopOnFocus: true,
+                    className: "toast_style"
+                }).showToast();
             }
-        } catch (error) {
-            console.error('Error fetching coupons:', error);
         }
-    }
-
-    // Copy coupon code to clipboard
-    function copyCouponCode(code) {
-        navigator.clipboard.writeText(code).then(() => {
-            // Show success message
-            const successMsg = document.createElement('div');
-            successMsg.className = 'fixed top-4 right-4 bg-green-100 text-green-700 px-4 py-2 rounded shadow-lg z-50';
-            successMsg.textContent = 'Coupon code copied!';
-            document.body.appendChild(successMsg);
-            setTimeout(() => successMsg.remove(), 2000);
-        }).catch(err => {
-            console.error('Failed to copy code:', err);
-        });
     }
 
     function updateQuantity(change) {
@@ -433,7 +394,4 @@
             showToast("Failed to process buy now request", true);
         }
     }
-
-    // Fetch coupons when page loads
-    document.addEventListener('DOMContentLoaded', fetchProductCoupons);
 </script>
