@@ -266,6 +266,28 @@ exports.orderCreation = async (req,res)=>{
                         });
                         await newOrder.save({ session });
 
+                        if (coupon) {
+                            const user = await Users.findById(userId);
+                        
+                            // Find the coupon in the user's claimedCoupons
+                            const claimedCoupon = user.claimedCoupons.find(c => c.couponId.equals(coupon.id));
+                        
+                            if (claimedCoupon) {
+                                // Increment the usage count if the coupon is already claimed
+                                claimedCoupon.usageCount += 1;
+                            } else {
+                                // Add the coupon to claimedCoupons if not already present
+                                user.claimedCoupons.push({
+                                    couponId: coupon.id,
+                                    usageCount: 1,
+                                    claimedAt: new Date()
+                                });
+                            }
+                        
+                            // Save the updated user document
+                            await user.save({ session });
+                        }
+
                         // Inventory updation
                         if(orderData.buyNow) {
                             await Products.findByIdAndUpdate(
@@ -329,6 +351,28 @@ exports.orderCreation = async (req,res)=>{
                 'coupon.couponId':coupon ? coupon.id : null
             });
             await newOrder.save();
+            
+            if (coupon) {
+                const user = await Users.findById(userId);
+            
+                // Find the coupon in the user's claimedCoupons
+                const claimedCoupon = user.claimedCoupons.find(c => c.couponId.equals(coupon.id));
+            
+                if (claimedCoupon) {
+                    // Increment the usage count if the coupon is already claimed
+                    claimedCoupon.usageCount += 1;
+                } else {
+                    // Add the coupon to claimedCoupons if not already present
+                    user.claimedCoupons.push({
+                        couponId: coupon.id,
+                        usageCount: 1,
+                        claimedAt: new Date()
+                    });
+                }
+            
+                // Save the updated user document
+                await user.save();
+            }
     
             // Update inventory
             if(orderData.buyNow) {

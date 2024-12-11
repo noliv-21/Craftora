@@ -74,23 +74,21 @@
                 <div id="couponHistory" class="grid gap-4 grid-cols-1 lg:grid-cols-2">
                     <% if (couponHistory && couponHistory.length > 0) { %>
                         <% couponHistory.forEach(history => { %>
-                            <div class="bg-gray-100 p-4 rounded-lg shadow">
+                            <div class="bg-white p-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
                                 <div class="flex flex-col sm:flex-row justify-between gap-4">
                                     <div class="flex-1">
-                                        <p class="font-bold"><%= history.coupon.name %></p>
+                                        <p class="font-bold text-lg"><%= history.coupon.name %></p>
                                         <p class="text-gray-600">
                                             <% if (history.coupon.discountType === 'PERCENTAGE') { %>
-                                                <%= history.coupon.discountValue %>% off
+                                                <span class="text-green-600 font-semibold"><%= history.coupon.discountValue %>% off</span>
                                             <% } else { %>
-                                                ₹<%= history.coupon.discountValue %> off
+                                                <span class="text-green-600 font-semibold">₹<%= history.coupon.discountValue %> off</span>
                                             <% } %>
                                         </p>
-                                        <p class="text-sm text-gray-500 mt-2">Used on: <%= new Date(history.usedAt).toLocaleDateString() %></p>
+                                        <p class="text-sm text-gray-500 mt-2">Claimed on: <%= new Date(history.claimedAt).toLocaleDateString() %></p>
                                     </div>
                                     <div class="text-left sm:text-right">
                                         <p class="text-gray-600">Code: <span class="font-mono font-semibold"><%= history.coupon.couponCode %></span></p>
-                                        <p class="text-gray-600">Order: #<%= history.orderId %></p>
-                                        <p class="text-gray-600">Saved: ₹<%= history.discountAmount %></p>
                                     </div>
                                 </div>
                             </div>

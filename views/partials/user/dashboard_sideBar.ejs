@@ -1,21 +1,61 @@
-<aside class="bg-orange-100 sticky h-screen top-0 p-6 w-1/5">
+<aside class="bg-white shadow-lg sticky h-screen top-0 p-6 w-1/5 rounded-lg">
     <div class="mb-6 flex flex-col justify-center text-center w-full">
-        <h2 class="text-xl font-bold mb-3 bg-orange-200 p-2 rounded">Account</h2>
-        <ul class="flex flex-col mx-auto justify-center w-4/5">
-            <li class="mb-2"><a href="/user/profile" class="block w-full p-2 rounded-full text-center <%= activeTab === 'profile' ? 'bg-orange-300' : 'bg-orange-200' %>">Information</a></li>
-            <li class="mb-2"><a href="/user/addresses" class="block w-full p-2 rounded-full text-center <%= activeTab === 'addresses' ? 'bg-orange-300' : 'bg-orange-200' %>">Manage address</a></li>
-            <li class="mb-2"><a href="/user/orders" class="block w-full p-2 rounded-full text-center <%= activeTab === 'orders' ? 'bg-orange-300' : 'bg-orange-200' %>">Order History</a></li>
-            <li class="mb-2"><a href="/user/dashboard/coupons" class="block w-full p-2 rounded-full text-center <%= activeTab === 'coupons' ? 'bg-orange-300' : 'bg-orange-200' %>">Coupons</a></li>
+        <h2 class="text-xl font-bold mb-3 bg-orange-200 p-2 rounded-lg cursor-pointer transition duration-300 ease-in-out hover:bg-orange-300" onclick="toggleSection('account')">Account</h2>
+        <ul id="accountMenu" class="flex flex-col mx-auto justify-center w-4/5 hidden transition-all duration-300 ease-in-out">
+            <li class="mb-2"><a href="/user/profile" class="block w-full p-2 rounded-lg text-center <%= activeTab === 'profile' ? 'bg-orange-300' : 'bg-orange-200' %> transition duration-300 ease-in-out hover:bg-orange-300 hover:scale-105 hover:shadow-lg"><i class="fas fa-user"></i> Information</a></li>
+            <li class="mb-2"><a href="/user/addresses" class="block w-full p-2 rounded-lg text-center <%= activeTab === 'addresses' ? 'bg-orange-300' : 'bg-orange-200' %> transition duration-300 ease-in-out hover:bg-orange-300 hover:scale-105 hover:shadow-lg"><i class="fas fa-map-marker-alt"></i> Manage Address</a></li>
+            <li class="mb-2"><a href="/user/orders" class="block w-full p-2 rounded-lg text-center <%= activeTab === 'orders' ? 'bg-orange-300' : 'bg-orange-200' %> transition duration-300 ease-in-out hover:bg-orange-300 hover:scale-105 hover:shadow-lg"><i class="fas fa-box"></i> Order History</a></li>
+            <li class="mb-2"><a href="/user/dashboard/coupons" class="block w-full p-2 rounded-lg text-center <%= activeTab === 'coupons' ? 'bg-orange-300' : 'bg-orange-200' %> transition duration-300 ease-in-out hover:bg-orange-300 hover:scale-105 hover:shadow-lg"><i class="fas fa-tag"></i> Coupons</a></li>
         </ul>
     </div>
     <div class="mb-6 flex flex-col justify-center text-center w-full">
-        <h2 class="text-xl font-bold mb-4 bg-orange-200 p-2 rounded">Payments</h2>
-        <ul class="flex flex-col mx-auto justify-center w-4/5">
-            <li class="mb-2"><a href="/user/dashboard/wallet" class="block w-full bg-orange-200 p-2 rounded-full text-center <%= activeTab === 'wallet' ? 'bg-orange-300' : 'bg-orange-200' %>">Wallet</a></li>
-            <li class="mb-2"><a href="/user/dashboard/online-banking" class="block w-full bg-orange-200 p-2 rounded-full text-center <%= activeTab === 'internet-banking' ? 'bg-orange-300' : 'bg-orange-200' %>">Internet Banking</a></li>
+        <h2 class="text-xl font-bold mb-4 bg-orange-200 p-2 rounded-lg cursor-pointer transition duration-300 ease-in-out hover:bg-orange-300" onclick="toggleSection('payments')">Payments</h2>
+        <ul id="paymentsMenu" class="flex flex-col mx-auto justify-center w-4/5 hidden transition-all duration-300 ease-in-out">
+            <li class="mb-2"><a href="/user/dashboard/wallet" class="block w-full bg-orange-200 p-2 rounded-lg text-center <%= activeTab === 'wallet' ? 'bg-orange-300' : 'bg-orange-200' %> transition duration-300 ease-in-out hover:bg-orange-300 hover:scale-105 hover:shadow-lg"><i class="fas fa-wallet"></i> Wallet</a></li>
         </ul>
     </div>
     <div class="mb-6 flex flex-col justify-center text-center w-full">
-        <h2 class="text-xl font-bold mb-4 bg-orange-200 p-2 rounded">Sign Out?</h2>
+        <h2 class="text-xl font-bold mb-4 bg-orange-200 p-2 rounded-lg">Sign Out?</h2>
     </div>
 </aside>
+
+<script>
+function toggleSection(section) {
+    const accountMenu = document.getElementById('accountMenu');
+    const paymentsMenu = document.getElementById('paymentsMenu');
+    if (section === 'account') {
+        accountMenu.classList.toggle('hidden');
+        paymentsMenu.classList.add('hidden');
+        localStorage.setItem('activeSection', 'account');
+    } else if (section === 'payments') {
+        paymentsMenu.classList.toggle('hidden');
+        accountMenu.classList.add('hidden');
+        localStorage.setItem('activeSection', 'payments');
+    }
+}
+
+function setActiveTab(tab) {
+    localStorage.setItem('activeTab', tab);
+}
+
+// On page load, check localStorage for the active section and tab
+document.addEventListener('DOMContentLoaded', function() {
+    const activeSection = localStorage.getItem('activeSection');
+    const activeTab = localStorage.getItem('activeTab');
+    if (activeSection === 'account') {
+        document.getElementById('accountMenu').classList.remove('hidden');
+    } else if (activeSection === 'payments') {
+        document.getElementById('paymentsMenu').classList.remove('hidden');
+    }
+    if (activeTab) {
+        const tabs = document.querySelectorAll('a');
+        tabs.forEach(tab => {
+            if (tab.getAttribute('href').includes(activeTab)) {
+                tab.classList.add('bg-orange-300');
+            } else {
+                tab.classList.remove('bg-orange-300');
+            }
+        });
+    }
+});
+</script>

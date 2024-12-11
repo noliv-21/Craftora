@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema({
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'coupon'
             },
+            usageCount: {
+                type: Number,
+                default: 1
+            },
             claimedAt: {
                 type: Date,
                 default: Date.now

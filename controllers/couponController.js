@@ -8,29 +8,37 @@ const mongoose = require('mongoose');
 const getUserCoupons = async (req, res) => {
     try {
         const session = req.session.user;
-        
-        // Get available coupons - using $expr to compare fields
-        const availableCoupons = await Coupons.find({
+        const userId = session._id;
+
+        // Get all active coupons
+        const coupons = await Coupons.find({
             isActive: true,
             expiryDate: { $gt: new Date() },
-            $expr: { $lt: ["$usedCount", "$totalLimit"] }  // Compare usedCount with totalLimit
+            startingDate: { $lt: new Date() },
+            $expr: { $lt: ["$usedCount", "$totalLimit"] }
         }).sort({ createdAt: -1 });
 
-        // Get user's coupon history
-        const couponHistory = await Orders.find({
-            userId: session._id,
-            'couponApplied.coupon': { $exists: true }
-        })
-        .populate('couponApplied.coupon')
-        .sort({ createdAt: -1 })
-        .select('couponApplied orderId createdAt');
+        // Retrieve user's claimed coupons
+        const user = await Users.findById(userId, {
+            claimedCoupons: 1
+        }).populate('claimedCoupons.couponId');
+
+        const claimedCoupons = user.claimedCoupons.reduce((acc, claimed) => {
+            acc[claimed.couponId._id.toString()] = claimed.usageCount;
+            return acc;
+        }, {});
+
+        // Filter out coupons user has already used beyond their perUserLimit
+        const availableCoupons = coupons.filter(coupon => {
+            const usageCount = claimedCoupons[coupon._id.toString()] || 0;
+            return usageCount < coupon.perUserLimit;
+        });
 
         // Format coupon history
-        const formattedHistory = couponHistory.map(order => ({
-            orderId: order.orderId,
-            coupon: order.couponApplied.coupon,
-            usedAt: order.createdAt,
-            savedAmount: order.couponApplied.discountAmount
+        const formattedHistory = user.claimedCoupons.map(claimed => ({
+            coupon: claimed.couponId,
+            usageCount: claimed.usageCount,
+            claimedAt: claimed.claimedAt
         }));
 
         res.render('user/dashboard/coupons', {
@@ -64,24 +72,23 @@ const getAvailableCoupons = async (req, res) => {
         const coupons = await Coupons.find({
             isActive: true,
             expiryDate: { $gt: new Date() },
+            startingDate: { $lt: new Date()},
             minAmount: { $lte: cartTotal },
             // usedCount: { $lt: mongoose.Types.ObjectId('$totalLimit') }
         });
 
-        // Filter out coupons user has already used
-        const userOrders = await Orders.find({ 
-            userId,
-            'coupons.couponId': { $in: coupons.map(c => c._id) }
-        });
+        // Retrieve user's claimed coupons
+        const user = await Users.findById(userId);
+        const claimedCoupons = user.claimedCoupons.reduce((acc, claimed) => {
+            acc[claimed.couponId.toString()] = claimed.usageCount;
+            return acc;
+        }, {});
 
-        const usedCoupons = new Set(userOrders.flatMap(order => 
-            order.coupons.map(c => c.couponId.toString())
-        ));
-
-        const availableCoupons = coupons.filter(coupon => 
-            !usedCoupons.has(coupon._id.toString()) && 
-            coupon.usedCount < coupon.totalLimit
-        ).map(coupon => ({
+        // Filter out coupons user has already used beyond their perUserLimit
+        const availableCoupons = coupons.filter(coupon => {
+            const usageCount = claimedCoupons[coupon._id.toString()] || 0;
+            return usageCount < coupon.perUserLimit && coupon.usedCount < coupon.totalLimit;
+        }).map(coupon => ({
             code: coupon.couponCode,
             description: coupon.description,
             discountType: coupon.discountType,
