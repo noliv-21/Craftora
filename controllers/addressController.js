@@ -4,9 +4,7 @@ const Addresses = require('../models/addressSchema')
 exports.showUserAddresses = async (req,res)=>{
     try {
         const errorMessage = req.session.user.errorMess;
-        console.log(errorMessage);
         const successMessage = req.session.user.successMess;
-        console.log(successMessage);
         const session = req.session.user;
         const addresses = await Addresses.find({userId:session._id})
         res.render('user/dashboard/address',{
@@ -20,17 +18,39 @@ exports.showUserAddresses = async (req,res)=>{
 exports.addAddress = async (req,res)=>{
     try {
         const address = req.body;
+        console.log('Received address data:', address);
+        console.log('User session:', req.session.user);
+        
         const newAddress = new Addresses({
-            name:address.name, streetAddress:address.streetAddress, city:address.city,
-            state:address.state, country:address.country, pincode:address.pincode, phone:address.phone,
+            name:address.name, 
+            streetAddress:address.streetAddress, 
+            city:address.city,
+            state:address.state, 
+            country:address.country, 
+            pincode:address.pincode, 
+            phone:address.phone,
             userId:req.session.user._id
         })
+        
+        try {
+            await newAddress.validate();
+        } catch (validationError) {
+            console.error('Validation error:', validationError);
+            return res.status(400).json({
+                error: "Validation failed",
+                details: validationError.errors
+            });
+        }
+        
         await newAddress.save()
         console.log("Address saved successfully");
         res.status(201).json("Address successfully created")
     } catch (error) {
-        console.error(error)
-        res.status(500).json("Error saving address")
+        console.error('Full error:', error)
+        res.status(500).json({
+            message: "Error saving address",
+            error: error.message
+        })
     }
 }
 

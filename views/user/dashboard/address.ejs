@@ -10,7 +10,7 @@
         background-color: rgba(0, 0, 0, 0.5);
         justify-content: center;
         align-items: center;
-        z-index: 1000;
+        z-index: 1060 !important;
         opacity: 0;
         transition: opacity 0.3s ease;
         visibility: hidden;
@@ -35,6 +35,22 @@
 
     .modal.show .modal-content {
         transform: translateY(0);
+    }
+
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        transform: translateX(120%);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .toast.show {
+        transform: translateX(0);
     }
 </style>
 <!-- Header -->
@@ -96,7 +112,7 @@
             </div>
         </div>
         <!-- Add Address Modal -->
-        <div id="addressModal" class="modal hidden">
+        <div id="addressModal" class="modal hidden z-1100">
             <div class="modal-content w-3/4 p-6 bg-white rounded-lg shadow-lg relative">
                 <span class="inline-flex close-button text-right text-lg cursor-pointer absolute top-2 right-2" onclick="closeModal()">×</span>
                 <h2 class="font-bold text-xl mb-4 text-center">Enter the Address Details</h2>
@@ -154,6 +170,7 @@
 
     function openAddressModal(address = null) {
         const modal = document.getElementById('addressModal');
+        modal.style.zIndex = '1100';
         
         // Set modal title and button text
         const modalTitle = document.querySelector('#addressModal h2');
@@ -367,10 +384,11 @@
             const result = await response.json();
 
             if (response.ok) {
-                alert('Address deleted successfully')
-                location.reload()
+                showToast('Address deleted successfully', false);
+                setTimeout(() => location.reload(), 1000);
             } else {
-                alert(result.error || "Failed to delete address.");
+                console.error(result.error);
+                showToast(result.error || "Failed to delete address.", true);
             }
         } catch (error) {
             console.error(error)
@@ -406,4 +424,24 @@
 //     const address = fetchAddressData(addressId); // Fetch address data
 //     openAddressModal(address); // Pass the address to the modal
 // }
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = `toast ${isError ? 'bg-red-100 border-red-500' : 'bg-green-100 border-green-500'}`;
+    toast.style.zIndex = '1100';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    // Show toast with animation
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+    });
+    
+    // Hide and remove toast
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
 </script>
