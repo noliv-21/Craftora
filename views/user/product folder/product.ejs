@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="/css/user/product_details.css">
 <style>
-    .toast_style{
+    .toast_style {
         width: fit-content;
         max-width: 300px;
         border-radius: 8px;
@@ -9,7 +9,7 @@
         font-family: Arial, sans-serif;
         font-size: 16px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        position: absolute;
+        position: fixed;
         top: 100px;
         right: 40px;
         z-index: 100;
@@ -32,36 +32,86 @@
         opacity: 1;
         transform: translateY(0);
     }
+
+    .zoom-container {
+        position: relative;
+        width: 100%;
+        padding-bottom: 100%; /* Makes container square */
+        height: 0;
+        overflow: hidden;
+    }
+    
+    #zoomable-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* This will maintain aspect ratio */
+    }
+
+    @media (max-width: 768px) {
+        .toast_style {
+            top: 10px;
+            right: 10px;
+            max-width: 250px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .toast_style {
+            max-width: 200px;
+            font-size: 14px;
+        }
+    }
+
+    @media (max-width: 320px) {
+        h1 {
+            font-size: 1.25rem; /* Smaller font size for headings */
+        }
+        .zoom-container {
+            padding-bottom: 100%; /* Maintain square aspect ratio */
+        }
+    }
 </style>
 <!-- Header -->
 <%-include('../../partials/user/header')%>
 <!-- Main Content -->
-<main class="p-8">
-    <div class="flex justify-center gap-x-10 sm:gap-x-20" style="padding:30px 150px">
-        <!-- Product Image -->
-        <div class="w-1/3">
-            <div class="zoom-container" onmousemove="zoomIn(event)" onmouseleave="resetZoom()">
-                    <img id="zoomable-image" 
-                         alt="zoomable-image"
-                         class="rounded-lg"
-                         height="400" width="400"
-                         src="<%= product.image && product.image.length ? '/uploads/product-images/' + product.image[0] : 'images/no_productImage.png' %>"/>
+<main class="p-4 md:p-8">
+    <div class="flex flex-col md:flex-row justify-center gap-4 md:gap-x-10 p-4 md:p-12 lg:p-20">
+        <!-- Product Details for mobile -->
+        <div class="block md:hidden mb-4">
+            <div class="text-sm text-gray-500">
+                <a href="/user/home">Home</a> &gt; <a href="/user/products">Products</a> &gt; <a href="/user/categories/<%= product.category?.name %>"><%= product.category?.name %></a>
             </div>
-            <!-- Thumbnail     -->
-            <div class="flex space-x-2 mt-4">
+            <h1 class="text-xl md:text-2xl font-bold mt-2"><%= product.name %></h1>
+        </div>
+        <!-- Product Image -->
+        <div class="w-full md:w-1/3 lg:w-1/3">
+            <div class="max-w-[400px] mx-auto">
+                <div class="zoom-container mb-4" onmousemove="zoomIn(event)" onmouseleave="resetZoom()">
+                    <img id="zoomable-image" 
+                        alt="zoomable-image"
+                        class="rounded-lg"
+                        src="<%= product.image && product.image.length ? '/uploads/product-images/' + product.image[0] : 'images/no_productImage.png' %>"/>
+                </div>
+            </div>
+            <!-- Thumbnails -->
+            <div class="flex flex-wrap justify-center gap-2">
                 <% product.image.forEach((image,index)=>{%>
-                    <img alt="Thumbnail <% index %>" class="thumbnail w-20 h-20 rounded-lg" height="70" width="70"
+                    <img alt="Thumbnail <%= index %>" 
+                        class="thumbnail w-16 h-16 md:w-20 md:h-20 rounded-lg cursor-pointer hover:opacity-80 transition-all"
                         src="/uploads/product-images/<%= image %>"
                         onclick="updateMainImage(this,'<%= image %>')"/>
                 <% }) %>
             </div>
         </div>
-        <!-- Product Details -->
-        <div class="w-2/3">
-            <div class="text-sm text-gray-500">
+        <!-- Product Details for Desktop -->
+        <div class="w-full md:w-2/3 lg:w-2/3 mt-6 md:mt-0">
+            <div class="hidden md:block text-sm text-gray-500">
                 <a href="/user/home">Home</a> &gt; <a href="/user/products">Products</a> &gt; <a href="/user/categories/<%= product.category?.name %>"><%= product.category?.name %></a>
             </div>
-            <h1 class="text-2xl font-bold mt-2"><%= product.name %></h1>
+            <h1 class="hidden md:block text-xl md:text-2xl font-bold mt-2"><%= product.name %></h1>
             <div class="flex items-center mt-2">
                 <div class="bg-green-500 text-white px-2 py-1 rounded">Rating <%= product.rating %> <i class="fas fa-star"></i></div>
             </div>
@@ -109,135 +159,75 @@
                     </li>
                 </ul>
             </div>
-            <div class="flex space-x-4 mt-6">
+            <div class="flex flex-col sm:flex-row gap-4 mt-6">
                 <!-- Quantity Selector -->
-                <div class="flex items-center bg-white border border-gray-300 rounded-lg overflow-hidden">
-                    <button onclick="updateQuantity(-1)" 
-                            class="px-3 py-2 hover:bg-gray-100 transition-colors duration-200 focus:outline-none">
+                <div class="flex items-center bg-white border border-gray-300 rounded-lg overflow-hidden w-full md:w-auto">
+                    <button onclick="updateQuantity(-1)"
+                            class="flex-1 px-3 py-2 hover:bg-gray-100 transition-all focus:outline-none">
                         <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
                         </svg>
                     </button>
                     <input type="number" id="quantity" value="1" min="1" max="<%= product.inventory < 6 ? product.inventory : 5 %>"
-                           class="w-12 text-center border-x border-gray-300 py-2 focus:outline-none"
+                           class="flex-1 w-12 text-center border-x border-gray-300 py-2 focus:outline-none"
                            onchange="validateQuantity(this)">
                     <button onclick="updateQuantity(1)"
-                            class="px-3 py-2 hover:bg-gray-100 transition-colors duration-200 focus:outline-none">
+                            class="flex-1 px-3 py-2 hover:bg-gray-100 transition-all focus:outline-none">
                         <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
                     </button>
                 </div>
-                <button class="btn bg-orange-500 text-white px-4 py-2 rounded" 
+                <button class="w-full md:w-auto btn bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition-all" 
                         onclick="addToCart('<%= product._id %>')">
                     Add to Cart
                 </button>
                 <button onclick="buyNow('<%= product._id %>')" 
-                    class="btn bg-green-100 text-green-600 px-4 py-2 rounded hover:bg-green-600 transition-colors duration-200">
+                    class="w-full md:w-auto btn bg-green-100 text-green-600 px-4 py-2 rounded hover:bg-green-600 hover:text-white transition-all">
                     Buy Now
                 </button>
             </div>
         </div>
     </div>
     <!-- User Ratings and Reviews -->
-    <section class="mt-8">
-        <h2 class="text-xl font-bold">
+    <section class="mt-8 px-4 md:px-12 lg:px-20">
+        <h2 class="text-lg md:text-xl font-bold mb-4">
             User ratings and reviews
         </h2>
+        <% for(let i=0; i<3; i++){ %>
         <div class="bg-orange-200 p-4 rounded-lg mt-4">
             <div class="flex items-center space-x-2">
                 <div class="flex space-x-1 text-yellow-500">
-                    <i class="fas fa-star">
-                    </i>
-                    <i class="fas fa-star">
-                    </i>
-                    <i class="fas fa-star">
-                    </i>
-                    <i class="fas fa-star">
-                    </i>
-                    <i class="fas fa-star">
-                    </i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
                 </div>
             </div>
             <p class="mt-2">
                 They are so beautiful and the packaging was so good. Will buy the product again.
             </p>
             <div class="flex items-center mt-2">
-                <i class="fas fa-user-circle text-gray-500">
-                </i>
-                <span class="ml-2 font-bold">
-                    Lindsey McNeese
-                </span>
+                <i class="fas fa-user-circle text-gray-500"></i>
+                <span class="ml-2 font-bold">Lindsey McNeese</span>
             </div>
         </div>
-        <div class="bg-orange-200 p-4 rounded-lg mt-4">
-            <div class="flex items-center space-x-2">
-                <div class="flex space-x-1 text-yellow-500">
-                    <i class="fas fa-star">
-                    </i>
-                    <i class="fas fa-star">
-                    </i>
-                    <i class="fas fa-star">
-                    </i>
-                    <i class="fas fa-star">
-                    </i>
-                    <i class="fas fa-star">
-                    </i>
-                </div>
-            </div>
-            <p class="mt-2">
-                They are so beautiful and the packaging was so good. Will buy the product again.
-            </p>
-            <div class="flex items-center mt-2">
-                <i class="fas fa-user-circle text-gray-500">
-                </i>
-                <span class="ml-2 font-bold">
-                    Lindsey McNeese
-                </span>
-            </div>
-        </div>
-        <div class="bg-orange-200 p-4 rounded-lg mt-4">
-            <div class="flex items-center space-x-2">
-                <div class="flex space-x-1 text-yellow-500">
-                    <i class="fas fa-star">
-                    </i>
-                    <i class="fas fa-star">
-                    </i>
-                    <i class="fas fa-star">
-                    </i>
-                    <i class="fas fa-star">
-                    </i>
-                    <i class="fas fa-star">
-                    </i>
-                </div>
-            </div>
-            <p class="mt-2">
-                They are so beautiful and the packaging was so good. Will buy the product again.
-            </p>
-            <div class="flex items-center mt-2">
-                <i class="fas fa-user-circle text-gray-500">
-                </i>
-                <span class="ml-2 font-bold">
-                    Lindsey McNeese
-                </span>
-            </div>
-        </div>
+        <% } %>
     </section>
     <!-- You may also like -->
-    <section class="mt-8" style="padding:30px 150px">
-        <h2 class="text-xl font-bold">
+    <section class="mt-8 px-4 md:px-12 lg:px-20">
+        <h2 class="text-lg md:text-xl font-bold mb-4">
             You may also like...
         </h2>
-        <div class="grid grid-cols-<%= Math.min(relatedProducts.length, 5) %> gap-4 mt-4">
-            <% relatedProducts.slice(0, 10).forEach((relProd, index) => { %>
-                <% if (index > 0 && index % 5 === 0) { %> 
-                    </div><div class="grid grid-cols-<%= Math.min(relatedProducts.length - index, 5) %> gap-4 mt-4">
-                <% } %>
-                <div>
-                    <a href="/user/product/<%= relProd._id %>">
-                        <img alt="Related product image" class="rounded-lg" width="200" height="200"
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <% relatedProducts.slice(0, 10).forEach((relProd) => { %>
+                <div class="p-2 rounded-lg hover:shadow-lg transition-all">
+                    <a href="/user/product/<%= relProd._id %>" class="block">
+                        <img alt="Related product image" 
+                             class="rounded-lg w-full h-auto object-cover"
                              src="<%= relProd.image && relProd.image.length ? '/uploads/product-images/' + relProd.image[0] : '/images/no_productImage.png' %>"/>
-                        <div class="mt-2"><%= relProd.name %></div>
+                        <div class="mt-2 text-sm md:text-base"><%= relProd.name %></div>
                     </a>
                 </div>
             <% }) %>
@@ -301,22 +291,10 @@
         // Add show class to trigger animation
         toast.classList.add('show');
 
-        // // Show toast with animation
-        // requestAnimationFrame(() => {
-        //     toast.style.opacity = '1';
-        //     toast.style.transform = 'translateY(0)';
-        // });
-
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
         }, 3000);
-        // // Hide and remove toast
-        // setTimeout(() => {
-        //     toast.style.opacity = '0';
-        //     toast.style.transform = 'translateY(20px)';
-        //     setTimeout(() => toast.remove(), 300);
-        // }, 3000);
     }
 
     async function addToCart(productId){
@@ -365,7 +343,7 @@
             
             if (data.coupons && data.coupons.length > 0) {
                 const couponsHtml = data.coupons.map(coupon => `
-                    <div class="bg-orange-50 p-3 rounded-lg border border-orange-200 hover:shadow-md transition-shadow duration-200">
+                    <div class="bg-orange-50 p-3 rounded-lg border border-orange-200 hover:shadow-md transition-all">
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="font-mono font-bold text-orange-600">${coupon.code}</span>
@@ -380,7 +358,7 @@
                                     ${coupon.minAmount ? `<span class="text-gray-500"> • Min. ₹${coupon.minAmount}</span>` : ''}
                                 </div>
                                 <button onclick="copyCouponCode('${coupon.code}')" 
-                                    class="px-3 py-1 text-sm bg-orange-100 hover:bg-orange-200 text-orange-700 rounded transition duration-200">
+                                    class="px-3 py-1 text-sm bg-orange-100 hover:bg-orange-200 text-orange-700 rounded transition-all">
                                     Copy
                                 </button>
                             </div>

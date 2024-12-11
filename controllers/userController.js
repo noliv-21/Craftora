@@ -33,8 +33,6 @@ exports.login = async (req, res) => {
 }
 
 exports.login_verify = async (req, res) => {
-    console.log(req.body);
-
     const Cred = req.body.cred;
     const Password = req.body.password;
 

@@ -34,44 +34,62 @@
 <style>
     @media (max-width: 320px) {
         footer {
-            padding: 1rem; /* Reduce padding for smaller screens */
+            padding: 1rem;
+            /* Reduce padding for smaller screens */
         }
 
         .container {
-            padding: 0; /* Remove container padding */
+            padding: 0;
+            /* Remove container padding */
         }
 
         h2 {
-            font-size: 1.5rem; /* Smaller font size for headings */
+            font-size: 1.5rem;
+            /* Smaller font size for headings */
         }
 
         #contact {
-            flex-direction: column; /* Stack input and button vertically */
-            align-items: center; /* Center items */
-        }
-
-        #contact input {
-            width: 100%; /* Full width for input */
-            margin-bottom: 0.5rem; /* Space between input and button */
-        }
-
-        #contact button {
-            width: 100%; /* Full width for button */
+            display: flex;
+            flex-direction: column;
+            /* Stack input and button vertically */
+            align-items: center;
+            /* Center items */
         }
 
         nav {
-            flex-direction: column; /* Stack nav items vertically */
-            align-items: center; /* Center nav items */
-            margin-bottom: 1rem; /* Space below nav */
+            flex-direction: column;
+            /* Stack nav items vertically */
+            align-items: center;
+            /* Center nav items */
+            margin-bottom: 1rem;
+            /* Space below nav */
         }
 
         nav a {
-            margin-bottom: 0.5rem; /* Space between nav items */
+            margin-bottom: 0.5rem;
+            /* Space between nav items */
         }
 
         .flex {
-            flex-direction: row; /* Change to row for horizontal layout */
-            justify-content: center; /* Center the icons */
+            flex-direction: row;
+            /* Change to row for horizontal layout */
+            justify-content: center;
+            /* Center the icons */
+        }
+    }
+
+    @media (max-width: 375px) {
+
+        #contact input {
+            width: 100%;
+            /* Full width for input */
+            margin-bottom: 0.5rem;
+            /* Space between input and button */
+        }
+
+        #contact button {
+            width: 100%;
+            /* Full width for button */
         }
     }
 </style>
