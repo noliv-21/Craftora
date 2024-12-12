@@ -50,4 +50,8 @@ app.use('/admin', adminAuth, adminRoute)
 app.use('/user', userRoute);
 app.use('/', authRoute)
 
+app.use((req,res,next)=>{
+    res.status(404).render('404')
+})
+
 app.listen(4004, () => console.log("Server running on port 4004"))

@@ -351,7 +351,6 @@
         try {
             const response = await axios.post(`/admin/cancelOrder/${orderId}`)
             if(response.status === 200){
-                alert('cancelled')
                 Toastify({
                     text: response.data.message,
                     duration: 3000,
